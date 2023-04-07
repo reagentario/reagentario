@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block body %}
+<br>
+<h1>Reagents</h1>
+<hr>
+  <div class="top-pad">
+    <form method="POST" action="{{ url_for('list') }}" role="form">
+      <div class="form-group">{{ form.name.label }}: {{ form.name() }}</div>
+      <div class="form-group">{{ form.location.label }}: {{ form.location() }}</div>
+  <button type="submit" class="btn btndefault">Submit</button>
+    </form>
+  </div>
+  <hr>
+
+{% if reagents %}
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Amount</th>
+            <th>Amount2</th>
+            <th>Size</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for reagent in reagents %}
+        <tr style="cursor:pointer;">
+            <td><a href="/show/{{reagent.id}}" class="btn btn-dark pull-right">{{"{:05d}".format(reagent.id)}}</a></td>
+            <td onclick="window.location='/show/{{reagent.id}}';">{{reagent.name}}</td>
+            <td> {{reagent.location.name}}</td>
+            <td> {{reagent.amount}}</td>
+            <td> {{reagent.amount2}}</td>
+            <td> {{reagent.size}}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+{% if warning %}
+<h2>{{ warning }}</h2>
+{% endif %}
+{% endblock %}
