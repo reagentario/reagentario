@@ -26,7 +26,7 @@ class LocationField(SelectField):
 
 class CreateForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired()])
-    location = LocationField('Locations', coerce=int)
+    location = LocationField('Locations')
     amount = DecimalField('Amount')
 
 

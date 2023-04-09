@@ -1,8 +1,47 @@
-from flask import render_template, make_response, flash, redirect, url_for, request
+from flask import render_template, make_response, flash, redirect, url_for, request, render_template_string
 from app import app
 from app import db
 from app.forms import LoginForm, CreateForm, SearchForm
-from app.models import Inventory, Locations
+from app.models import Inventory, Locations, User, Role, UserRoles
+from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+from datetime import datetime
+
+user_manager = UserManager(app, db, User)
+admin = Admin(app, name='reagentario', template_mode='bootstrap3')
+admin.add_view(ModelView(User, db.session))
+admin.add_view(ModelView(Role, db.session))
+admin.add_view(ModelView(UserRoles, db.session))
+admin.add_view(ModelView(Inventory, db.session))
+admin.add_view(ModelView(Locations, db.session))
+
+
+
+with app.app_context():
+
+    # Create 'member@example.com' user with no roles
+    if not User.query.filter(User.email == 'member@example.com').first():
+        user = User(
+            email='member@example.com',
+            email_confirmed_at=datetime.datetime.utcnow(),
+            password=user_manager.hash_password('Password1'),
+        )
+        db.session.add(user)
+        db.session.commit()
+
+    # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
+    if not User.query.filter(User.email == 'admin@example.com').first():
+        user = User(
+            email='admin@example.com',
+            email_confirmed_at=datetime.datetime.utcnow(),
+            password=user_manager.hash_password('Password1'),
+        )
+        user.roles.append(Role(name='Admin'))
+        user.roles.append(Role(name='Agent'))
+        db.session.add(user)
+        db.session.commit()
+
 
 @app.route('/')
 @app.route('/index')
@@ -19,6 +58,22 @@ def login():
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
 
+
+# The Members page is only accessible to authenticated users
+@app.route('/members')
+@login_required    # Use of @login_required decorator
+def member_page():
+    return render_template_string("""
+            {% extends "flask_user_layout.html" %}
+            {% block content %}
+                <h2>{%trans%}Members page{%endtrans%}</h2>
+                <p><a href={{ url_for('user.register') }}>{%trans%}Register{%endtrans%}</a></p>
+                <p><a href={{ url_for('user.login') }}>{%trans%}Sign in{%endtrans%}</a></p>
+                <p><a href={{ url_for('index') }}>{%trans%}Home Page{%endtrans%}</a> (accessible to anyone)</p>
+                <p><a href={{ url_for('member_page') }}>{%trans%}Member Page{%endtrans%}</a> (login_required: member@example.com / Password1)</p>
+                <p><a href={{ url_for('user.logout') }}>{%trans%}Sign out{%endtrans%}</a></p>
+            {% endblock %}
+            """)
 
 @app.route('/list', methods=['GET', 'POST'])
 def list():
@@ -123,3 +178,10 @@ def locations():
             'name': reagent.name
         }
     return jsonify(res)
+
+
+@app.route('/admin/dashboard')
+@roles_required('Admin')
+def admin_dashboard():
+    pass
+

@@ -4,6 +4,14 @@
 <br>
 <h1>{{ title }}</h1>
 <hr>
+
+
+<center>
+<table class="table-3">
+<tr>
+<td id="top">
+<div>
+
 {% if reagent %}
 <table class="table table-hover table-striped">
     <thead>
@@ -20,4 +28,23 @@
     </tbody>
 </table>
 {% endif %}
+
+
+</div>
+</td>
+<td width=70px></td>
+<td>
+<table class="table-1">
+<tr >
+<td> <img src="{{ url_for('static', filename='box_cart.png') }}" style="width:200px"/> <a href="/list"</a> </td>
+<td> <a href="/list"</a>Add 1 item from warehouse</td>
+</tr>
+</table>
+</td>
+</tr>
+</table>
+</center>
+
+
+
 {% endblock %}

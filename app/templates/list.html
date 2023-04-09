@@ -14,14 +14,14 @@
   <hr>
 
 {% if reagents %}
-<table class="table table-hover table-striped">
+<table id="myTable" class="table table-hover table-striped">
     <thead>
         <tr>
             <th>ID</th>
             <th>Name</th>
             <th>Location</th>
-            <th>Amount</th>
-            <th>Amount2</th>
+            <th>Lab Amouunt </th>
+            <th>Warehouse Amount</th>
             <th>Size</th>
         </tr>
     </thead>
@@ -42,4 +42,10 @@
 {% if warning %}
 <h2>{{ warning }}</h2>
 {% endif %}
+
+<script>
+  $(document).ready( function () {
+    $('#myTable').DataTable();
+  } );
+</script>
 {% endblock %}
