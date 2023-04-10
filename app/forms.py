@@ -33,3 +33,11 @@ class CreateForm(FlaskForm):
 class SearchForm(FlaskForm):
     name = StringField('Name')
     location = LocationField('Locations')
+
+
+# Define the User profile form
+class EditProfileForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired('Email is required')])
+    alias = StringField('Alias', validators=[DataRequired('Alias required')])
+
+    submit = SubmitField('Save')
