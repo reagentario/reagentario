@@ -14,15 +14,18 @@
   <hr>
 
 {% if reagents %}
-<table id="myTable" class="table table-hover table-striped">
+<table id="myTable" class="table table-hover table-striped text-center">
     <thead>
         <tr>
             <th>ID</th>
             <th>Name</th>
             <th>Location</th>
-            <th>Lab Amouunt </th>
+            <th>Lab Amount </th>
             <th>Warehouse Amount</th>
             <th>Size</th>
+            <th>Amount Limit</th>
+            <th>Notes</th>
+            <th>To be ordered</th>
         </tr>
     </thead>
     <tbody>
@@ -34,6 +37,9 @@
             <td> {{reagent.amount}}</td>
             <td> {{reagent.amount2}}</td>
             <td> {{reagent.size}}</td>
+            <td> {{reagent.amount_limit}}</td>
+            <td> {{reagent.notes}}</td>
+            <td> {{reagent.to_be_ordered}}</td>
         </tr>
         {% endfor %}
     </tbody>

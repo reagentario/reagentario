@@ -160,6 +160,12 @@ def create_location():
 @app.route('/create', methods=['GET', 'POST'])
 def create():
     form = CreateForm(csrf_enabled=False)
+    form.amount.data=0
+    form.amount2.data=0
+    form.amount_limit.data=0
+    form.to_be_ordered.data=0
+
+
 
     if request.method == 'POST':
         name = request.form['name']
