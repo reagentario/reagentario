@@ -10,7 +10,18 @@ from datetime import datetime
 
 user_manager = UserManager(app, db, User)
 admin = Admin(app, name='reagentario', template_mode='bootstrap3')
-admin.add_view(ModelView(User, db.session))
+from flask_admin.contrib.sqla.ajax import QueryAjaxModelLoader
+from flask_admin.model import BaseModelView
+
+class MyUserView(ModelView):
+    form_ajax_refs = {
+        'user': QueryAjaxModelLoader('user', db.session, User, fields=['roles'], page_size=10)
+    }
+    column_auto_select_related = True
+
+  #  column_list = ('user', 'email')
+
+admin.add_view(MyUserView(User, db.session))
 admin.add_view(ModelView(Role, db.session))
 admin.add_view(ModelView(UserRoles, db.session))
 admin.add_view(ModelView(Inventory, db.session))
@@ -153,8 +164,20 @@ def create():
     if request.method == 'POST':
         name = request.form['name']
         location = Locations.query.get_or_404(form.location.data)
+        amount = request.form['amount']
+        amount2 = request.form['amount2']
+        size = request.form['size']
+        amount_limit = request.form['amount_limit']
+        notes = request.form['notes']
+        to_be_ordered = request.form['to_be_ordered']
         reagent = Inventory(name=name,
-                          location=location)
+                          location=location,
+                          amount=amount,
+                          amount2=amount2,
+                          size=size,
+                          amount_limit=amount_limit,
+                          notes=notes,
+                          to_be_ordered=to_be_ordered)
         db.session.add(reagent)
         db.session.commit()
 
@@ -179,9 +202,43 @@ def locations():
         }
     return jsonify(res)
 
+@app.route('/plus/<int:id>/')
+def plus(id):
+    r = Inventory.query.get_or_404(id)
+    r.amount += 1
+    db.session.commit()
+    return redirect(url_for('show', id = id))
 
-@app.route('/admin/dashboard')
-@roles_required('Admin')
-def admin_dashboard():
-    pass
+
+@app.route('/minus/<int:id>/')
+def minus(id):
+    r = Inventory.query.get_or_404(id)
+    if r.amount == 0:
+        flash("No Reagents Found!")
+        return redirect(url_for('show', id = id))
+    else:
+        r.amount -= 1
+        db.session.commit()
+        return redirect(url_for('show', id = id))
+
+
+@app.route('/move/<int:id>/')
+def move(id):
+    r = Inventory.query.get_or_404(id)
+    if r.amount2 == 0:
+        flash("No more items available in the warehouse")
+    else:
+        r.amount2 -=1
+        r.amount +=1
+        db.session.commit()
+        return redirect(url_for('show', id = id))
+
+
+@app.route('/add/<int:id>/')
+def add(id):
+    r = Inventory.query.get_or_404(id)
+    r.amount2 += 1
+    db.session.commit()
+    return redirect(url_for('show', id = id))
+
 
