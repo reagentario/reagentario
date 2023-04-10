@@ -1,7 +1,7 @@
 from app import db
 from app.models import Inventory, Locations
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, DecimalField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
 from wtforms.validators import DataRequired, InputRequired, NumberRange
 
 class LoginForm(FlaskForm):
@@ -27,7 +27,12 @@ class LocationField(SelectField):
 class CreateForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired()])
     location = LocationField('Locations')
-    amount = DecimalField('Amount')
+    amount = IntegerField('Amount', validators=[NumberRange(min=0, max=None)])
+    amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=None)])
+    size = StringField('Size', validators=[InputRequired()])
+    amount_limit = StringField('Amount Limit', validators=[NumberRange(min=0, max=None)])
+    notes = StringField('Notes')
+    to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=None)])
 
 
 class SearchForm(FlaskForm):
