@@ -36,15 +36,20 @@ class UserRoles(db.Model):
 
 
 class Locations(db.Model):
+    __tablename__ = 'locations'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
     alias = db.Column(db.String(8), index=True, unique=True)
 
+    def __repr__(self):
+        return self.name
+
 class Inventory(db.Model):
+    __tablename__ = 'inventory'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), index=True, unique=False, nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
-    location = db.relationship('Locations', backref='reagents', lazy='select')
+    location = db.relationship('Locations', backref='inventory', lazy='select')
     amount = db.Column(db.Integer, default=0)
     amount2 = db.Column(db.Integer, default=0)
     amount_limit = db.Column(db.Integer, default=0)
