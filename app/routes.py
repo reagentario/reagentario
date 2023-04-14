@@ -1,7 +1,7 @@
 from flask import render_template, make_response, flash, redirect, url_for, request, render_template_string
 from app import app
 from app import db
-from app.forms import LoginForm, CreateForm, SearchForm
+from app.forms import LoginForm, CreateForm, SearchForm, EditForm
 from app.models import Inventory, Locations, User, Role, UserRoles
 from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
 from flask_admin import Admin
@@ -12,12 +12,17 @@ user_manager = UserManager(app, db, User)
 admin = Admin(app, name='reagentario', template_mode='bootstrap3')
 from flask_admin.contrib.sqla.ajax import QueryAjaxModelLoader
 from flask_admin.model import BaseModelView
+from sqlalchemy import inspect
 
 class MyUserView(ModelView):
     form_ajax_refs = {
         'user': QueryAjaxModelLoader('user', db.session, User, fields=['roles'], page_size=10)
     }
     column_auto_select_related = True
+
+    column_display_pk = True # optional, but I like to see the IDs in the list
+    column_hide_backrefs = False
+    column_list = [c_attr.key for c_attr in inspect(User).mapper.column_attrs]
 
   #  column_list = ('user', 'email')
 
@@ -101,7 +106,7 @@ def list():
         reagents = Inventory.query.all()
 
     if len(reagents) > 0:
-        flash("Number of reagents: " + str(len(reagents)))
+        flash("Number of reagents: " + str(len(reagents)), 'info')
         return render_template('list.html', form=form, reagents=reagents)
     else:
         flash("No Reagents Found!")
@@ -114,7 +119,6 @@ def list_locations():
     locations = Locations.query.all()
 
     if len(locations) > 0:
-        flash(locations)
         return render_template('list_locations.html', locations=locations)
     else:
         flash("No Locations Found!")
@@ -136,6 +140,49 @@ def show(id):
     return render_template('show.html', title=reagent.name, reagent=reagent)
 
 
+@app.route('/edit/<int:id>/', methods=['GET', 'POST'])
+def edit(id):
+    r = db.session.query(Inventory).filter(Inventory.id == id).with_for_update().first()
+    l = [(l.id, l.name) for l in Locations.query.all()]
+    form = EditForm(request.form, csrf_enabled=False, location=r.location.id)
+    app.logger.debug("l = %s", l)
+    form.location.choices = l
+    form.name.data = r.name
+    #form.location.data = Locations.query.get_or_404(r.location_id)
+    form.amount.data = r.amount
+    form.amount2.data = r.amount2
+    form.size.data = r.size
+    form.amount_limit.data = r.amount_limit
+    form.notes.data = r.notes
+    form.to_be_ordered.data = r.to_be_ordered
+
+    if request.method == 'POST':
+        name = request.form['name']
+        location = Locations.query.get_or_404(form.location.data)
+        amount = request.form['amount']
+        amount2 = request.form['amount2']
+        size = request.form['size']
+        amount_limit = request.form['amount_limit']
+        notes = request.form['notes']
+        to_be_ordered = request.form['to_be_ordered']
+        reagent = Inventory(name=name,
+                          location=location,
+                          amount=amount,
+                          amount2=amount2,
+                          size=size,
+                          amount_limit=amount_limit,
+                          notes=notes,
+                          to_be_ordered=to_be_ordered)
+        if form.validate_on_submit():
+            app.logger.debug("updated id %s", r.id)
+            db.session.commit()
+        else:
+            app.logger.debug("ERROR not updated id %s", r.id)
+        return redirect(url_for('show', id=id))
+
+    return render_template('edit.html', id=id, form=form)
+
+
 @app.route('/create_location', methods=['GET', 'POST'])
 def create_location():
     if request.method == 'POST':
@@ -147,12 +194,11 @@ def create_location():
             Locations.name == name or Locations.alias == alias
         ).first()
         if existing_location:
-            return make_response(
-                f'{name} ({alias}) already created!'
-            )
+            # https://getbootstrap.com/docs/5.0/components/alerts/ colors
+            flash('A Location with this name ({}) or alias ({}) already exists!'.format(name, alias), 'danger')
+            return render_template('create_location.html')
         db.session.add(location)
         db.session.commit()
-
         return redirect(url_for('list_locations'))
     return render_template('create_location.html')
 

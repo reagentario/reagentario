@@ -63,16 +63,16 @@
             <td> <a href="/add/{{ reagent.id}}"</a>Add 1 item to warehouse</td>
           </tr>
           <tr >
-            <td> <img src="{{ url_for('static', filename='images/order.png') }}" style="width:48px"/> <a href="/order/{{ reagent.id }}"</a></td>
-            <td> <a href="/order/{{ reagent.id}}"</a>Add 1 item to warehouse</td>
-          </tr>
-          <tr >
-            <td> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:48px"/> <a href="/add/{{ reagent.id }}"</a></td>
-            <td> <a href="/add/{{ reagent.id}}"</a>Add 1 item to warehouse</td>
+            <td> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:48px"/> <a href="/order/{{ reagent.id }}"</a></td>
+            <td> <a href="/edit/{{ reagent.id}}"</a>Edit</td>
           </tr>
           <tr >
             <td> <img src="{{ url_for('static', filename='images/log.png') }}" style="width:48px"/> <a href="/add/{{ reagent.id }}"</a></td>
-            <td> <a href="/add/{{ reagent.id}}"</a>Add 1 item to warehouse</td>
+            <td> <a href="/log/{{ reagent.id}}"</a>Log</td>
+          </tr>
+          <tr >
+            <td> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:48px"/> <a href="/add/{{ reagent.id }}"</a></td>
+            <td> <a href="/delete/{{ reagent.id}}"</a>Delete</td>
           </tr>
 
         </table>
