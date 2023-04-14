@@ -4,45 +4,45 @@
 <br>
 <h1>Reagents</h1>
 <hr>
-  <div class="top-pad">
-    <form method="POST" action="{{ url_for('list') }}" role="form">
-      <div class="form-group">{{ form.name.label }}: {{ form.name() }}</div>
-      <div class="form-group">{{ form.location.label }}: {{ form.location() }}</div>
-  <button type="submit" class="btn btndefault">Submit</button>
-    </form>
-  </div>
-  <hr>
+<div class="top-pad">
+  <form method="POST" action="{{ url_for('list') }}" role="form">
+    <div class="form-group">{{ form.name.label }}: {{ form.name() }}</div>
+    <div class="form-group">{{ form.location.label }}: {{ form.location() }}</div>
+    <button type="submit" class="btn btndefault">Submit</button>
+  </form>
+</div>
+<hr>
 
 {% if reagents %}
 <table id="myTable" class="table table-hover table-striped text-center">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Lab Amount </th>
-            <th>Warehouse Amount</th>
-            <th>Size</th>
-            <th>Amount Limit</th>
-            <th>Notes</th>
-            <th>To be ordered</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for reagent in reagents %}
-        <tr style="cursor:pointer;">
-            <td><a href="/show/{{reagent.id}}" class="btn btn-dark pull-right">{{"{:05d}".format(reagent.id)}}</a></td>
-            <td onclick="window.location='/show/{{reagent.id}}';">{{reagent.name}}</td>
-            <td> {{reagent.location.name}}</td>
-            <td> {{reagent.amount}}</td>
-            <td> {{reagent.amount2}}</td>
-            <td> {{reagent.size}}</td>
-            <td> {{reagent.amount_limit}}</td>
-            <td> {{reagent.notes}}</td>
-            <td> {{reagent.to_be_ordered}}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Location</th>
+      <th>Lab Amount </th>
+      <th>Warehouse Amount</th>
+      <th>Size</th>
+      <th>Amount Limit</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for reagent in reagents %}
+    {% if (reagent.amount+reagent.amount2)<reagent.amount_limit %}
+      <tr style="color:red">
+    {% else %}
+      <tr style="color:black">
+    {% endif %}
+        <td><a href="/show/{{reagent.id}}" class="btn btn-dark pull-right">{{"{:05d}".format(reagent.id)}}</a></td>
+        <td onclick="window.location='/show/{{reagent.id}}';">{{reagent.name}}</td>
+        <td> {{reagent.location.name}}</td>
+        <td> {{reagent.amount}}</td>
+        <td> {{reagent.amount2}}</td>
+        <td> {{reagent.size}}</td>
+        <td> {{reagent.amount_limit}}</td>
+      </tr>
+      {% endfor %}
+  </tbody>
 </table>
 {% endif %}
 {% if warning %}
@@ -51,7 +51,7 @@
 
 <script>
   $(document).ready( function () {
-    $('#myTable').DataTable();
-  } );
+      $('#myTable').DataTable();
+    } );
 </script>
 {% endblock %}

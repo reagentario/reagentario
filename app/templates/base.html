@@ -43,13 +43,14 @@
           </script>
         {% endblock %}
         <hr>
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-        <ul>
-            {% for message in messages %}
-            <li>{{ message }}</li>
-            {% endfor %}
-        </ul>
+          {% for category, message in messages %}
+              <div class="alert alert-{{category}} alert-dismissible mb-3" role="alert">
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              {{ message }}
+              </div>
+          {% endfor %}
         {% endif %}
         {% endwith %}
     </body>
