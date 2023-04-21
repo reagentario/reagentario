@@ -1,62 +1,59 @@
-from flask import render_template, make_response, flash, redirect, url_for, request, render_template_string
+from flask import render_template, make_response, flash, redirect, url_for, request, render_template_string, Blueprint
 from app import app
 from app import db
 from app.forms import LoginForm, CreateForm, SearchForm, EditForm
-from app.models import Inventory, Locations, User, Role, UserRoles
-from flask_user import current_user, login_required, roles_required, UserManager, UserMixin
+from app.models import Inventory, Locations, User
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.urls import url_parse
 
-user_manager = UserManager(app, db, User)
 admin = Admin(app, name='reagentario', template_mode='bootstrap3')
 from flask_admin.contrib.sqla.ajax import QueryAjaxModelLoader
 from flask_admin.model import BaseModelView
 from sqlalchemy import inspect
 
-class MyUserView(ModelView):
-    form_ajax_refs = {
-        'user': QueryAjaxModelLoader('user', db.session, User, fields=['roles'], page_size=10)
-    }
-    column_auto_select_related = True
+from flask_login import current_user, login_user, logout_user, login_required
 
-    column_display_pk = True # optional, but I like to see the IDs in the list
-    column_hide_backrefs = False
-    column_list = [c_attr.key for c_attr in inspect(User).mapper.column_attrs]
-
-  #  column_list = ('user', 'email')
-
-admin.add_view(MyUserView(User, db.session))
-admin.add_view(ModelView(Role, db.session))
-admin.add_view(ModelView(UserRoles, db.session))
+admin.add_view(ModelView(User, db.session))
 admin.add_view(ModelView(Inventory, db.session))
 admin.add_view(ModelView(Locations, db.session))
 
 
+@app.route('/c')
+def c():
+    with app.app_context():
 
-with app.app_context():
+        # Create 'member@example.com' user with no roles
+        if not User.query.filter(User.email == 'member@example.com').first():
+            user = User(
+                email='member@example.com',
+                #email_confirmed_at=datetime.utcnow(),
+                password=generate_password_hash('Password1'),
+                alias='ME'
+            )
+            db.session.add(user)
+            db.session.commit()
 
-    # Create 'member@example.com' user with no roles
-    if not User.query.filter(User.email == 'member@example.com').first():
-        user = User(
-            email='member@example.com',
-            email_confirmed_at=datetime.datetime.utcnow(),
-            password=user_manager.hash_password('Password1'),
-        )
-        db.session.add(user)
-        db.session.commit()
+        # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
+        if not User.query.filter(User.email == 'admin2@example.com').first():
+            user = User(
+                email='admin2@example.com',
+                #email_confirmed_at=datetime.utcnow(),
+                password=generate_password_hash('Password1'),
+                alias='A2'
+            )
+            if not user.check_password('Password1'):
+                app.logger.debug("ERROR creating user admin")
+                return render_template('index.html')
+            app.logger.debug("created user admin")
+            user.admin = True
+            user.superadmin = True
+            db.session.add(user)
+            db.session.commit()
 
-    # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
-    if not User.query.filter(User.email == 'admin@example.com').first():
-        user = User(
-            email='admin@example.com',
-            email_confirmed_at=datetime.datetime.utcnow(),
-            password=user_manager.hash_password('Password1'),
-        )
-        user.roles.append(Role(name='Admin'))
-        user.roles.append(Role(name='Agent'))
-        db.session.add(user)
-        db.session.commit()
+    return render_template('index.html')
 
 
 @app.route('/')
@@ -67,29 +64,54 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        flash('You are already logged in', 'info')
+        return redirect(url_for('index'))
+
     form = LoginForm()
     if form.validate_on_submit():
-        flash('Login requested for user {}, remember_me={}'.format(
-            form.username.data, form.remember_me.data))
-        return redirect(url_for('index'))
+        email = request.form.get('email')
+        password = request.form.get('password')
+        existing_user = User.query.filter_by(email=email).first()
+        if not existing_user:
+            flash('Invalid username ' + str(email), 'danger')
+            return render_template('login.html', title='Sign In', form=form)
+        if not check_password_hash(existing_user.password, password):
+            flash('Invalid password. Please try again.', 'danger')
+            flash(existing_user.check_password(password), 'danger')
+            return render_template('login.html', title='Sign In', form=form)
+        login_user(existing_user, remember=form.remember_me.data)
+        flash('You have successfully logged in.', 'success')
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)
+    if form.errors:
+        flash(form.errors, 'danger')
     return render_template('login.html', title='Sign In', form=form)
 
 
-# The Members page is only accessible to authenticated users
-@app.route('/members')
-@login_required    # Use of @login_required decorator
-def member_page():
-    return render_template_string("""
-            {% extends "flask_user_layout.html" %}
-            {% block content %}
-                <h2>{%trans%}Members page{%endtrans%}</h2>
-                <p><a href={{ url_for('user.register') }}>{%trans%}Register{%endtrans%}</a></p>
-                <p><a href={{ url_for('user.login') }}>{%trans%}Sign in{%endtrans%}</a></p>
-                <p><a href={{ url_for('index') }}>{%trans%}Home Page{%endtrans%}</a> (accessible to anyone)</p>
-                <p><a href={{ url_for('member_page') }}>{%trans%}Member Page{%endtrans%}</a> (login_required: member@example.com / Password1)</p>
-                <p><a href={{ url_for('user.logout') }}>{%trans%}Sign out{%endtrans%}</a></p>
-            {% endblock %}
-            """)
+@app.route('/logout')
+def logout():
+    logout_user()
+    flash('You have successfully logged out.', 'success')
+    return redirect(url_for('index'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(email=form.email.data, alias=form.alias.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+
 
 @app.route('/list', methods=['GET', 'POST'])
 def list():
@@ -137,48 +159,83 @@ def list_location_content(id):
 @app.route('/show/<int:id>/')
 def show(id):
     reagent = Inventory.query.get_or_404(id)
+    app.logger.debug(reagent.name)
+    app.logger.debug(type(reagent.location))
+    app.logger.debug(type(reagent.location_id))
+    app.logger.debug(type(reagent.amount))
+    app.logger.debug(type(reagent.amount2))
+    app.logger.debug(type(reagent.amount_limit))
+    app.logger.debug(type(reagent.size))
+    app.logger.debug(type(reagent.notes))
+    app.logger.debug(type(reagent.to_be_ordered))
+
     return render_template('show.html', title=reagent.name, reagent=reagent)
 
 
 @app.route('/edit/<int:id>/', methods=['GET', 'POST'])
 def edit(id):
-    r = db.session.query(Inventory).filter(Inventory.id == id).with_for_update().first()
+    #r = db.session.query(Inventory).filter(Inventory.id == id).with_for_update().first()
+    r = db.session.query(Inventory).filter(Inventory.id == id).first()
     l = [(l.id, l.name) for l in Locations.query.all()]
-    form = EditForm(request.form, csrf_enabled=False, location=r.location.id)
-    app.logger.debug("l = %s", l)
+    form = EditForm(csrf_enabled=False, obj=r, location=r.location.id)
+
+    #app.logger.debug("l = %s", l)
     form.location.choices = l
-    form.name.data = r.name
-    #form.location.data = Locations.query.get_or_404(r.location_id)
-    form.amount.data = r.amount
-    form.amount2.data = r.amount2
-    form.size.data = r.size
+    #form.name.data = r.name
+    ##form.location.data = Locations.query.get_or_404(r.location_id)
+    #form.amount.data = r.amount
+    #form.amount2.data = r.amount2
+    #form.size.data = r.size
     form.amount_limit.data = r.amount_limit
-    form.notes.data = r.notes
-    form.to_be_ordered.data = r.to_be_ordered
+    #form.notes.data = r.notes
+    #form.to_be_ordered.data = r.to_be_ordered
 
     if request.method == 'POST':
-        name = request.form['name']
-        location = Locations.query.get_or_404(form.location.data)
-        amount = request.form['amount']
-        amount2 = request.form['amount2']
-        size = request.form['size']
-        amount_limit = request.form['amount_limit']
-        notes = request.form['notes']
-        to_be_ordered = request.form['to_be_ordered']
-        reagent = Inventory(name=name,
-                          location=location,
-                          amount=amount,
-                          amount2=amount2,
-                          size=size,
-                          amount_limit=amount_limit,
-                          notes=notes,
-                          to_be_ordered=to_be_ordered)
-        if form.validate_on_submit():
+        app.logger.debug(form.name)
+        app.logger.debug(type(form.location.data))
+        app.logger.debug(type(form.location_id.data))
+        app.logger.debug(type(form.amount.data))
+        app.logger.debug(type(form.amount2.data))
+        app.logger.debug(form.amount_limit.data)
+        app.logger.debug(type(form.amount_limit.data))
+        app.logger.debug(type(form.size.data))
+        app.logger.debug(type(form.notes.data))
+        app.logger.debug(type(form.to_be_ordered.data))
+    if form.validate_on_submit():
+        form.populate_obj(r)
+    #    save_changes(r, form)
+        #name = request.form['name']
+        #location = Locations.query.get_or_404(form.location.data)
+        #app.logger.debug("loc: %s", form.location.data)
+        #amount = request.form['amount']
+        #amount2 = request.form['amount2']
+        #size = request.form['size']
+        #amount_limit = request.form['amount_limit']
+        #notes = request.form['notes']
+        #to_be_ordered = request.form['to_be_ordered']
+        #reagent = Inventory(name=name,
+        #                  location=location,
+        #                  amount=amount,
+        #                  amount2=amount2,
+        #                  size=size,
+        #                  amount_limit=amount_limit,
+        #                  notes=notes,
+        #                  to_be_ordered=to_be_ordered)
+        try:
             app.logger.debug("updated id %s", r.id)
             db.session.commit()
-        else:
+        except Exception as e:
+            flash('Error updating %s' % str(e), 'error')
             app.logger.debug("ERROR not updated id %s", r.id)
+            db.session.rollback()
+        #else:
+        #    flash('Reagent updated', 'info')
         return redirect(url_for('show', id=id))
+
+        return redirect(url_for('show', id=id))
+
+#    elif not form.errors:
+#        form.process(formdata=form.data, obj=r)
 
     return render_template('edit.html', id=id, form=form)
 
@@ -292,5 +349,3 @@ def add(id):
     r.amount2 += 1
     db.session.commit()
     return redirect(url_for('show', id = id))
-
-

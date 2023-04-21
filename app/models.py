@@ -1,7 +1,9 @@
 from app import db
-from flask_user import UserMixin
+from app import login_manager
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-class User(db.Model, UserMixin):
+class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     active = db.Column('is_active', db.Boolean(), nullable=False, server_default='1')
@@ -10,29 +12,31 @@ class User(db.Model, UserMixin):
     # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.
     email = db.Column(db.String(255), nullable=False, unique=True)
     email_confirmed_at = db.Column(db.DateTime())
-    password = db.Column(db.String(255), nullable=False, server_default='')
-
+    password = db.Column(db.String(255))
     # User information
     alias = db.Column(db.String(3), nullable=False, unique=True)
+    admin = db.Column(db.Boolean(), nullable=False, default=False)
+    superadmin = db.Column(db.Boolean(), nullable=False, default=False)
 
-    # Define the relationship to Role via UserRoles
-    roles = db.relationship('Role', secondary='user_roles', backref=db.backref('users', lazy='dynamic'))
+    def __init__(self, email, password, alias):
+        self.email = email
+        self.password = generate_password_hash(password)
+        self.alias = alias
 
-# Define the Role data-model
-class Role(db.Model):
-    __tablename__ = 'roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(50), unique=True)
+    def set_password(self,password):
+        self.password_hash = generate_password_hash(password)
 
-    def __repr__(self):
-        return '<Role "{}">'.format(self.rolename)
+    def check_password(self,password):
+        return check_password_hash(self.password,password)
 
-# Define the UserRoles association table
-class UserRoles(db.Model):
-    __tablename__ = 'user_roles'
-    id = db.Column(db.Integer(), primary_key=True)
-    user_id = db.Column(db.Integer(), db.ForeignKey('users.id', ondelete='CASCADE'))
-    role_id = db.Column(db.Integer(), db.ForeignKey('roles.id', ondelete='CASCADE'))
+    def is_admin(self):
+        return self.admin
+
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
 
 
 class Locations(db.Model):
