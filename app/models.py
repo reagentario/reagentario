@@ -1,6 +1,7 @@
 from app import db
 from app import login_manager
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_admin.contrib.sqla import ModelView
 from flask_login import UserMixin
 
 class User(UserMixin, db.Model):
@@ -44,8 +45,12 @@ class Locations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
     alias = db.Column(db.String(8), index=True, unique=True)
+    #reagents = db.relationship('Inventory', backref='locations')
 
     def __repr__(self):
+        return self.name
+
+    def __str__(self):
         return self.name
 
 class Inventory(db.Model):
@@ -53,7 +58,7 @@ class Inventory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256), index=True, unique=False, nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
-    location = db.relationship('Locations', backref='inventory', lazy='select')
+    location = db.relationship('Locations', backref='inventory')#, lazy='select')
     amount = db.Column(db.Integer, default=0)
     amount2 = db.Column(db.Integer, default=0)
     amount_limit = db.Column(db.Integer, default=0)
@@ -62,5 +67,10 @@ class Inventory(db.Model):
     to_be_ordered = db.Column(db.Integer, default=0)
 
     def __repr__(self):
-        return '<Reagent {}>'.format(self.name)
+        return self.name #'<Reagent {}>'.format(self.name)
+
+class InventoryView(ModelView):
+    column_display_pk = True # optional, but I like to see the IDs in the list
+    column_hide_backrefs = False
+    #column_list = ('id', 'name', 'parent')
 
