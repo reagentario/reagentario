@@ -2,7 +2,7 @@ from flask import render_template, make_response, flash, redirect, url_for, requ
 from app import app
 from app import db
 from app.forms import LoginForm, CreateForm, SearchForm, EditForm
-from app.models import Inventory, Locations, User, InventoryView
+from app.models import Inventory, Locations, User, Products, ProdLoc, InventoryView
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from datetime import datetime
@@ -19,6 +19,8 @@ from flask_login import current_user, login_user, logout_user, login_required
 admin.add_view(ModelView(User, db.session))
 admin.add_view(InventoryView(Inventory, db.session))
 admin.add_view(ModelView(Locations, db.session))
+admin.add_view(ModelView(Products, db.session))
+admin.add_view(ModelView(ProdLoc, db.session))
 
 
 @app.route('/c')
@@ -176,10 +178,14 @@ def edit(id):
     #r = db.session.query(Inventory).filter(Inventory.id == id).with_for_update().first()
     r = db.session.query(Inventory).filter(Inventory.id == id).first()
     l = [(l.id, l.name) for l in Locations.query.all()]
-    form = EditForm(csrf_enabled=False, obj=r, location=r.location.id)
+    form = EditForm(csrf_enabled=False, exclude_fk=False, obj=r)
 
     #app.logger.debug("l = %s", l)
     form.location.choices = l
+    #form.location.data = 2
+    #form.location_id.choices = l
+    #form.location_id.data = 2
+
     #form.name.data = r.name
     ##form.location.data = Locations.query.get_or_404(r.location_id)
     #form.amount.data = r.amount
@@ -191,17 +197,20 @@ def edit(id):
 
     if request.method == 'POST':
         app.logger.debug(form.name)
+        app.logger.debug(form.location.data)
         app.logger.debug(type(form.location.data))
         app.logger.debug(type(form.amount.data))
         app.logger.debug(type(form.amount2.data))
-        app.logger.debug(form.amount_limit.data)
         app.logger.debug(type(form.amount_limit.data))
         app.logger.debug(type(form.size.data))
         app.logger.debug(type(form.notes.data))
         app.logger.debug(type(form.to_be_ordered.data))
+
+
+
     if form.validate_on_submit():
         form.populate_obj(r)
-    #    save_changes(r, form)
+        #save_changes(r, form)
         #name = request.form['name']
         #location = Locations.query.get_or_404(form.location.data)
         #app.logger.debug("loc: %s", form.location.data)
@@ -231,6 +240,8 @@ def edit(id):
         return redirect(url_for('show', id=id))
 
         return redirect(url_for('show', id=id))
+    else:
+         app.logger.debug("error on form validation")
 
 #    elif not form.errors:
 #        form.process(formdata=form.data, obj=r)
