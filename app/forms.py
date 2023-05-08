@@ -31,18 +31,18 @@ class CreateForm(FlaskForm):
     amount = IntegerField('Amount', validators=[NumberRange(min=0, max=None)])
     amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=None)])
     size = StringField('Size', validators=[InputRequired()])
-    amount_limit = StringField('Amount Limit', validators=[NumberRange(min=0, max=None)])
+    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=None)])
     notes = StringField('Notes')
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=None)])
 
 
 class EditForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired()])
-    location = SelectField('Locations')
+    location = SelectField('Locations', coerce=int)
     amount = IntegerField('Amount', validators=[NumberRange(min=0, max=None)])
     amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=None)])
     size = StringField('Size', validators=[InputRequired()])
-    amount_limit = StringField('Amount Limit', validators=[NumberRange(min=0, max=None)])
+    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=None)])
     notes = StringField('Notes')
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=None)])
 

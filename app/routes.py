@@ -161,73 +161,27 @@ def list_location_content(id):
 @app.route('/show/<int:id>/')
 def show(id):
     reagent = Inventory.query.get_or_404(id)
-    app.logger.debug(reagent.name)
-    app.logger.debug(type(reagent.location))
-    app.logger.debug(type(reagent.amount))
-    app.logger.debug(type(reagent.amount2))
-    app.logger.debug(type(reagent.amount_limit))
-    app.logger.debug(type(reagent.size))
-    app.logger.debug(type(reagent.notes))
-    app.logger.debug(type(reagent.to_be_ordered))
-
     return render_template('show.html', title=reagent.name, reagent=reagent)
 
 
 @app.route('/edit/<int:id>/', methods=['GET', 'POST'])
 def edit(id):
-    #r = db.session.query(Inventory).filter(Inventory.id == id).with_for_update().first()
     r = db.session.query(Inventory).filter(Inventory.id == id).first()
     l = [(l.id, l.name) for l in Locations.query.all()]
     form = EditForm(csrf_enabled=False, exclude_fk=False, obj=r)
-
-    #app.logger.debug("l = %s", l)
     form.location.choices = l
-    #form.location.data = 2
-    #form.location_id.choices = l
-    #form.location_id.data = 2
-
-    #form.name.data = r.name
-    ##form.location.data = Locations.query.get_or_404(r.location_id)
-    #form.amount.data = r.amount
-    #form.amount2.data = r.amount2
-    #form.size.data = r.size
-    form.amount_limit.data = r.amount_limit
-    #form.notes.data = r.notes
-    #form.to_be_ordered.data = r.to_be_ordered
-
-    if request.method == 'POST':
-        app.logger.debug(form.name)
-        app.logger.debug(form.location.data)
-        app.logger.debug(type(form.location.data))
-        app.logger.debug(type(form.amount.data))
-        app.logger.debug(type(form.amount2.data))
-        app.logger.debug(type(form.amount_limit.data))
-        app.logger.debug(type(form.size.data))
-        app.logger.debug(type(form.notes.data))
-        app.logger.debug(type(form.to_be_ordered.data))
-
-
+    form.location.data=r.location.id
 
     if form.validate_on_submit():
-        form.populate_obj(r)
-        #save_changes(r, form)
-        #name = request.form['name']
-        #location = Locations.query.get_or_404(form.location.data)
-        #app.logger.debug("loc: %s", form.location.data)
-        #amount = request.form['amount']
-        #amount2 = request.form['amount2']
-        #size = request.form['size']
-        #amount_limit = request.form['amount_limit']
-        #notes = request.form['notes']
-        #to_be_ordered = request.form['to_be_ordered']
-        #reagent = Inventory(name=name,
-        #                  location=location,
-        #                  amount=amount,
-        #                  amount2=amount2,
-        #                  size=size,
-        #                  amount_limit=amount_limit,
-        #                  notes=notes,
-        #                  to_be_ordered=to_be_ordered)
+        loc_selected = request.form['location']
+        r.name = request.form['name']
+        r.location = Locations.query.get(loc_selected)
+        r.amount = request.form['amount']
+        r.amount2 = request.form['amount2']
+        r.size = request.form['size']
+        r.amount_limit = request.form['amount_limit']
+        r.notes = request.form['notes']
+        r.to_be_ordered = request.form['to_be_ordered']
         try:
             app.logger.debug("updated id %s", r.id)
             db.session.commit()
@@ -235,16 +189,10 @@ def edit(id):
             flash('Error updating %s' % str(e), 'error')
             app.logger.debug("ERROR not updated id %s", r.id)
             db.session.rollback()
-        #else:
-        #    flash('Reagent updated', 'info')
         return redirect(url_for('show', id=id))
 
-        return redirect(url_for('show', id=id))
     else:
          app.logger.debug("error on form validation")
-
-#    elif not form.errors:
-#        form.process(formdata=form.data, obj=r)
 
     return render_template('edit.html', id=id, form=form)
 
