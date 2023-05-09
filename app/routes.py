@@ -186,7 +186,7 @@ def edit(id):
             app.logger.debug("updated id %s", r.id)
             db.session.commit()
         except Exception as e:
-            flash('Error updating %s' % str(e), 'error')
+            flash('Error updating %s' % str(e), 'danger')
             app.logger.debug("ERROR not updated id %s", r.id)
             db.session.rollback()
         return redirect(url_for('show', id=id))
@@ -196,6 +196,24 @@ def edit(id):
 
     return render_template('edit.html', id=id, form=form)
 
+
+@app.route('/delete/<int:id>/', methods=['GET', 'POST'])
+def delete(id):
+    r = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if r:
+        try:
+            db.session.delete(r)
+            db.session.commit()
+            flash("Item deleted")
+            app.logger.debug("deleted id %s", r.id)
+        except Exception as e:
+            flash('Error deleting {} with error {}'.format(r.id, str(e)), 'danger')
+            app.logger.debug("ERROR not deleted id %s", r.id)
+            db.session.rollback()
+    else:
+        flash('Error deleting product with id: ' + str(id), 'danger')
+        return redirect(url_for('show', id=id))
+    return redirect(url_for('list'))
 
 @app.route('/create_location', methods=['GET', 'POST'])
 def create_location():
