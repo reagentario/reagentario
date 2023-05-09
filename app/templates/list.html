@@ -4,6 +4,7 @@
 <br>
 <h1>Reagents</h1>
 <hr>
+{#
 <div class="top-pad">
   <form method="POST" action="{{ url_for('list') }}" role="form">
     <div class="form-group">{{ form.name.label }}: {{ form.name() }}</div>
@@ -11,6 +12,7 @@
     <button type="submit" class="btn btndefault">Submit</button>
   </form>
 </div>
+#}
 <hr>
 
 {% if reagents %}
