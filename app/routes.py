@@ -197,7 +197,7 @@ def edit(id):
     return render_template('edit.html', id=id, form=form)
 
 
-@app.route('/delete/<int:id>/', methods=['GET', 'POST'])
+@app.route('/delete/<int:id>/', methods=['GET'])
 def delete(id):
     r = db.session.query(Inventory).filter(Inventory.id == id).first()
     if r:
@@ -214,6 +214,7 @@ def delete(id):
         flash('Error deleting product with id: ' + str(id), 'danger')
         return redirect(url_for('show', id=id))
     return redirect(url_for('list'))
+
 
 @app.route('/create_location', methods=['GET', 'POST'])
 def create_location():
@@ -269,6 +270,53 @@ def create():
 
     return render_template('create.html', form=form)
 
+@app.route('/order/<int:id>/', methods=['GET'])
+def order(id):
+    r = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if r:
+        r.to_be_ordered += 1
+        try:
+            db.session.commit()
+            flash("Item ordered")
+            app.logger.debug("ordered id %s", r.id)
+        except Exception as e:
+            flash('Error ordering {} with error {}'.format(r.id, str(e)), 'danger')
+            app.logger.debug("ERROR ordefing id %s", r.id)
+            db.session.rollback()
+    else:
+        flash('Error ordering product with id: ' + str(id), 'danger')
+        return redirect(url_for('show', id=id))
+    return redirect(url_for('show', id=id))
+
+
+@app.route('/view_orders/', methods=['GET'])
+def view_orders():
+    o = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
+    if o.count() > 0:
+        return render_template('view_orders.html', reagents=o)
+    else:
+        flash('No orders pending', 'info')
+        return  render_template('view_orders.html', reagents=o)
+    return redirect(url_for('view_orders'))
+
+
+@app.route('/reset_order/<int:id>/', methods=['GET'])
+def reset_order(id):
+    r = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if r:
+        r.to_be_ordered = 0
+        try:
+            db.session.commit()
+            flash("Item orders reset")
+            app.logger.debug("reset orders for id %s", r.id)
+        except Exception as e:
+            flash('Error reset ordering {} with error {}'.format(r.id, str(e)), 'danger')
+            app.logger.debug("ERROR resetting order id %s", r.id)
+            db.session.rollback()
+    else:
+        flash('Error resetting order product with id: ' + str(id), 'danger')
+        return redirect(url_for('show', id=id))
+    return redirect(url_for('view_orders'))
 
 @app.route('/locations')
 def locations():
