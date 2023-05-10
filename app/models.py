@@ -9,11 +9,7 @@ class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     active = db.Column('is_active', db.Boolean(), nullable=False, server_default='1')
-
-    # User authentication information. The collation='NOCASE' is required
-    # to search case insensitively when USER_IFIND_MODE is 'nocase_collation'.
     email = db.Column(db.String(255), nullable=False, unique=True)
-    email_confirmed_at = db.Column(db.DateTime())
     password = db.Column(db.String(255))
     # User information
     alias = db.Column(db.String(3), nullable=False, unique=True)
@@ -31,15 +27,20 @@ class User(UserMixin, db.Model):
         self.password = generate_password_hash(password)
         self.alias = alias
 
-    def set_password(self,password):
+    def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
-    def check_password(self,password):
+    def check_password(self, password):
         return check_password_hash(self.password,password)
 
     def is_admin(self):
         return self.admin
 
+    def is_superadmin(self):
+        return self.superadmin
+
+    def is_active(self):
+        return self.active
 
 
 @login_manager.user_loader
@@ -52,14 +53,13 @@ class Locations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
     alias = db.Column(db.String(8), index=True, unique=True)
-#    reagents = db.relationship('Inventory', backref='location')
-#    reagents = db.relationship('Inventory', backref=db.backref('location', lazy=True))
 
     def __repr__(self):
         return self.name
 
     def __str__(self):
         return self.name
+
 
 class Inventory(db.Model):
     __tablename__ = 'inventory'
@@ -77,34 +77,12 @@ class Inventory(db.Model):
     def __repr__(self):
         return self.name #'<Reagent {}>'.format(self.name)
 
-class Products(db.Model):
-    __tablename__ = 'products'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(256), index=True, unique=False, nullable=False)
-    location = db.Column(db.String(16), nullable=False)
-    amount = db.Column(db.Integer, default=0)
-    amount2 = db.Column(db.Integer, default=0)
-    amount_limit = db.Column(db.Integer, default=0)
-    size = db.Column(db.String(16), nullable=False)
-    notes = db.Column(db.String(512))
-    to_be_ordered = db.Column(db.Integer, default=0)
-
-    def __repr__(self):
-        return self.name #'<Reagent {}>'.format(self.name)
-
-class ProdLoc(db.Model):
-    __tablename__ = 'prodloc'
-    id = db.Column(db.Integer, primary_key=True)
-    location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'))
-    location = db.relationship('Locations', backref='location2', lazy=True)
-    product = db.relationship('Products', backref='product2', lazy=True)
-
 
 class InventoryView(ModelView):
     column_display_pk = True # optional, but I don't like to see the IDs in the list
     column_hide_backrefs = False
     column_list = ('id', 'name', 'location', 'amount', 'amount2', 'amount_limit', 'size', 'notes', 'to_be_ordered')
+
 
 class UserView(ModelView):
     column_display_pk = True # optional, but I don't like to see the IDs in the list
