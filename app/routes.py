@@ -270,6 +270,7 @@ def create():
 
     return render_template('create.html', form=form)
 
+
 @app.route('/order/<int:id>/', methods=['GET'])
 def order(id):
     r = db.session.query(Inventory).filter(Inventory.id == id).first()
@@ -297,7 +298,6 @@ def view_orders():
     else:
         flash('No orders pending', 'info')
         return  render_template('view_orders.html', reagents=o)
-    return redirect(url_for('view_orders'))
 
 
 @app.route('/reset_order/<int:id>/', methods=['GET'])
@@ -318,6 +318,17 @@ def reset_order(id):
         return redirect(url_for('show', id=id))
     return redirect(url_for('view_orders'))
 
+
+@app.route('/view_low_quantity/', methods=['GET'])
+def view_low_quantity():
+    o = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
+    if o.count() > 0:
+        return render_template('list.html', reagents=o, title="Low Quantity")
+    else:
+        flash('No reagents below quantity limits', 'info')
+        return  render_template('list.html', reagents=o)
+
+
 @app.route('/locations')
 def locations():
     locations = Locations.query.all()
@@ -333,6 +344,7 @@ def locations():
             'name': reagent.name
         }
     return jsonify(res)
+
 
 @app.route('/plus/<int:id>/')
 def plus(id):
