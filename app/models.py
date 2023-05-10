@@ -106,3 +106,6 @@ class InventoryView(ModelView):
     column_hide_backrefs = False
     column_list = ('id', 'name', 'location', 'amount', 'amount2', 'amount_limit', 'size', 'notes', 'to_be_ordered')
 
+class UserView(ModelView):
+    column_display_pk = True # optional, but I don't like to see the IDs in the list
+    column_exclude_list = ['password', ]

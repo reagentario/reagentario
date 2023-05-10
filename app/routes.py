@@ -2,7 +2,7 @@ from flask import render_template, make_response, flash, redirect, url_for, requ
 from app import app
 from app import db
 from app.forms import LoginForm, CreateForm, SearchForm, EditForm
-from app.models import Inventory, Locations, User, Products, ProdLoc, InventoryView
+from app.models import Inventory, Locations, User, Products, ProdLoc, InventoryView, UserView
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from datetime import datetime
@@ -16,7 +16,7 @@ from sqlalchemy import inspect
 
 from flask_login import current_user, login_user, logout_user, login_required
 
-admin.add_view(ModelView(User, db.session))
+admin.add_view(UserView(User, db.session))
 admin.add_view(InventoryView(Inventory, db.session))
 admin.add_view(ModelView(Locations, db.session))
 admin.add_view(ModelView(Products, db.session))
