@@ -2,7 +2,7 @@ from flask import render_template, make_response, flash, redirect, url_for, requ
 from app import app
 from app import db
 from app import bcrypt
-from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm
+from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm
 from app.models import Inventory, Locations, User, InventoryView, UserView
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -107,6 +107,24 @@ def edit_profile():
         form.email.data = current_user.email
         form.alias.data = current_user.alias
     return render_template('edit_profile.html', title='Edit Profile',
+                           form=form)
+
+
+@app.route('/change_pw/<alias>', methods=['GET', 'POST'])
+@login_required
+def change_pw(alias):
+    form = ChangePasswordForm()
+    user = User.query.filter_by(alias=alias).first()
+    if not user:
+        flash('Not existing user alias ' + alias, 'danger')
+        return redirect(url_for('index'))
+    if form.validate_on_submit():
+        user.password = bcrypt.generate_password_hash(form.password.data)
+        flash('Password changed for ' + alias, 'info')
+        db.session.commit()
+        return redirect(url_for('index'))
+    app.logger.debug("user: %s, pwd: %s" % (user.alias, form.password.data))
+    return render_template('change_pw.html', title='Change Password',
                            form=form)
 
 
