@@ -2,7 +2,7 @@ from flask import render_template, make_response, flash, redirect, url_for, requ
 from app import app
 from app import db
 from app import bcrypt
-from app.forms import LoginForm, CreateForm, SearchForm, EditForm
+from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm
 from app.models import Inventory, Locations, User, InventoryView, UserView
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
@@ -91,6 +91,23 @@ def logout():
     logout_user()
     flash('You have successfully logged out.', 'success')
     return redirect(url_for('index'))
+
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@login_required
+def edit_profile():
+    form = EditProfileForm()
+    if form.validate_on_submit():
+        current_user.email = form.email.data
+        current_user.alias = form.alias.data
+        db.session.commit()
+        flash('Your changes have been saved.')
+        return redirect(url_for('edit_profile'))
+    elif request.method == 'GET':
+        form.email.data = current_user.email
+        form.alias.data = current_user.alias
+    return render_template('edit_profile.html', title='Edit Profile',
+                           form=form)
 
 
 @app.route('/list', methods=['GET', 'POST'])

@@ -25,6 +25,7 @@ class LocationField(SelectField):
             else:
                 raise ValueError(self.gettext('Not a valid choice'))
 
+
 class CreateForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired()])
     location = LocationField('Locations')
@@ -47,17 +48,14 @@ class EditForm(FlaskForm):
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=None)])
 
 
-
 class SearchForm(FlaskForm):
     name = StringField('Name')
     location = LocationField('Locations')
 
 
-# Define the User profile form
 class EditProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired('Email is required')])
     alias = StringField('Alias', validators=[DataRequired('Alias required')])
-
     submit = SubmitField('Save')
 
 
