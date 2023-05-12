@@ -1,6 +1,7 @@
 from flask import render_template, make_response, flash, redirect, url_for, request, render_template_string, Blueprint
 from app import app
 from app import db
+from app import bcrypt
 from app.forms import LoginForm, CreateForm, SearchForm, EditForm
 from app.models import Inventory, Locations, User, InventoryView, UserView
 from flask_admin import Admin
@@ -29,22 +30,20 @@ def c():
         if not User.query.filter(User.email == 'member@example.com').first():
             user = User(
                 email='member@example.com',
-                #email_confirmed_at=datetime.utcnow(),
-                password=generate_password_hash('Password1'),
+                password='Password1',
                 alias='ME'
             )
             db.session.add(user)
             db.session.commit()
 
         # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
-        if not User.query.filter(User.email == 'admin2@example.com').first():
+        if not User.query.filter(User.email == 'admin3@example.com').first():
             user = User(
-                email='admin2@example.com',
-                #email_confirmed_at=datetime.utcnow(),
-                password=generate_password_hash('Password1'),
-                alias='A2'
+                email='admin3@example.com',
+                password='Password1',
+                alias='A3'
             )
-            if not user.check_password('Password1'):
+            if not user.check_password_hash('Password1'):
                 app.logger.debug("ERROR creating user admin")
                 return render_template('index.html')
             app.logger.debug("created user admin")
@@ -76,16 +75,12 @@ def login():
         if not existing_user:
             flash('Invalid username ' + str(email), 'danger')
             return render_template('login.html', title='Sign In', form=form)
-        if not check_password_hash(existing_user.password, password):
+        if not existing_user.check_password_hash(password):
             flash('Invalid password. Please try again.', 'danger')
-            flash(existing_user.check_password(password), 'danger')
             return render_template('login.html', title='Sign In', form=form)
         login_user(existing_user, remember=form.remember_me.data)
         flash('You have successfully logged in.', 'success')
-        next_page = request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
+        return redirect(url_for('index'))
     if form.errors:
         flash(form.errors, 'danger')
     return render_template('login.html', title='Sign In', form=form)
@@ -96,21 +91,6 @@ def logout():
     logout_user()
     flash('You have successfully logged out.', 'success')
     return redirect(url_for('index'))
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(email=form.email.data, alias=form.alias.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Congratulations, you are now a registered user!')
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
 
 
 @app.route('/list', methods=['GET', 'POST'])
@@ -124,7 +104,7 @@ def list():
         msg = location
         return render_template('list.html', form=form, reagents=reagents, warning=msg)
 
-    elif request.method == 'GET':
+    if request.method == 'GET':
         reagents = Inventory.query.all()
 
     if len(reagents) > 0:
@@ -150,9 +130,9 @@ def list_locations():
 
 @app.route('/list_location_content', methods=['GET', 'POST'])
 def list_location_content(id):
-    l = Locations.query.get_or_404(id)
-    for r in l.reagents:
-            print(f'> {r.name}')
+    loc = Locations.query.get_or_404(id)
+    for reag in loc.reagents:
+        print(f'> {reag.name}')
     print('----')
 
 

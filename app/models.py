@@ -1,5 +1,6 @@
 from app import db
 from app import login_manager
+from app import bcrypt
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_admin.contrib.sqla import ModelView
 from flask_login import UserMixin
@@ -24,14 +25,14 @@ class User(UserMixin, db.Model):
 
     def __init__(self, email, password, alias):
         self.email = email
-        self.password = generate_password_hash(password)
+        self.password = bcrypt.generate_password_hash(password)
         self.alias = alias
 
     def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+        self.password = bcrypt.generate_password_hash(password)
 
-    def check_password(self, password):
-        return check_password_hash(self.password,password)
+    def check_password_hash(self, password):
+        return bcrypt.check_password_hash(self.password, password)
 
     def is_admin(self):
         return self.admin
@@ -42,10 +43,8 @@ class User(UserMixin, db.Model):
     def is_active(self):
         return self.active
 
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)
+    def get_id(self):
+        return self.id
 
 
 class Locations(db.Model):
