@@ -1,6 +1,6 @@
 from app import app
 from app import db
-from app.models import Inventory, Locations
+from app.models import Inventory, Locations, User
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
 from wtforms.validators import DataRequired, InputRequired, NumberRange, Email, EqualTo

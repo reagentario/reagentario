@@ -16,8 +16,8 @@
         {% for location in locations %}
         <tr style="cursor:pointer;">
             <td><a href="/locations/{{location.id}}" class="btn btn-dark pull-right">{{"{:05d}".format(location.id)}}</a></td>
-            <td onclick="window.location='/locations/{{location.id}}';">{{location.name}}</td>
-            <td onclick="window.location='/locations/{{location.id}}';">{{location.alias}}</td>
+            <td onclick="window.location='/list_location_content/{{location.id}}';">{{location.name}}</td>
+            <td onclick="window.location='/list_location_content/{{location.id}}';">{{location.alias}}</td>
         </tr>
         {% endfor %}
     </tbody>

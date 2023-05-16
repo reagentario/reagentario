@@ -1,22 +1,20 @@
-from flask import render_template, make_response, flash, redirect, url_for, request, render_template_string, Blueprint
+from datetime import datetime
+from flask import render_template, make_response, flash, redirect, url_for, request
+from flask_login import current_user, login_user, logout_user, login_required
 from app import app
 from app import db
 from app import bcrypt
+from app import log
 from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm
 from app.models import Inventory, Locations, User, InventoryView, UserView
+
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
-from werkzeug.urls import url_parse
-
-admin = Admin(app, name='reagentario', template_mode='bootstrap3')
 from flask_admin.contrib.sqla.ajax import QueryAjaxModelLoader
 from flask_admin.model import BaseModelView
 from sqlalchemy import inspect
 
-from flask_login import current_user, login_user, logout_user, login_required
-
+admin = Admin(app, name='reagentario', template_mode='bootstrap3')
 admin.add_view(UserView(User, db.session))
 admin.add_view(InventoryView(Inventory, db.session))
 admin.add_view(ModelView(Locations, db.session))
@@ -44,9 +42,9 @@ def c():
                 alias='A3'
             )
             if not user.check_password_hash('Password1'):
-                app.logger.debug("ERROR creating user admin")
+                log.debug("ERROR creating user admin")
                 return render_template('index.html')
-            app.logger.debug("created user admin")
+            log.debug("created user admin")
             user.admin = True
             user.superadmin = True
             db.session.add(user)
@@ -58,11 +56,13 @@ def c():
 @app.route('/')
 @app.route('/index')
 def index():
+    """ index """
     return render_template('index.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """ login form """
     if current_user.is_authenticated:
         flash('You are already logged in', 'info')
         return redirect(url_for('index'))
@@ -88,6 +88,7 @@ def login():
 
 @app.route('/logout')
 def logout():
+    """ logout """
     logout_user()
     flash('You have successfully logged out.', 'success')
     return redirect(url_for('index'))
@@ -96,6 +97,7 @@ def logout():
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
+    """ edit profile form """
     form = EditProfileForm()
     if form.validate_on_submit():
         current_user.email = form.email.data
@@ -103,7 +105,7 @@ def edit_profile():
         db.session.commit()
         flash('Your changes have been saved.')
         return redirect(url_for('edit_profile'))
-    elif request.method == 'GET':
+    if request.method == 'GET':
         form.email.data = current_user.email
         form.alias.data = current_user.alias
     return render_template('edit_profile.html', title='Edit Profile',
@@ -113,6 +115,7 @@ def edit_profile():
 @app.route('/change_pw/<alias>', methods=['GET', 'POST'])
 @login_required
 def change_pw(alias):
+    """ change password form """
     form = ChangePasswordForm()
     user = User.query.filter_by(alias=alias).first()
     if not user:
@@ -123,13 +126,14 @@ def change_pw(alias):
         flash('Password changed for ' + alias, 'info')
         db.session.commit()
         return redirect(url_for('index'))
-    app.logger.debug("user: %s, pwd: %s" % (user.alias, form.password.data))
+    log.debug("user: %s, pwd: %s" % (user.alias, form.password.data))
     return render_template('change_pw.html', title='Change Password',
                            form=form)
 
 
 @app.route('/list', methods=['GET', 'POST'])
 def list():
+    """ list all reagents """
     form = SearchForm(csrf_enabled=False)
 
     if request.method == 'POST':
@@ -145,83 +149,91 @@ def list():
     if len(reagents) > 0:
         flash("Number of reagents: " + str(len(reagents)), 'info')
         return render_template('list.html', form=form, reagents=reagents)
-    else:
-        flash("No Reagents Found!")
-        msg = 'No Reagents Found'
-        return render_template('list.html', form=form, warning=msg)
+    flash("No Reagents Found!")
+    msg = 'No Reagents Found'
+    return render_template('list.html', form=form, warning=msg)
 
 
 @app.route('/list_locations', methods=['GET'])
 def list_locations():
+    """ list all locations """
     locations = Locations.query.all()
 
     if len(locations) > 0:
         return render_template('list_locations.html', locations=locations)
-    else:
-        flash("No Locations Found!")
-        msg = 'No Locations Found'
-        return render_template('list_locations.html', warning=msg)
+    flash("No Locations Found!")
+    msg = 'No Locations Found'
+    return render_template('list_locations.html', warning=msg)
 
 
-@app.route('/list_location_content', methods=['GET', 'POST'])
-def list_location_content(id):
-    loc = Locations.query.get_or_404(id)
-    for reag in loc.reagents:
-        print(f'> {reag.name}')
-    print('----')
+@app.route('/list_location_content/<int:_id>/', methods=['GET', 'POST'])
+def list_location_content(_id):
+    """ list content of a location """
+    reagents = Inventory.query.filter(Inventory.location_id==_id).all()
+    location = Locations.query.filter(Locations.id==_id).first()
+    loc_name = location.name
+
+    if len(reagents) > 0:
+        flash("Number of reagents: " + str(len(reagents)), 'info')
+        return render_template('list.html', title=loc_name, reagents=reagents)
+    flash("No Reagents Found!")
+    msg = 'No Reagents Found in this location'
+    return render_template('list.html', title=loc_name, warning=msg)
 
 
 @app.route('/show/<int:id>/')
 def show(id):
+    """ show a specific reagent """
     reagent = Inventory.query.get_or_404(id)
     return render_template('show.html', title=reagent.name, reagent=reagent)
 
 
 @app.route('/edit/<int:id>/', methods=['GET', 'POST'])
 def edit(id):
-    r = db.session.query(Inventory).filter(Inventory.id == id).first()
-    l = [(l.id, l.name) for l in Locations.query.all()]
-    form = EditForm(csrf_enabled=False, exclude_fk=False, obj=r)
-    form.location.choices = l
-    form.location.data=r.location.id
+    """ edit a specific reagent"""
+    reag = db.session.query(Inventory).filter(Inventory.id == id).first()
+    loc = [(loc.id, loc.name) for loc in Locations.query.all()]
+    form = EditForm(csrf_enabled=False, exclude_fk=False, obj=reag)
+    form.location.choices = loc
+    form.location.data=reag.location.id
 
     if form.validate_on_submit():
         loc_selected = request.form['location']
-        r.name = request.form['name']
-        r.location = Locations.query.get(loc_selected)
-        r.amount = request.form['amount']
-        r.amount2 = request.form['amount2']
-        r.size = request.form['size']
-        r.amount_limit = request.form['amount_limit']
-        r.notes = request.form['notes']
-        r.to_be_ordered = request.form['to_be_ordered']
+        reag.name = request.form['name']
+        reag.location = Locations.query.get(loc_selected)
+        reag.amount = request.form['amount']
+        reag.amount2 = request.form['amount2']
+        reag.size = request.form['size']
+        reag.amount_limit = request.form['amount_limit']
+        reag.notes = request.form['notes']
+        reag.to_be_ordered = request.form['to_be_ordered']
         try:
-            app.logger.debug("updated id %s", r.id)
+            log.debug("updated id %s", reag.id)
             db.session.commit()
         except Exception as e:
             flash('Error updating %s' % str(e), 'danger')
-            app.logger.debug("ERROR not updated id %s", r.id)
+            log.debug("ERROR not updated id %s", reag.id)
             db.session.rollback()
         return redirect(url_for('show', id=id))
 
-    else:
-         app.logger.debug("error on form validation")
+    log.debug("error on form validation")
 
     return render_template('edit.html', id=id, form=form)
 
 
 @app.route('/delete/<int:id>/', methods=['GET'])
 def delete(id):
-    r = db.session.query(Inventory).filter(Inventory.id == id).first()
-    if r:
+    """ delete a specific reagent """
+    reag = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if reag:
         try:
-            db.session.delete(r)
+            db.session.delete(reag)
             db.session.commit()
             flash("Item deleted")
-            app.logger.debug("deleted id %s", r.id)
+            log.debug("deleted id %s", reag.id)
         except Exception as e:
-            flash('Error deleting {} with error {}'.format(r.id, str(e)), 'danger')
-            app.logger.debug("ERROR not deleted id %s", r.id)
+            flash('Error deleting {} with error {}'.format(reag.id, str(e)), 'danger')
+            log.debug("ERROR not deleted id %s", reag.id)
             db.session.rollback()
     else:
         flash('Error deleting product with id: ' + str(id), 'danger')
@@ -231,6 +243,7 @@ def delete(id):
 
 @app.route('/create_location', methods=['GET', 'POST'])
 def create_location():
+    """ create a new location form """
     if request.method == 'POST':
         name = request.form['name']
         alias = request.form['alias']
@@ -251,6 +264,7 @@ def create_location():
 
 @app.route('/create', methods=['GET', 'POST'])
 def create():
+    """ create a new reagent form """
     form = CreateForm(csrf_enabled=False)
     form.amount.data=0
     form.amount2.data=0
@@ -286,16 +300,17 @@ def create():
 
 @app.route('/order/<int:id>/', methods=['GET'])
 def order(id):
-    r = db.session.query(Inventory).filter(Inventory.id == id).first()
-    if r:
-        r.to_be_ordered += 1
+    """ set order for a reagent """
+    reag = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if reag:
+        reag.to_be_ordered += 1
         try:
             db.session.commit()
             flash("Item ordered")
-            app.logger.debug("ordered id %s", r.id)
+            log.debug("ordered id %s", reag.id)
         except Exception as e:
-            flash('Error ordering {} with error {}'.format(r.id, str(e)), 'danger')
-            app.logger.debug("ERROR ordefing id %s", r.id)
+            flash('Error ordering {} with error {}'.format(reag.id, str(e)), 'danger')
+            log.debug("ERROR ordefing id %s", reag.id)
             db.session.rollback()
     else:
         flash('Error ordering product with id: ' + str(id), 'danger')
@@ -305,26 +320,27 @@ def order(id):
 
 @app.route('/view_orders/', methods=['GET'])
 def view_orders():
-    o = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
-    if o.count() > 0:
-        return render_template('view_orders.html', reagents=o)
-    else:
-        flash('No orders pending', 'info')
-        return  render_template('view_orders.html', reagents=o)
+    """ view orders """
+    orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
+    if orders.count() > 0:
+        return render_template('view_orders.html', reagents=orders)
+    flash('No orders pending', 'info')
+    return  render_template('view_orders.html', reagents=orders)
 
 
 @app.route('/reset_order/<int:id>/', methods=['GET'])
 def reset_order(id):
-    r = db.session.query(Inventory).filter(Inventory.id == id).first()
-    if r:
-        r.to_be_ordered = 0
+    """ reset order for a specific reagent """
+    reag = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if reag:
+        reag.to_be_ordered = 0
         try:
             db.session.commit()
             flash("Item orders reset")
-            app.logger.debug("reset orders for id %s", r.id)
+            log.debug("reset orders for id %s", reag.id)
         except Exception as e:
-            flash('Error reset ordering {} with error {}'.format(r.id, str(e)), 'danger')
-            app.logger.debug("ERROR resetting order id %s", r.id)
+            flash('Error reset ordering {} with error {}'.format(reag.id, str(e)), 'danger')
+            log.debug("ERROR resetting order id %s", reag.id)
             db.session.rollback()
     else:
         flash('Error resetting order product with id: ' + str(id), 'danger')
@@ -334,66 +350,52 @@ def reset_order(id):
 
 @app.route('/view_low_quantity/', methods=['GET'])
 def view_low_quantity():
-    o = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
-    if o.count() > 0:
-        return render_template('list.html', reagents=o, title="Low Quantity")
-    else:
-        flash('No reagents below quantity limits', 'info')
-        return  render_template('list.html', reagents=o)
-
-
-@app.route('/locations')
-def locations():
-    locations = Locations.query.all()
-    reagents = Inventory.query.all()
-    res = {}
-    for location in locations:
-        res[location.id] = {
-            'name': location.name
-        }
-    for reagent in locations.reagents:
-        res[location.id]['reagents'] = {
-            'id': reagent.id,
-            'name': reagent.name
-        }
-    return jsonify(res)
+    """ view list of reagent with low quantity """
+    reag = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
+    if reag.count() > 0:
+        return render_template('list.html', reagents=reag, title="Low Quantity")
+    flash('No reagents below quantity limits', 'info')
+    return  render_template('list.html', reagents=reag)
 
 
 @app.route('/plus/<int:id>/')
 def plus(id):
-    r = Inventory.query.get_or_404(id)
-    r.amount += 1
+    """ add 1 item of a specific reagent in lab """
+    reag = Inventory.query.get_or_404(id)
+    reag.amount += 1
     db.session.commit()
     return redirect(url_for('show', id = id))
 
 
 @app.route('/minus/<int:id>/')
 def minus(id):
-    r = Inventory.query.get_or_404(id)
-    if r.amount == 0:
+    """ remove 1 item of a specific reagent in lab """
+    reag = Inventory.query.get_or_404(id)
+    if reag.amount == 0:
         flash("No Reagents Found!")
         return redirect(url_for('show', id = id))
-    else:
-        r.amount -= 1
-        db.session.commit()
-        return redirect(url_for('show', id = id))
+    reag.amount -= 1
+    db.session.commit()
+    return redirect(url_for('show', id = id))
 
 
 @app.route('/move/<int:id>/')
 def move(id):
-    r = Inventory.query.get_or_404(id)
-    if r.amount2 == 0:
+    """ move 1 item of a specific reagent from warehouse to lab """
+    reag = Inventory.query.get_or_404(id)
+    if reag.amount2 == 0:
         flash("No more items available in the warehouse")
     else:
-        r.amount2 -=1
-        r.amount +=1
+        reag.amount2 -=1
+        reag.amount +=1
         db.session.commit()
         return redirect(url_for('show', id = id))
 
 
 @app.route('/add/<int:id>/')
 def add(id):
-    r = Inventory.query.get_or_404(id)
-    r.amount2 += 1
+    """ add 1 item of a specific reagent to warehouse """
+    reag = Inventory.query.get_or_404(id)
+    reag.amount2 += 1
     db.session.commit()
     return redirect(url_for('show', id = id))
