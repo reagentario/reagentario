@@ -212,6 +212,8 @@ def edit(id):
         try:
             log.debug("updated id %s", reag.id)
             db.session.commit()
+            add_log(reag.id, current_user.id, 'updated item %s - %s' % (reag.id, reag.name))
+
         except Exception as e:
             flash('Error updating %s' % str(e), 'danger')
             log.debug("ERROR not updated id %s", reag.id)
@@ -226,16 +228,17 @@ def edit(id):
 @app.route('/delete/<int:id>/', methods=['GET'])
 def delete(id):
     """ delete a specific reagent """
-    reag = db.session.query(Inventory).filter(Inventory.id == id).first()
-    if reag:
+    reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if reagent:
         try:
-            db.session.delete(reag)
+            db.session.delete(reagent)
             db.session.commit()
+            add_log(reagent.id, current_user.id, 'deleted item %s - %s' % (reagent.id, reagent.name))
             flash("Item deleted")
-            log.debug("deleted id %s", reag.id)
+            log.debug("deleted id %s", reagent.id)
         except Exception as e:
-            flash('Error deleting {} with error {}'.format(reag.id, str(e)), 'danger')
-            log.debug("ERROR not deleted id %s", reag.id)
+            flash('Error deleting {} with error {}'.format(reagent.id, str(e)), 'danger')
+            log.debug("ERROR not deleted id %s", reagent.id)
             db.session.rollback()
     else:
         flash('Error deleting product with id: ' + str(id), 'danger')
@@ -274,8 +277,6 @@ def create():
     form.amount_limit.data=0
     form.to_be_ordered.data=0
 
-
-
     if request.method == 'POST':
         name = request.form['name']
         location = Locations.query.get_or_404(form.location.data)
@@ -305,16 +306,18 @@ def create():
 @app.route('/order/<int:id>/', methods=['GET'])
 def order(id):
     """ set order for a reagent """
-    reag = db.session.query(Inventory).filter(Inventory.id == id).first()
-    if reag:
-        reag.to_be_ordered += 1
+    reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if reagent:
+        reagent.to_be_ordered += 1
         try:
             db.session.commit()
             flash("Item ordered")
-            log.debug("ordered id %s", reag.id)
+            add_log(reagent.id, current_user.id, 'ordered item %s - %s' %
+                   (reagent.id, reagent.name))
+            log.debug("ordered id %s", reagent.id)
         except Exception as e:
-            flash('Error ordering {} with error {}'.format(reag.id, str(e)), 'danger')
-            log.debug("ERROR ordefing id %s", reag.id)
+            flash('Error ordering {} with error {}'.format(reagent.id, str(e)), 'danger')
+            log.debug("ERROR ordefing id %s", reagent.id)
             db.session.rollback()
     else:
         flash('Error ordering product with id: ' + str(id), 'danger')
@@ -335,16 +338,17 @@ def view_orders():
 @app.route('/reset_order/<int:id>/', methods=['GET'])
 def reset_order(id):
     """ reset order for a specific reagent """
-    reag = db.session.query(Inventory).filter(Inventory.id == id).first()
-    if reag:
-        reag.to_be_ordered = 0
+    reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
+    if reagent:
+        reagent.to_be_ordered = 0
         try:
             db.session.commit()
             flash("Item orders reset")
-            log.debug("reset orders for id %s", reag.id)
+            add_log(reagent.id, current_user.id, 'created item %s - %s' % (reagent.id, reagent.name))
+            log.debug("reset orders for id %s", reagent.id)
         except Exception as e:
-            flash('Error reset ordering {} with error {}'.format(reag.id, str(e)), 'danger')
-            log.debug("ERROR resetting order id %s", reag.id)
+            flash('Error reset ordering {} with error {}'.format(reagent.id, str(e)), 'danger')
+            log.debug("ERROR resetting order id %s", reagent.id)
             db.session.rollback()
     else:
         flash('Error resetting order product with id: ' + str(id), 'danger')
@@ -365,41 +369,47 @@ def view_low_quantity():
 @app.route('/plus/<int:id>/')
 def plus(id):
     """ add 1 item of a specific reagent in lab """
-    reag = Inventory.query.get_or_404(id)
-    reag.amount += 1
+    reagent = Inventory.query.get_or_404(id)
+    reagent.amount += 1
     db.session.commit()
+    add_log(reagent.id, current_user.id, 'added item %s - %s' % (reagent.id, reagent.name))
     return redirect(url_for('show', id = id))
 
 
 @app.route('/minus/<int:id>/')
 def minus(id):
     """ remove 1 item of a specific reagent in lab """
-    reag = Inventory.query.get_or_404(id)
-    if reag.amount == 0:
+    reagent = Inventory.query.get_or_404(id)
+    if reagent.amount == 0:
         flash("No Reagents Found!")
         return redirect(url_for('show', id = id))
-    reag.amount -= 1
+    reagent.amount -= 1
     db.session.commit()
+    add_log(reagent.id, current_user.id, 'removed item %s - %s' % (reagent.id, reagent.name))
+
     return redirect(url_for('show', id = id))
 
 
 @app.route('/move/<int:id>/')
 def move(id):
     """ move 1 item of a specific reagent from warehouse to lab """
-    reag = Inventory.query.get_or_404(id)
-    if reag.amount2 == 0:
-        flash("No more items available in the warehouse")
+    reagent = Inventory.query.get_or_404(id)
+    if reagent.amount2 == 0:
+        flash("No more items available in the warehouse", 'danger')
+        return redirect(url_for('show', id = id))
     else:
-        reag.amount2 -=1
-        reag.amount +=1
+        reagent.amount2 -=1
+        reagent.amount +=1
         db.session.commit()
+        add_log(reagent.id, current_user.id, 'moved from warehouse item %s - %s' % (reagent.id, reagent.name))
         return redirect(url_for('show', id = id))
 
 
 @app.route('/add/<int:id>/')
 def add(id):
     """ add 1 item of a specific reagent to warehouse """
-    reag = Inventory.query.get_or_404(id)
-    reag.amount2 += 1
+    reagent = Inventory.query.get_or_404(id)
+    reagent.amount2 += 1
     db.session.commit()
+    add_log(reagent.id, current_user.id, 'added to warehouse item %s - %s' % (reagent.id, reagent.name))
     return redirect(url_for('show', id = id))
