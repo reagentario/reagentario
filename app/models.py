@@ -1,10 +1,10 @@
 from app import db
 from app import login_manager
 from app import bcrypt
-from werkzeug.security import generate_password_hash, check_password_hash
 from flask_admin.contrib.sqla import ModelView
 from flask_login import UserMixin
 from sqlalchemy.orm import validates
+
 
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
@@ -75,6 +75,20 @@ class Inventory(db.Model):
 
     def __repr__(self):
         return self.name #'<Reagent {}>'.format(self.name)
+
+
+class Applog(db.Model):
+    __tablename__ = 'applog'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user = db.relationship('User', backref='users', lazy=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('inventory.id'))
+    product = db.relationship('Inventory', backref='inventory', lazy=True)
+    event_time = db.Column(db.DateTime)
+    event_detail = db.Column(db.String(512))
+
+    def __repr__(self):
+          return self.event_detail
 
 
 class InventoryView(ModelView):

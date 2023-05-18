@@ -14,6 +14,8 @@ from flask_admin.contrib.sqla.ajax import QueryAjaxModelLoader
 from flask_admin.model import BaseModelView
 from sqlalchemy import inspect
 
+from app.functions import add_log
+
 admin = Admin(app, name='reagentario', template_mode='bootstrap3')
 admin.add_view(UserView(User, db.session))
 admin.add_view(InventoryView(Inventory, db.session))
@@ -258,6 +260,7 @@ def create_location():
             return render_template('create_location.html')
         db.session.add(location)
         db.session.commit()
+
         return redirect(url_for('list_locations'))
     return render_template('create_location.html')
 
@@ -292,7 +295,8 @@ def create():
                           to_be_ordered=to_be_ordered)
         db.session.add(reagent)
         db.session.commit()
-
+        db.session.refresh(reagent)
+        add_log(reagent.id, current_user.id, 'created item %s - %s' % (reagent.id, reagent.name))
         return redirect(url_for('list'))
 
     return render_template('create.html', form=form)
