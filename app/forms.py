@@ -48,6 +48,13 @@ class EditForm(FlaskForm):
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=None)])
 
 
+class EditLocationForm(FlaskForm):
+    name = StringField('Name', validators=[InputRequired('Name is required')])
+    alias = StringField('Alias', validators=[DataRequired('Alias is required')])
+    Submit = SubmitField('Save')
+
+
+
 class SearchForm(FlaskForm):
     name = StringField('Name')
     location = LocationField('Locations')

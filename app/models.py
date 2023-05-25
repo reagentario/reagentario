@@ -46,12 +46,15 @@ class User(UserMixin, db.Model):
     def get_id(self):
         return self.id
 
+    def __repr__(self):
+        return self.alias
+
 
 class Locations(db.Model):
     __tablename__ = 'locations'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)
-    alias = db.Column(db.String(8), index=True, unique=True)
+    short_name = db.Column(db.String(8), index=True, unique=True)
 
     def __repr__(self):
         return self.name

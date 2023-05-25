@@ -5,14 +5,15 @@ from app import app
 from app import db
 from app import bcrypt
 from app import log
-from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm
-from app.models import Inventory, Locations, User, InventoryView, UserView
+from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm, EditLocationForm
+from app.models import Inventory, Locations, User, InventoryView, UserView, Applog
 
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.ajax import QueryAjaxModelLoader
 from flask_admin.model import BaseModelView
 from sqlalchemy import inspect
+from sqlalchemy.exc import IntegrityError
 
 from app.functions import add_log
 
@@ -20,6 +21,7 @@ admin = Admin(app, name='reagentario', template_mode='bootstrap3')
 admin.add_view(UserView(User, db.session))
 admin.add_view(InventoryView(Inventory, db.session))
 admin.add_view(ModelView(Locations, db.session))
+
 
 
 @app.route('/c')
@@ -166,6 +168,38 @@ def list_locations():
     flash("No Locations Found!")
     msg = 'No Locations Found'
     return render_template('list_locations.html', warning=msg)
+
+
+@app.route('/edit_location/<int:id>/', methods=['GET', 'POST'])
+@login_required
+def edit_location(id):
+    """ edit location form """
+    form = EditLocationForm()
+    location = db.session.query(Locations).filter(Locations.id == id).first()
+
+    if form.validate_on_submit():
+        location.name = form.name.data
+        location.alias = form.alias.data
+        existing_location = Locations.query.filter(Locations.name == location.name or Locations.alias == location.alias).first()
+        if existing_location:
+            # https://getbootstrap.com/docs/5.0/components/alerts/ colors
+            flash('A Location with this name ({}) or alias ({}) already exists!'.format(location.name, location.alias), 'danger')
+            return render_template('edit_location.html', title='Edit Location', id=id, form=form)
+        try:
+            db.session.commit()
+            flash('Your changes have been saved.')
+            return redirect(url_for('list_locations'))
+        except Exception as e:
+            flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
+            db.session.rollback()
+            return render_template('edit_location.html', title='Edit Location',
+                                   id=id, form=form)
+    if request.method == 'GET':
+        form.name.data = location.name
+        form.alias.data = location.alias
+        return render_template('edit_location.html', title='Edit Location',
+                            id=id, form=form)
+    return redirect(url_for('list_locations'))
 
 
 @app.route('/list_location_content/<int:_id>/', methods=['GET', 'POST'])
@@ -344,7 +378,7 @@ def reset_order(id):
         try:
             db.session.commit()
             flash("Item orders reset")
-            add_log(reagent.id, current_user.id, 'created item %s - %s' % (reagent.id, reagent.name))
+            add_log(reagent.id, current_user.id, 'reset orders for item %s - %s' % (reagent.id, reagent.name))
             log.debug("reset orders for id %s", reagent.id)
         except Exception as e:
             flash('Error reset ordering {} with error {}'.format(reagent.id, str(e)), 'danger')
@@ -413,3 +447,39 @@ def add(id):
     db.session.commit()
     add_log(reagent.id, current_user.id, 'added to warehouse item %s - %s' % (reagent.id, reagent.name))
     return redirect(url_for('show', id = id))
+
+
+@app.route('/show_log/<int:id>/')
+def show_log(id):
+    """ list logs """
+    #form = SearchForm(csrf_enabled=False)
+
+    #if request.method == 'POST':
+    #    name = request.form['name']
+    #    location = request.form['location']  #Locations.query.get_or_404(form.location.data)
+    #    reagents = Inventory.query.filter(db.and_(Inventory.name.like('%'+name+'%'), Inventory.location_id.like('%'+form.location.data+'%'))).all()
+    #    msg = location
+    #    return render_template('list.html', form=form, reagents=reagents, warning=msg)
+
+    if request.method == 'GET':
+        if id == 0:
+            logs = Applog.query.all()
+        else:
+            logs = Applog.query.filter(Applog.product_id==id).all()
+
+    if len(logs) > 0:
+        flash("Log rows: " + str(len(logs)), 'info')
+        return render_template('show_log.html', logs=logs)
+    flash("No Logs Found!")
+    return render_template('show_log.html')
+
+
+#Handling error 404 and displaying relevant web page
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'),404
+
+#Handling error 500 and displaying relevant web page
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'),500
