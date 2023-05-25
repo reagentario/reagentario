@@ -9,7 +9,7 @@ from sqlalchemy.orm import validates
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    active = db.Column('is_active', db.Boolean(), nullable=False, server_default='1')
+    active = db.Column('is_active', db.Boolean(), nullable=False, default=False)  # server_default='1')
     email = db.Column(db.String(255), nullable=False, unique=True)
     password = db.Column(db.String(255))
     # User information
@@ -34,17 +34,13 @@ class User(UserMixin, db.Model):
     def check_password_hash(self, password):
         return bcrypt.check_password_hash(self.password, password)
 
+    @property
     def is_admin(self):
         return self.admin
 
+    @property
     def is_superadmin(self):
         return self.superadmin
-
-    def is_active(self):
-        return self.active
-
-    def get_id(self):
-        return self.id
 
     def __repr__(self):
         return self.alias
@@ -95,11 +91,11 @@ class Applog(db.Model):
 
 
 class InventoryView(ModelView):
-    column_display_pk = True # optional, but I don't like to see the IDs in the list
+    column_display_pk = True # optional, to see the IDs in the list
     column_hide_backrefs = False
     column_list = ('id', 'name', 'location', 'amount', 'amount2', 'amount_limit', 'size', 'notes', 'to_be_ordered')
 
 
 class UserView(ModelView):
-    column_display_pk = True # optional, but I don't like to see the IDs in the list
+    column_display_pk = True # optional, to see the IDs in the list
     column_exclude_list = ['password', ]
