@@ -100,3 +100,4 @@ class InventoryView(ModelView):
 class UserView(ModelView):
     column_display_pk = True # optional, to see the IDs in the list
     column_exclude_list = ['password', ]
+    form_excluded_columns = ('password')

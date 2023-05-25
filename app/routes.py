@@ -135,19 +135,23 @@ def edit_profile():
 @login_required
 def change_pw(alias):
     """ change password form """
-    form = ChangePasswordForm()
-    user = User.query.filter_by(alias=alias).first()
-    if not user:
-        flash('Not existing user alias ' + alias, 'danger')
-        return redirect(url_for('index'))
-    if form.validate_on_submit():
-        user.password = bcrypt.generate_password_hash(form.password.data)
-        flash('Password changed for ' + alias, 'info')
-        db.session.commit()
-        return redirect(url_for('index'))
-    log.debug("user: %s, pwd: %s" % (user.alias, form.password.data))
-    return render_template('change_pw.html', title='Change Password',
+    if current_user.alias == alias or current_user.is_superadmin:
+        form = ChangePasswordForm()
+        user = User.query.filter_by(alias=alias).first()
+        if not user:
+            flash('Not existing user alias ' + alias, 'danger')
+            return redirect(url_for('index'))
+        if form.validate_on_submit():
+            user.password = bcrypt.generate_password_hash(form.password.data)
+            flash('Password changed for ' + alias, 'info')
+            db.session.commit()
+            return redirect(url_for('index'))
+        log.debug("user: %s, pwd: %s" % (user.alias, form.password.data))
+        return render_template('change_pw.html', title='Change Password',
                            form=form)
+    else:
+        flash('You cannot change the password for user {}'.format(alias), 'danger')
+        return redirect(url_for('index'))
 
 
 @app.route('/list', methods=['GET', 'POST'])
