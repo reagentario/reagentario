@@ -5,7 +5,7 @@ from app import app
 from app import db
 from app import bcrypt
 from app import log
-from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm, EditLocationForm
+from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm, EditLocationForm, RegistrationForm
 from app.models import Inventory, Locations, User, InventoryView, UserView, Applog
 
 from flask_admin import Admin
@@ -96,6 +96,21 @@ def logout():
     logout_user()
     flash('You have successfully logged out.', 'success')
     return redirect(url_for('index'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(email=form.email.data, alias=form.alias.data, password=form.password.data, )
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
 
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
