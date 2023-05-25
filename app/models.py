@@ -80,9 +80,9 @@ class Applog(db.Model):
     __tablename__ = 'applog'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    user = db.relationship('User', backref='users', lazy=True)
+    user = db.relationship('User', backref='user', lazy=True)
     product_id = db.Column(db.Integer, db.ForeignKey('inventory.id'))
-    product = db.relationship('Inventory', backref='inventory', lazy=True)
+    product = db.relationship('Inventory', backref='log', lazy=True)
     event_time = db.Column(db.DateTime)
     event_detail = db.Column(db.String(512))
 
@@ -92,8 +92,9 @@ class Applog(db.Model):
 
 class InventoryView(ModelView):
     column_display_pk = True # optional, to see the IDs in the list
-    column_hide_backrefs = False
+    column_hide_backrefs = True
     column_list = ('id', 'name', 'location', 'amount', 'amount2', 'amount_limit', 'size', 'notes', 'to_be_ordered')
+    form_excluded_columns = ('log')
 
 
 class UserView(ModelView):

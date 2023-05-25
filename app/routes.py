@@ -194,11 +194,11 @@ def edit_location(id):
 
     if form.validate_on_submit():
         location.name = form.name.data
-        location.alias = form.alias.data
-        existing_location = Locations.query.filter(Locations.name == location.name or Locations.alias == location.alias).first()
+        location.short_name = form.short_name.data
+        existing_location = Locations.query.filter(Locations.name == location.name or Locations.short_name == location.short_name).first()
         if existing_location:
             # https://getbootstrap.com/docs/5.0/components/alerts/ colors
-            flash('A Location with this name ({}) or alias ({}) already exists!'.format(location.name, location.alias), 'danger')
+            flash('A Location with this name ({}) or short_name ({}) already exists!'.format(location.name, location.short_name), 'danger')
             return render_template('edit_location.html', title='Edit Location', id=id, form=form)
         try:
             db.session.commit()
@@ -211,7 +211,7 @@ def edit_location(id):
                                    id=id, form=form)
     if request.method == 'GET':
         form.name.data = location.name
-        form.alias.data = location.alias
+        form.short_name.data = location.short_name
         return render_template('edit_location.html', title='Edit Location',
                             id=id, form=form)
     return redirect(url_for('list_locations'))
@@ -300,15 +300,15 @@ def create_location():
     """ create a new location form """
     if request.method == 'POST':
         name = request.form['name']
-        alias = request.form['alias']
+        short_name = request.form['short_name']
         location = Locations(name=name,
-                          alias=alias)
+                          short_name=short_name)
         existing_location = Locations.query.filter(
-            Locations.name == name or Locations.alias == alias
+            Locations.name == name or Locations.short_name == short_name
         ).first()
         if existing_location:
             # https://getbootstrap.com/docs/5.0/components/alerts/ colors
-            flash('A Location with this name ({}) or alias ({}) already exists!'.format(name, alias), 'danger')
+            flash('A Location with this name ({}) or short_name ({}) already exists!'.format(name, short_name), 'danger')
             return render_template('create_location.html')
         db.session.add(location)
         db.session.commit()

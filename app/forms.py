@@ -2,7 +2,7 @@ from app import app
 from app import db
 from app.models import Inventory, Locations, User
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, ValidationError
 from wtforms.validators import DataRequired, InputRequired, NumberRange, Email, EqualTo
 
 class LoginForm(FlaskForm):
@@ -50,7 +50,7 @@ class EditForm(FlaskForm):
 
 class EditLocationForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired('Name is required')])
-    alias = StringField('Alias', validators=[DataRequired('Alias is required')])
+    short_name = StringField('Short Name', validators=[DataRequired('Short Name is required')])
     Submit = SubmitField('Save')
 
 
