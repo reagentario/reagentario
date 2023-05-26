@@ -110,7 +110,7 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route('/edit_user', methods=['GET', 'POST'])
+@app.route('/edit_profile', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
     """ edit profile form """
@@ -125,7 +125,7 @@ def edit_profile():
         form.email.data = current_user.email
         form.alias.data = current_user.alias
     return render_template('edit_profile.html', title='Edit Profile',
-                           form=form)
+                           form=form, user=current_user)
 
 
 @app.route('/edit_user/<alias>', methods=['GET', 'POST'])
