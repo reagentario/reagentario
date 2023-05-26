@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block body %}
-    <h1>Set new password</h1>
+<h1>Set new password for user {{ user.alias }} - {{ user.email }}</h1>
     <form action="" method="post">
         {{ form.hidden_tag() }}
         <p>

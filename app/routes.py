@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import render_template, make_response, flash, redirect, url_for, request
+from flask import render_template, make_response, flash, redirect, url_for, request, session
 from flask_login import current_user, login_user, logout_user, login_required
 from app import app
 from app import db
@@ -21,7 +21,6 @@ admin = Admin(app, name='reagentario', template_mode='bootstrap3')
 admin.add_view(UserView(User, db.session))
 admin.add_view(InventoryView(Inventory, db.session))
 admin.add_view(ModelView(Locations, db.session))
-
 
 
 @app.route('/c')
@@ -100,8 +99,6 @@ def logout():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
     form = RegistrationForm()
     if form.validate_on_submit():
         user = User(email=form.email.data, alias=form.alias.data, password=form.password.data, )
@@ -113,7 +110,7 @@ def register():
     return render_template('register.html', title='Register', form=form)
 
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
+@app.route('/edit_user', methods=['GET', 'POST'])
 @login_required
 def edit_profile():
     """ edit profile form """
@@ -131,6 +128,33 @@ def edit_profile():
                            form=form)
 
 
+@app.route('/edit_user/<alias>', methods=['GET', 'POST'])
+@login_required
+def edit_user(alias):
+    """ edit user form """
+    if current_user.alias == alias or current_user.is_superadmin:
+        form = EditProfileForm()
+        user = User.query.filter_by(alias=alias).first()
+        if not user:
+            flash('Not existing user alias ' + alias, 'danger')
+            return redirect(url_for('index'))
+        if form.validate_on_submit():
+            user.email = form.email.data
+            user.alias = form.alias.data
+            db.session.commit()
+            flash('Your changes have been saved.')
+            return redirect(url_for('index'))
+        if request.method == 'GET':
+            form.email.data = user.email
+            form.alias.data = user.alias
+        return render_template('edit_profile.html', title='Edit Profile',
+                               form=form, user=user)
+    else:
+        flash('You cannot change data for user {}'.format(alias), 'danger')
+        return redirect(url_for('index'))
+
+
+
 @app.route('/change_pw/<alias>', methods=['GET', 'POST'])
 @login_required
 def change_pw(alias):
@@ -146,12 +170,20 @@ def change_pw(alias):
             flash('Password changed for ' + alias, 'info')
             db.session.commit()
             return redirect(url_for('index'))
-        log.debug("user: %s, pwd: %s" % (user.alias, form.password.data))
         return render_template('change_pw.html', title='Change Password',
-                           form=form)
+                           form=form, user=user)
     else:
         flash('You cannot change the password for user {}'.format(alias), 'danger')
         return redirect(url_for('index'))
+
+
+@app.route('/users', methods=['GET'])
+@login_required
+def users():
+    if not current_user.is_admin:
+        return render_template('401.html')
+    _users = User.query.all()
+    return render_template('users.html', users=_users)
 
 
 @app.route('/list', methods=['GET', 'POST'])
@@ -502,3 +534,8 @@ def not_found_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html'),500
+
+#Handling error 401 and displaying relevant web page
+@app.errorhandler(401)
+def not_auth_error(error):
+    return render_template('401.html'),401
