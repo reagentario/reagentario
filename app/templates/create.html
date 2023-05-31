@@ -3,17 +3,16 @@
     <h1 style="width: 100%">{% block title %} Add a New Reagent {% endblock %}</h1>
 
 {% block body %}
-  <div class="top-pad">
+  <div class="md-3">
     <form method="POST" action="{{ url_for('create') }}" role="form">
-      <div class="form-group">{{ form.name.label }}: {{ form.name() }}</div>
-      <div class="form-group">{{ form.location.label }}: {{ form.location() }}</div>
-      <div class="form-group">{{ form.amount.label }}: {{ form.amount() }}</div>
-      <div class="form-group">{{ form.amount2.label }}: {{ form.amount2() }}</div>
-      <div class="form-group">{{ form.size.label }}: {{ form.size() }}</div>
-      <div class="form-group">{{ form.amount_limit.label }}: {{ form.amount_limit() }}</div>
-      <div class="form-group">{{ form.notes.label }}: {{ form.notes() }}</div>
-      <div class="form-group">{{ form.to_be_ordered.label }}: {{ form.to_be_ordered() }}</div>
-
+      <p>Name <br> {{ form.name() }}<p>
+      <p>Location <br> {{ form.location() }}</p>
+      <p>Amount in lab <br> {{ form.amount() }}</p>
+      <p>Amount in warehouse <br> {{ form.amount2() }}</p>
+      <p>Item Size <br> {{ form.size() }}</p>
+      <p>Item minimum stock <br> {{ form.amount_limit() }}</p>
+      <p>Notes <br> {{ form.notes() }}</div>
+      <p>To be ordered<br> {{ form.to_be_ordered() }}</p>
 
 
 
