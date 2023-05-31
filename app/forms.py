@@ -3,7 +3,7 @@ from app import db
 from app.models import Inventory, Locations, User
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, ValidationError
-from wtforms.validators import DataRequired, InputRequired, NumberRange, Email, EqualTo
+from wtforms.validators import DataRequired, InputRequired, NumberRange, Email, EqualTo, Length
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired()])
@@ -27,32 +27,31 @@ class LocationField(SelectField):
 
 
 class CreateForm(FlaskForm):
-    name = StringField('Name', validators=[InputRequired()])
-    location = LocationField('Locations')
-    amount = IntegerField('Amount', validators=[NumberRange(min=0, max=None)])
-    amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=None)])
-    size = StringField('Size', validators=[InputRequired()])
-    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=None)])
-    notes = StringField('Notes')
-    to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=None)])
+    name = StringField('Name', validators=[DataRequired(), Length(min=3, max=256)])
+    location = LocationField('Locations',  validators=[InputRequired()])
+    amount = IntegerField('Amount', validators=[NumberRange(min=0, max=1000000)])
+    amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
+    size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
+    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
+    notes = StringField('Notes', validators=[Length(min=0, max=512)])
+    to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
 
 
 class EditForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired()])
     location = SelectField('Locations', coerce=int)
-    amount = IntegerField('Amount', validators=[NumberRange(min=0, max=None)])
-    amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=None)])
+    amount = IntegerField('Amount', validators=[NumberRange(min=0, max=1000000)])
+    amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
     size = StringField('Size', validators=[InputRequired()])
-    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=None)])
+    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
     notes = StringField('Notes')
-    to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=None)])
+    to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
 
 
 class EditLocationForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired('Name is required')])
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required')])
     Submit = SubmitField('Save')
-
 
 
 class SearchForm(FlaskForm):
