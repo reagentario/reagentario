@@ -353,6 +353,32 @@ def create_location():
     return render_template('create_location.html')
 
 
+@app.route('/delete_location/<int:id>/', methods=['GET'])
+def delete_location(id):
+    """ delete a specific reagent """
+    location = db.session.query(Locations).filter(Locations.id == id).first()
+    if location:
+        reagents_in = Inventory.query.filter(Inventory.location_id==id).all()
+        if len(reagents_in) > 0:
+            flash("Location %s contains some reagents, it cannot be deleted" % location.name, 'danger')
+            return redirect(url_for('list_locations'))
+        try:
+            db.session.delete(location)
+            db.session.commit()
+            add_log(location.id, current_user.id, 'deleted location %s - %s' % (location.id, location.name))
+            flash("Location deleted")
+            log.debug("deleted location id %s", location.id)
+        except Exception as e:
+            flash('Error deleting {} with error {}'.format(location.id, str(e)), 'danger')
+            log.debug("ERROR not deleted location id %s", location.id)
+            db.session.rollback()
+    else:
+        flash('Error deleting location with id: ' + str(id), 'danger')
+        return redirect(url_for('list_locations'))
+    return redirect(url_for('list_locations'))
+
+
+
 @app.route('/create', methods=['GET', 'POST'])
 def create():
     """ create a new reagent form """

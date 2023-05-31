@@ -12,20 +12,41 @@
             <th>Short Name</th>
             {% if current_user.is_admin and current_user.is_active %}
             <th>Edit</th>
+            <th>Delete_modal</th>
             {% endif %}
         </tr>
     </thead>
     <tbody>
         {% for location in locations %}
         <tr>
-            <td onclick="window.location='/list_location_content/{{location.id}}';">{{location.name}}</td>
-            <td onclick="window.location='/list_location_content/{{location.id}}';">{{location.short_name}}</td>
+            <td><a href="/list_location_content/{{location.id}}" class="btn btn-dark pull-right">{{"{}".format(location.name)}}</a></td>
+            <td>{{location.short_name}}</td>
             {% if current_user.is_admin and current_user.is_active %}
             <td><a href="/edit_location/{{location.id}}" class="btn btn-dark pull-right">Edit</a></td>
-            {% endif %}
+            <td><button type="button" class="btn btn-block btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
+            <div class="modal fade" id="loc{{ location.id }}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h2 class="h6 modal-title">Are you sure ?</h2>
+							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+						</div>
+						<div class="modal-body">
+                          <p>Are you sure you want to delete location {{ location.name }} ? </p>
+						</div>
+						<div class="modal-footer">
+                            <a class="btn btn-secondary" href="/delete_location/{{ location.id }}">Yes, proceed</a>
+							<button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">No, go back</button>
+						</div>
+					</div>
+				</div>
+			</div>
+            </td>
+			{% endif %}
         </tr>
         {% endfor %}
     </tbody>
 </table>
+
 {% endif %}
 {% endblock %}
