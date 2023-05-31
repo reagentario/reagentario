@@ -2,7 +2,7 @@ from app import app
 from app import db
 from app.models import Inventory, Locations, User
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, ValidationError
+from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, ValidationError
 from wtforms.validators import DataRequired, InputRequired, NumberRange, Email, EqualTo, Length
 
 class LoginForm(FlaskForm):
@@ -33,24 +33,24 @@ class CreateForm(FlaskForm):
     amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
     amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
-    notes = StringField('Notes', validators=[Length(min=0, max=512)])
+    notes = TextAreaField('Notes', render_kw={"rows": 6, "cols": 36}, validators=[Length(min=0, max=512)])
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
 
 
 class EditForm(FlaskForm):
-    name = StringField('Name', validators=[InputRequired()])
-    location = SelectField('Locations', coerce=int)
+    name = StringField('Name', validators=[DataRequired(), Length(min=3, max=256)])
+    location = SelectField('Locations', validators=[InputRequired()], coerce=int)
     amount = IntegerField('Amount', validators=[NumberRange(min=0, max=1000000)])
     amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
-    size = StringField('Size', validators=[InputRequired()])
+    size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
     amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
-    notes = StringField('Notes')
+    notes = TextAreaField('Notes', render_kw={"rows": 12, "cols": 24}, validators=[Length(min=0, max=512)])
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
 
 
 class EditLocationForm(FlaskForm):
-    name = StringField('Name', validators=[InputRequired('Name is required')])
-    short_name = StringField('Short Name', validators=[DataRequired('Short Name is required')])
+    name = StringField('Name', validators=[InputRequired('Name is required'), Length(min=2, max=128)])
+    short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
     Submit = SubmitField('Save')
 
 
