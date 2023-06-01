@@ -8,19 +8,16 @@
 {{ form.errors }}
 {% endif %}
 
-  <div class="top-pad">
-    <form method="POST" action="{{ url_for('edit', id=id) }}" role="form">
-      {{ form.hidden_tag() }}
-      <div class="form-group">{{ form.name.label }}: {{ form.name() }}</div>
-      <div class="form-group">{{ form.location.label }}: {{ form.location() }}</div>
-      <div class="form-group">{{ form.amount.label }}: {{ form.amount() }}</div>
-      <div class="form-group">{{ form.amount2.label }}: {{ form.amount2() }}</div>
-      <div class="form-group">{{ form.size.label }}: {{ form.size() }}</div>
-      <div class="form-group">{{ form.amount_limit.label }}: {{ form.amount_limit() }}</div>
-      <div class="form-group">{{ form.notes.label }}: {{ form.notes() }}</div>
-      <div class="form-group">{{ form.to_be_ordered.label }}: {{ form.to_be_ordered() }}</div>
+{% from 'bootstrap5/form.html' import render_form %}
 
-  <button type="submit" class="btn btndefault">Submit</button>
-    </form>
+<div class="container-sm">
+  <div class="row mb-3">
+    <div class="mx-lg-auto col-6">
+
+      {{ render_form(form, action=url_for('edit', id=id), role='form', method='post', form_type='basic', button_map={'submit': 'success', 'cancel': 'secondary'}) }}
+
+    </div>
   </div>
+</div>
+
 {% endblock %}

@@ -33,8 +33,9 @@ class CreateForm(FlaskForm):
     amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
     amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
-    notes = TextAreaField('Notes', render_kw={"rows": 6, "cols": 36}, validators=[Length(min=0, max=512)])
+    notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 36}, validators=[Length(min=0, max=512)])
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
+    submit = SubmitField()
 
 
 class EditForm(FlaskForm):
@@ -44,20 +45,20 @@ class EditForm(FlaskForm):
     amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
     amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
-    notes = TextAreaField('Notes', render_kw={"rows": 12, "cols": 24}, validators=[Length(min=0, max=512)])
+    notes = TextAreaField('Notes', render_kw={"rows": 8, "cols": 24}, validators=[Length(min=0, max=512)])
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
-
+    submit = SubmitField('Save')
+    cancel = SubmitField('Cancel')
 
 class EditLocationForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired('Name is required'), Length(min=2, max=128)])
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
-    Submit = SubmitField('Save')
+    submit = SubmitField('Save')
 
 
 class SearchForm(FlaskForm):
     name = StringField('Name')
     location = LocationField('Locations')
-
 
 class EditProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired('Email is required')])

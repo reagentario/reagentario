@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask.logging import create_logger
+from flask_bootstrap import Bootstrap5
 
 from .config import Config
 logging.basicConfig(filename='logfile.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
@@ -15,8 +16,9 @@ app.config.from_object(Config)
 
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
 login_manager.init_app(app)
+
+bootstrap = Bootstrap5(app)
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
