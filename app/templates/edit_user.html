@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block body %}
+    <h1>Edit User</h1>
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(size=32) }}<br>
+            {% for error in form.email.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.alias.label }}<br>
+            {{ form.alias(size=4) }}<br>
+            {% for error in form.alias.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        {% if current_user.is_admin and current_user.is_active %}
+        <p>
+            {{ form.admin.label }}<br>
+            {{ form.admin }}<br>
+            {% for error in form.admin.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        {% endif %}
+        {% if current_user.is_superadmin and current_user.is_active %}
+        <p>
+            {{ form.superadmin.label }}<br>
+            {{ form.superadmin }}<br>
+            {% for error in form.superadmin.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        {% endif %}
+
+        <p>{{ form.submit() }}</p>
+    </form>
+
+    <a href="/change_pw/{{ user.alias }}" class="btn btn-dark pull-right">CHANGE PASSWORD</a></td>
+{% endblock %}
