@@ -63,10 +63,11 @@ class SearchForm(FlaskForm):
 class EditProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired('Email is required')])
     alias = StringField('Alias', validators=[DataRequired('Alias required')])
+    active = BooleanField('Active')
     admin = BooleanField('Admin')
     superadmin = BooleanField('Superadmin')
     submit = SubmitField('Save')
-
+    cancel = SubmitField('Cancel')
 
 class ChangePasswordForm(FlaskForm):
       password = PasswordField('Password', validators=[DataRequired()])

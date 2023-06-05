@@ -142,6 +142,7 @@ def edit_user(alias):
         if form.validate_on_submit():
             user.email = form.email.data
             user.alias = form.alias.data
+            user.active = form.active.data
             user.admin = form.admin.data
             user.superadmin = form.superadmin.data
             db.session.commit()
@@ -150,6 +151,7 @@ def edit_user(alias):
         if request.method == 'GET':
             form.email.data = user.email
             form.alias.data = user.alias
+            form.active.data = user.active
             form.admin.data = user.admin
             form.superadmin.data = user.superadmin
         return render_template('edit_user.html', title='Edit Profile',
@@ -157,7 +159,6 @@ def edit_user(alias):
     else:
         flash('You cannot change data for user {}'.format(alias), 'danger')
         return redirect(url_for('users'))
-
 
 
 @app.route('/change_pw/<alias>', methods=['GET', 'POST'])
