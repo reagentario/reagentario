@@ -45,7 +45,7 @@ class EditForm(FlaskForm):
     amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
     amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
-    notes = TextAreaField('Notes', render_kw={"rows": 8, "cols": 24}, validators=[Length(min=0, max=512)])
+    notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 24}, validators=[Length(min=0, max=512)])
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
     submit = SubmitField('Save')
     cancel = SubmitField('Cancel')
@@ -63,6 +63,8 @@ class SearchForm(FlaskForm):
 class EditProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired('Email is required')])
     alias = StringField('Alias', validators=[DataRequired('Alias required')])
+    admin = BooleanField('Admin')
+    superadmin = BooleanField('Superadmin')
     submit = SubmitField('Save')
 
 

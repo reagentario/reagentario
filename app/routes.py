@@ -124,6 +124,7 @@ def edit_profile():
     if request.method == 'GET':
         form.email.data = current_user.email
         form.alias.data = current_user.alias
+
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form, user=current_user)
 
@@ -141,17 +142,21 @@ def edit_user(alias):
         if form.validate_on_submit():
             user.email = form.email.data
             user.alias = form.alias.data
+            user.admin = form.admin.data
+            user.superadmin = form.superadmin.data
             db.session.commit()
             flash('Your changes have been saved.')
-            return redirect(url_for('index'))
+            return redirect(url_for('users'))
         if request.method == 'GET':
             form.email.data = user.email
             form.alias.data = user.alias
-        return render_template('edit_profile.html', title='Edit Profile',
+            form.admin.data = user.admin
+            form.superadmin.data = user.superadmin
+        return render_template('edit_user.html', title='Edit Profile',
                                form=form, user=user)
     else:
         flash('You cannot change data for user {}'.format(alias), 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('users'))
 
 
 
