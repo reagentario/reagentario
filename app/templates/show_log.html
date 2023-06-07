@@ -1,9 +1,6 @@
 {% extends "base.html" %}
 
 {% block body %}
-<br>
-<h1>{{ title|default('Logs') }}</h1>
-<hr>
 {#
 <div class="top-pad">
   <form method="POST" action="{{ url_for('list') }}" role="form">
@@ -13,7 +10,6 @@
   </form>
 </div>
 #}
-<hr>
 
 {% if logs %}
 <table id="myTable" class="table table-hover table-striped text-center">

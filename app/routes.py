@@ -221,10 +221,10 @@ def list_locations():
     locations = Locations.query.all()
 
     if len(locations) > 0:
-        return render_template('list_locations.html', locations=locations)
+        return render_template('list_locations.html', locations=locations, title="Locations")
     flash("No Locations Found!")
     msg = 'No Locations Found'
-    return render_template('list_locations.html', warning=msg)
+    return render_template('list_locations.html', warning=msg, title="Locations")
 
 
 @app.route('/edit_location/<int:id>/', methods=['GET', 'POST'])
@@ -362,12 +362,12 @@ def create_location():
         if existing_location:
             # https://getbootstrap.com/docs/5.0/components/alerts/ colors
             flash('A Location with this name ({}) or short_name ({}) already exists!'.format(name, short_name), 'danger')
-            return render_template('create_location.html')
+            return render_template('create_location.html', title='Add a new location')
         db.session.add(location)
         db.session.commit()
 
         return redirect(url_for('list_locations'))
-    return render_template('create_location.html')
+    return render_template('create_location.html', title='Add a new location')
 
 
 @app.route('/delete_location/<int:id>/', methods=['GET'])
@@ -399,6 +399,7 @@ def delete_location(id):
 @app.route('/create', methods=['GET', 'POST'])
 def create():
     """ create a new reagent form """
+    title = "Add a new Reagent"
     form = CreateForm(csrf_enabled=False)
     form.amount.data=0
     form.amount2.data=0
@@ -428,7 +429,7 @@ def create():
         add_log(reagent.id, current_user.id, 'created item %s - %s' % (reagent.id, reagent.name))
         return redirect(url_for('list'))
 
-    return render_template('create.html', form=form)
+    return render_template('create.html', form=form, title=title)
 
 
 @app.route('/order/<int:id>/', methods=['GET'])
@@ -450,7 +451,7 @@ def order(id):
     else:
         flash('Error ordering product with id: ' + str(id), 'danger')
         return redirect(url_for('show', id=id))
-    return redirect(url_for('show', id=id))
+    return redirect(url_for('show', id=id, title=reagent.name))
 
 
 @app.route('/view_orders/', methods=['GET'])
@@ -458,9 +459,9 @@ def view_orders():
     """ view orders """
     orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
     if orders.count() > 0:
-        return render_template('view_orders.html', reagents=orders)
+        return render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
     flash('No orders pending', 'info')
-    return  render_template('view_orders.html', reagents=orders)
+    return  render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
 
 
 @app.route('/reset_order/<int:id>/', methods=['GET'])
@@ -489,9 +490,9 @@ def view_low_quantity():
     """ view list of reagent with low quantity """
     reag = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
     if reag.count() > 0:
-        return render_template('list.html', reagents=reag, title="Low Quantity")
-    flash('No reagents below quantity limits', 'info')
-    return  render_template('list.html', reagents=reag)
+        return render_template('list.html', reagents=reag, title="Low Quantity Report")
+    flash('No reagents below minimum stock limits', 'info')
+    return  render_template('list.html', reagents=reag, title='Low quantity Report')
 
 
 @app.route('/plus/<int:id>/')
@@ -563,9 +564,9 @@ def show_log(id):
 
     if len(logs) > 0:
         flash("Log rows: " + str(len(logs)), 'info')
-        return render_template('show_log.html', logs=logs)
-    flash("No Logs Found!")
-    return render_template('show_log.html')
+        return render_template('show_log.html', logs=logs, title='Logs report')
+    flash("No Logs Found for this reagent !", 'info')
+    return render_template('show_log.html', title='Logs report')
 
 
 #Handling error 404 and displaying relevant web page

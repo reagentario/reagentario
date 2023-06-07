@@ -3,20 +3,18 @@
 <h1 style="width: 100%">{% block title %} Add a New Reagent {% endblock %}</h1>
 
 {% block body %}
-  <div class="md-3">
-    <form method="POST" action="{{ url_for('create') }}" role="form">
-      <p>Name <br> {{ form.name() }}<p>
-      <p>Location <br> {{ form.location() }}</p>
-      <p>Amount in lab <br> {{ form.amount() }}</p>
-      <p>Amount in warehouse <br> {{ form.amount2() }}</p>
-      <p>Item Size <br> {{ form.size() }}</p>
-      <p>Item minimum stock <br> {{ form.amount_limit() }}</p>
-      <p>Notes <br> {{ form.notes() }}</div>
-      <p>To be ordered<br> {{ form.to_be_ordered() }}</p>
 
+  {% from 'bootstrap5/form.html' import render_form %}
+  <div class="container-sm">
+    <div class="row md-6">
+      <div class="col-8">
 
+      {{ render_form(form, action=url_for('create'), role='form', method='post', form_type='horizontal', button_map={'submit': 'success', 'cancel': 'secondary'}) }}
 
-  <button type="submit" class="btn btndefault">Submit</button>
-    </form>
+      </div>
+    </div>
   </div>
+
+
+
 {% endblock %}

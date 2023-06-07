@@ -28,11 +28,11 @@ class LocationField(SelectField):
 
 class CreateForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=256)])
-    location = LocationField('Locations',  validators=[InputRequired()])
-    amount = IntegerField('Amount', validators=[NumberRange(min=0, max=1000000)])
-    amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
+    location = LocationField('Location',  validators=[InputRequired()])
+    amount = IntegerField('Amount in lab', validators=[NumberRange(min=0, max=1000000)])
+    amount2 = IntegerField('Amount in warehouse', validators=[NumberRange(min=0, max=1000000)])
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
-    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
+    amount_limit = IntegerField('Minimum stock', validators=[NumberRange(min=0, max=1000000)])
     notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 36}, validators=[Length(min=0, max=512)])
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
     submit = SubmitField()
@@ -40,11 +40,11 @@ class CreateForm(FlaskForm):
 
 class EditForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=256)])
-    location = SelectField('Locations', validators=[InputRequired()], coerce=int)
-    amount = IntegerField('Amount', validators=[NumberRange(min=0, max=1000000)])
-    amount2 = IntegerField('Amount2', validators=[NumberRange(min=0, max=1000000)])
+    location = SelectField('Location', validators=[InputRequired()], coerce=int)
+    amount = IntegerField('Amount in lab', validators=[NumberRange(min=0, max=1000000)])
+    amount2 = IntegerField('Amount in warehouse', validators=[NumberRange(min=0, max=1000000)])
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
-    amount_limit = IntegerField('Amount Limit', validators=[NumberRange(min=0, max=1000000)])
+    amount_limit = IntegerField('Minimum stock', validators=[NumberRange(min=0, max=1000000)])
     notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 24}, validators=[Length(min=0, max=512)])
     to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
     submit = SubmitField('Save')
@@ -54,7 +54,7 @@ class EditLocationForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired('Name is required'), Length(min=2, max=128)])
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
     submit = SubmitField('Save')
-
+    cancel = SubmitField('Cancel')
 
 class SearchForm(FlaskForm):
     name = StringField('Name')
@@ -73,6 +73,7 @@ class ChangePasswordForm(FlaskForm):
       password = PasswordField('Password', validators=[DataRequired()])
       password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
       submit = SubmitField('Save')
+      cancel = SubmitField('Cancel')
 
 
 class RegistrationForm(FlaskForm):
@@ -81,6 +82,7 @@ class RegistrationForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
+    cancel = SubmitField('Cancel')
 
     def validate_alias(self, alias):
         user = User.query.filter_by(alias=alias.data).first()
