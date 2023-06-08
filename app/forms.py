@@ -54,7 +54,6 @@ class EditLocationForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired('Name is required'), Length(min=2, max=128)])
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
     submit = SubmitField('Save')
-    cancel = SubmitField('Cancel')
 
 class SearchForm(FlaskForm):
     name = StringField('Name')

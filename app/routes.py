@@ -336,7 +336,7 @@ def delete(id):
             db.session.delete(reagent)
             db.session.commit()
             add_log(reagent.id, current_user.id, 'deleted item %s - %s' % (reagent.id, reagent.name))
-            flash("Item deleted")
+            flash("Item deleted", 'info')
             log.debug("deleted id %s", reagent.id)
         except Exception as e:
             flash('Error deleting {} with error {}'.format(reagent.id, str(e)), 'danger')
@@ -383,7 +383,7 @@ def delete_location(id):
             db.session.delete(location)
             db.session.commit()
             add_log(location.id, current_user.id, 'deleted location %s - %s' % (location.id, location.name))
-            flash("Location deleted")
+            flash("Location deleted", 'info')
             log.debug("deleted location id %s", location.id)
         except Exception as e:
             flash('Error deleting {} with error {}'.format(location.id, str(e)), 'danger')
@@ -440,7 +440,7 @@ def order(id):
         reagent.to_be_ordered += 1
         try:
             db.session.commit()
-            flash("Item ordered")
+            flash("Item ordered", 'info')
             add_log(reagent.id, current_user.id, 'ordered item %s - %s' %
                    (reagent.id, reagent.name))
             log.debug("ordered id %s", reagent.id)
@@ -472,7 +472,7 @@ def reset_order(id):
         reagent.to_be_ordered = 0
         try:
             db.session.commit()
-            flash("Item orders reset")
+            flash("Item orders reset", 'info')
             add_log(reagent.id, current_user.id, 'reset orders for item %s - %s' % (reagent.id, reagent.name))
             log.debug("reset orders for id %s", reagent.id)
         except Exception as e:
@@ -501,6 +501,7 @@ def plus(id):
     reagent = Inventory.query.get_or_404(id)
     reagent.amount += 1
     db.session.commit()
+    flash("Added 1 item to laboratory", 'info')
     add_log(reagent.id, current_user.id, 'added item %s - %s' % (reagent.id, reagent.name))
     return redirect(url_for('show', id = id))
 
@@ -510,10 +511,11 @@ def minus(id):
     """ remove 1 item of a specific reagent in lab """
     reagent = Inventory.query.get_or_404(id)
     if reagent.amount == 0:
-        flash("No Reagents Found!")
+        flash("No more items available in laboratory!", 'danger')
         return redirect(url_for('show', id = id))
     reagent.amount -= 1
     db.session.commit()
+    flash("Removed one item from laboratory", 'info')
     add_log(reagent.id, current_user.id, 'removed item %s - %s' % (reagent.id, reagent.name))
 
     return redirect(url_for('show', id = id))
@@ -530,6 +532,7 @@ def move(id):
         reagent.amount2 -=1
         reagent.amount +=1
         db.session.commit()
+        flash("Moved one item from warehouse to laboratory", 'info')
         add_log(reagent.id, current_user.id, 'moved from warehouse item %s - %s' % (reagent.id, reagent.name))
         return redirect(url_for('show', id = id))
 
@@ -540,6 +543,7 @@ def add(id):
     reagent = Inventory.query.get_or_404(id)
     reagent.amount2 += 1
     db.session.commit()
+    flash("Added 1 item to warehouse", 'info')
     add_log(reagent.id, current_user.id, 'added to warehouse item %s - %s' % (reagent.id, reagent.name))
     return redirect(url_for('show', id = id))
 
