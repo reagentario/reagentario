@@ -12,12 +12,24 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.contrib.sqla.ajax import QueryAjaxModelLoader
 from flask_admin.model import BaseModelView
+from flask_admin import helpers, expose
+from flask_admin import AdminIndexView
+
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError
 
 from app.functions import add_log
 
-admin = Admin(app, name='reagentario', template_mode='bootstrap3')
+
+class MyAdminIndexView(AdminIndexView):
+
+    @expose('/')
+    def index(self):
+        if not current_user.is_superadmin:
+            return redirect(url_for('index'))
+        return super(MyAdminIndexView, self).index()
+
+admin = Admin(app, name='reagentario', template_mode='bootstrap4', index_view=MyAdminIndexView())
 admin.add_view(UserView(User, db.session))
 admin.add_view(InventoryView(Inventory, db.session))
 admin.add_view(ModelView(Locations, db.session))
