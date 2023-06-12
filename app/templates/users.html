@@ -4,16 +4,6 @@
 <br>
 <h1>{{ title|default('Users') }}</h1>
 <hr>
-{#
-<div class="top-pad">
-  <form method="POST" action="{{ url_for('list') }}" role="form">
-    <div class="form-group">{{ form.name.label }}: {{ form.name() }}</div>
-    <div class="form-group">{{ form.location.label }}: {{ form.location() }}</div>
-    <button type="submit" class="btn btndefault">Submit</button>
-  </form>
-</div>
-#}
-<hr>
 
 {% if users %}
 <table id="myTable" class="table table-hover table-striped text-center">
@@ -31,7 +21,7 @@
       <tr>
         <td><a href="/edit_user/{{user.alias}}" class="btn btn-dark pull-right">{{"{}".format(user.email)}}</a></td>
         <td> {{user.alias}}</td>
-        <td class="data-checkbox"> {{user.active}}</td>
+        <td  {{user.active}}</td>
         <td> {{user.is_admin}}</td>
         <td> {{user.is_superadmin}}</td>
       </tr>
