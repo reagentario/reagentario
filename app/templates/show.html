@@ -50,41 +50,43 @@
 
       <td width=100px></td>
       <td>
-        <table class="table-1 table-bordered border-dark text-center">
-          <tr >
+        <table class="table-sm table-bordered border-dark text-center">
+          <tr>
             <td> <a href="/move/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/move.png') }}" style="width:64px"/></a></td>
             <td> <a href="/move/{{ reagent.id }}"> Move 1 item from warehouse to lab</a></td>
           </tr>
-          <tr >
-            <td> <a href="/plus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/plus.png') }}" style="width:48px"/></a></td>
+          <tr>
+            <td> <a href="/plus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/plus.png') }}" style="width:64px"/></a></td>
             <td> <a href="/plus/{{ reagent.id }}"> Add 1 item in laboratory</a></td>
           </tr>
-          <tr >
-            <td> <a href="/minus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/minus.png') }}" style="width:48px"/></a></td>
+          <tr>
+            <td> <a href="/minus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/minus.png') }}" style="width:64px"/></a></td>
             <td> <a href="/minus/{{ reagent.id }}"> Remove 1 item from laboratory</a></td>
           </tr>
-          <tr >
-            <td> <a href="/add/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/add.png') }}" style="width:48px"/></a></td>
+          <tr>
+            <td> <a href="/add/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/add.png') }}" style="width:64px"/></a></td>
             <td> <a href="/add/{{ reagent.id }}"> Add 1 item to warehouse</a></td>
           </tr>
-          </tr>
-          <tr >
-            <td> <a href="/order/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/order.png') }}" style="width:48px"/></a></td>
+          <tr>
+            <td> <a href="/order/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/order.png') }}" style="width:64px"/></a></td>
             <td> <a href="/order/{{ reagent.id }}"> Order</a></td>
           </tr>
-          <tr >
-            <td> <a href="/edit/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:48px"/></a></td>
+          {% if current_user.is_admin and current_user.is_active %}
+          <tr>
+            <td> <a href="/edit/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:64px"/></a></td>
             <td> <a href="/edit/{{ reagent.id }}"> Edit</a></td>
           </tr>
-          <tr >
-            <td> <a href="/show_log/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/log.png') }}" style="width:48px"/></a></td>
+          <tr>
+            <td> <a href="/show_log/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/log.png') }}" style="width:64px"/></a></td>
             <td> <a href="/show_log/{{ reagent.id }}"> Log</a></td>
           </tr>
-          <tr >
-            <td> <a href="/delete/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:48px"/></a></td>
+          {% if reagent.amount==0 and reagent.amount2==0 %}
+          <tr>
+            <td> <a href="/delete/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:64px"/></a></td>
             <td> <a href="/delete/{{ reagent.id }}"> Delete</a></td>
           </tr>
-
+          {% endif %}
+          {% endif %}
         </table>
       </td>
     </tr>

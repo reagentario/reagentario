@@ -15,7 +15,7 @@
 <table id="myTable" class="table table-hover table-striped text-center">
   <thead>
     <tr>
-      <th>Date</th>
+      <th class="text-nowrap">Date</th>
       <th>ID</th>
       <th>Name</th>
       <th>Location</th>
@@ -26,7 +26,7 @@
   <tbody>
     {% for log in logs %}
     <tr>
-        <td> {{log.event_time}} </td>
+        <td class="text-nowrap"> {{log.event_time}} </td>
         <td> {{log.product.id}} </td>
         {% if log.product.id %}
         <td><a href="/show/{{log.product.id}}" class="btn btn-dark pull-right">{{"{}".format(log.product.name|default("item deleted from database"))}}</a></td>

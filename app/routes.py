@@ -322,8 +322,6 @@ def edit(id):
             flash('Item updated', 'info')
         return redirect(url_for('show', id=id))
 
-    flash('Error on form validation', 'danger')
-
     return render_template('edit.html', id=id, form=form)
 
 
