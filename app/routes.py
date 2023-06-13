@@ -224,8 +224,14 @@ def list_locations():
 @login_required
 def edit_location(id):
     """ edit location form """
+    if not current_user.is_admin:
+        return render_template('401.html')
+
     form = EditLocationForm()
     location = db.session.query(Locations).filter(Locations.id == id).first()
+    if not location:
+        flash('Not existing location', 'danger')
+        return redirect(url_for('list_locations'))
 
     if form.validate_on_submit():
         location.name = form.name.data
@@ -280,6 +286,10 @@ def show(id):
 @login_required
 def edit(id):
     """ edit a specific reagent"""
+
+    if not current_user.is_admin:
+          return render_template('401.html')
+
     reag = db.session.query(Inventory).filter(Inventory.id == id).first()
     loc = [(loc.id, loc.name) for loc in Locations.query.all()]
     form = EditForm(csrf_enabled=False, exclude_fk=False, obj=reag)
@@ -325,6 +335,9 @@ def edit(id):
 @login_required
 def delete(id):
     """ delete a specific reagent """
+    if not current_user.is_admin:
+          return render_template('401.html')
+
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
     if reagent:
         try:
@@ -347,6 +360,9 @@ def delete(id):
 @login_required
 def create_location():
     """ create a new location form """
+    if not current_user.is_admin:
+        return render_template('401.html')
+
     if request.method == 'POST':
         name = request.form['name']
         short_name = request.form['short_name']
@@ -369,7 +385,10 @@ def create_location():
 @app.route('/delete_location/<int:id>/', methods=['GET'])
 @login_required
 def delete_location(id):
-    """ delete a specific reagent """
+    """ delete a location """
+    if not current_user.is_admin:
+          return render_template('401.html')
+
     location = db.session.query(Locations).filter(Locations.id == id).first()
     if location:
         reagents_in = Inventory.query.filter(Inventory.location_id==id).all()
@@ -397,6 +416,9 @@ def delete_location(id):
 @login_required
 def create():
     """ create a new reagent form """
+    if not current_user.is_admin:
+          return render_template('401.html')
+
     title = "Add a new Reagent"
     form = CreateForm(csrf_enabled=False)
     form.amount.data=0
@@ -457,6 +479,9 @@ def order(id):
 @login_required
 def view_orders():
     """ view orders """
+    if not current_user.is_admin:
+        return render_template('401.html')
+
     orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
     if orders.count() > 0:
         return render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
@@ -468,6 +493,9 @@ def view_orders():
 @login_required
 def reset_order(id):
     """ reset order for a specific reagent """
+    if not current_user.is_admin:
+          return render_template('401.html')
+
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
     if reagent:
         reagent.to_be_ordered = 0
@@ -490,6 +518,9 @@ def reset_order(id):
 @login_required
 def view_low_quantity():
     """ view list of reagent with low quantity """
+    if not current_user.is_admin:
+          return render_template('401.html')
+
     reag = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
     if reag.count() > 0:
         return render_template('list.html', reagents=reag, title="Low Quantity Report")
@@ -558,6 +589,9 @@ def add(id):
 @login_required
 def show_log(id):
     """ list logs """
+    if not current_user.is_admin:
+        return render_template('401.html')
+
     #form = SearchForm(csrf_enabled=False)
 
     #if request.method == 'POST':
