@@ -77,7 +77,7 @@ class ChangePasswordForm(FlaskForm):
 
 class RegistrationForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
-    alias = StringField('Alias', validators=[DataRequired('Alias required')])
+    alias = StringField('Alias', validators=[DataRequired('Alias required'), Length(min=2, max=3)])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
@@ -86,9 +86,9 @@ class RegistrationForm(FlaskForm):
     def validate_alias(self, alias):
         user = User.query.filter_by(alias=alias.data).first()
         if user is not None:
-            raise ValidationError('Please use a different alias.')
+            raise ValidationError('Alias already in use, choose a different one.')
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
-            raise ValidationError('Please use a different email address.')
+            raise ValidationError('Email address already registered.')
