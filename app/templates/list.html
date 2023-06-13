@@ -21,7 +21,7 @@
     {% else %}
       <tr style="color:black;">
     {% endif %}
-        <td><a href="/show/{{reagent.id}}" class="btn btn-dark pull-right">{{"{}".format(reagent.name)}}</a></td>
+        <td><a href="/show/{{reagent.id}}" class="btn btn-primary pull-right">{{"{}".format(reagent.name)}}</a></td>
         <td> {{reagent.location.name}}</td>
         <td> {{reagent.amount}}</td>
         <td> {{reagent.amount2}}</td>
@@ -36,9 +36,4 @@
 <h2>{{ warning }}</h2>
 {% endif %}
 
-<script>
-  $(document).ready( function () {
-      $('#myTable').DataTable();
-    } );
-</script>
 {% endblock %}

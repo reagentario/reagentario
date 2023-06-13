@@ -2,7 +2,7 @@
 
 {% block body %}
 {% if locations %}
-<table class="table table-hover table-striped">
+<table class="table table-hover table-striped text-center">
     <thead>
         <tr>
             <th>Name</th>
@@ -20,7 +20,7 @@
             <td>{{location.short_name}}</td>
             {% if current_user.is_admin and current_user.is_active %}
             <td><a href="/edit_location/{{location.id}}" class="btn btn-success pull-right">Edit</a></td>
-            <td><button type="button" class="btn btn-block btn-danger mb-3" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
+            <td><button type="button" class="btn btn-block btn-danger mb-6" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
             <div class="modal fade" id="loc{{ location.id }}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered">
 					<div class="modal-content">

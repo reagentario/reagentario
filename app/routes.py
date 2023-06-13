@@ -313,19 +313,15 @@ def edit(id):
         k2 = set(r2.keys())
         common_keys = set(k1).intersection(set(k2))
         try:
-            log.debug("updating id %s", reag.id)
             db.session.commit()
             for key in common_keys:
                 if str(r1[key]) != str(r2[key]):
                     add_log(reag.id, current_user.id, 'updated item %s - %s: %s value changed from "%s" to "%s"' % (reag.id, reag.name, key, str(r1[key]), str(r2[key])))
                     log.debug('updated item %s - %s: %s value changed from "%s" to "%s"' % (reag.id, reag.name, key, str(r1[key]), str(r2[key])))
-
         except Exception as e:
             flash('Error updating %s' % str(e), 'danger')
             log.debug("ERROR not updated id %s", reag.id)
             db.session.rollback()
-        else:
-            flash('Item updated', 'info')
         return redirect(url_for('show', id=id))
 
     return render_template('edit.html', id=id, form=form, title='Edit reagent')

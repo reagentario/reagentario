@@ -20,7 +20,7 @@
         <td class="text-nowrap"> {{log.event_time}} </td>
         <td> {{log.product.id}} </td>
         {% if log.product.id %}
-        <td><a href="/show/{{log.product.id}}" class="btn btn-dark pull-right">{{"{}".format(log.product.name|default("item deleted from database"))}}</a></td>
+        <td><a href="/show/{{log.product.id}}" class="btn btn-primary pull-right">{{"{}".format(log.product.name|default("item deleted from database"))}}</a></td>
         {% else %}
         <td class="text-nowrap"> {{log.product.name|default("deleted from database")}}</a></td>
         {% endif %}
@@ -36,10 +36,4 @@
 <h2>{{ warning }}</h2>
 {% endif %}
 
-<script>
-  $(document).ready( function () {
-      $('#myTable').DataTable( {
-          "lengthMenu": [ [50, 10, 25, -1], [50, 10, 25, "All"] ] } );
-    } );
-</script>
 {% endblock %}
