@@ -14,37 +14,37 @@ from sqlalchemy.exc import IntegrityError
 from app.functions import add_log
 
 
-@app.route('/c')
-def c():
-    with app.app_context():
-
-        # Create 'member@example.com' user with no roles
-        if not User.query.filter(User.email == 'member@example.com').first():
-            user = User(
-                email='member@example.com',
-                password='Password1',
-                alias='ME'
-            )
-            db.session.add(user)
-            db.session.commit()
-
-        # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
-        if not User.query.filter(User.email == 'admin3@example.com').first():
-            user = User(
-                email='admin3@example.com',
-                password='Password1',
-                alias='A3'
-            )
-            if not user.check_password_hash('Password1'):
-                log.debug("ERROR creating user admin")
-                return render_template('index.html')
-            log.debug("created user admin")
-            user.admin = True
-            user.superadmin = True
-            db.session.add(user)
-            db.session.commit()
-
-    return render_template('index.html')
+#@app.route('/c')
+#def c():
+#    with app.app_context():
+#
+#        # Create 'member@example.com' user with no roles
+#        if not User.query.filter(User.email == 'member@example.com').first():
+#            user = User(
+#                email='member@example.com',
+#                password='Password1',
+#                alias='ME'
+#            )
+#            db.session.add(user)
+#            db.session.commit()
+#
+#        # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
+#        if not User.query.filter(User.email == 'admin@example.com').first():
+#            user = User(
+#                email='admin@example.com',
+#                password='Password1',
+#                alias='A1'
+#            )
+#            if not user.check_password_hash('Password1'):
+#                log.debug("ERROR creating user admin")
+#                return render_template('index.html')
+#            log.debug("created user admin")
+#            user.admin = True
+#            user.superadmin = True
+#            db.session.add(user)
+#            db.session.commit()
+#
+#    return render_template('index.html')
 
 
 @app.route('/')
