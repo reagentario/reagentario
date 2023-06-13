@@ -22,9 +22,9 @@
         {% if log.product.id %}
         <td><a href="/show/{{log.product.id}}" class="btn btn-dark pull-right">{{"{}".format(log.product.name|default("item deleted from database"))}}</a></td>
         {% else %}
-        <td> {{log.product.name|default("item deleted from database")}}</a></td>
+        <td class="text-nowrap"> {{log.product.name|default("deleted from database")}}</a></td>
         {% endif %}
-        <td> {{log.product.location}} </td>
+        <td class="text-nowrap"> {{log.product.location}} </td>
         <td> {{log.user.alias}} </td>
         <td> {{log.event_detail}} </td>
     </tr>
@@ -38,7 +38,8 @@
 
 <script>
   $(document).ready( function () {
-      $('#myTable').DataTable();
+      $('#myTable').DataTable( {
+          "lengthMenu": [ [50, 10, 25, -1], [50, 10, 25, "All"] ] } );
     } );
 </script>
 {% endblock %}

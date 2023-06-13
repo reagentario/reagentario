@@ -2,8 +2,6 @@
 
 {% block body %}
 <br>
-<h1>{{ title|default('Users') }}</h1>
-<hr>
 
 {% if users %}
 <table id="myTable" class="table table-hover table-striped text-center">
@@ -20,10 +18,10 @@
     {% for user in users %}
       <tr>
         <td><a href="/edit_user/{{user.alias}}" class="btn btn-dark pull-right">{{"{}".format(user.email)}}</a></td>
-        <td> {{user.alias}}</td>
-        <td  {{user.active}}</td>
-        <td> {{user.is_admin}}</td>
-        <td> {{user.is_superadmin}}</td>
+        <td> {{ user.alias }}</td>
+        <td> {{ user.is_active }}</td>
+        <td> {{ user.is_admin }}</td>
+        <td> {{ user.is_superadmin }}</td>
       </tr>
       {% endfor %}
   </tbody>

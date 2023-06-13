@@ -72,7 +72,7 @@ def login():
         if not existing_user.check_password_hash(password):
             flash('Invalid password. Please try again.', 'danger')
             return render_template('login.html', title='Sign In', form=form)
-        login_user(existing_user, remember=form.remember_me.data)
+        login_user(existing_user, remember=form.remember_me.data, force=False)
         flash('You have successfully logged in.', 'success')
         return redirect(url_for('index'))
     if form.errors:
@@ -180,7 +180,7 @@ def users():
     if not current_user.is_superadmin:
         return render_template('401.html')
     _users = User.query.all()
-    return render_template('users.html', users=_users)
+    return render_template('users.html', users=_users, title='Users')
 
 
 @app.route('/list', methods=['GET', 'POST'])
@@ -328,7 +328,7 @@ def edit(id):
             flash('Item updated', 'info')
         return redirect(url_for('show', id=id))
 
-    return render_template('edit.html', id=id, form=form)
+    return render_template('edit.html', id=id, form=form, title='Edit reagent')
 
 
 @app.route('/delete/<int:id>/', methods=['GET'])

@@ -9,7 +9,7 @@ from sqlalchemy.orm import validates
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
-    active = db.Column('is_active', db.Boolean(), nullable=False, default=False)  # server_default='1')
+    active = db.Column(db.Boolean(), nullable=False, default=False)  # server_default='1')
     email = db.Column(db.String(255), nullable=False, unique=True)
     password = db.Column(db.String(255))
     # User information
@@ -41,6 +41,10 @@ class User(UserMixin, db.Model):
     @property
     def is_superadmin(self):
         return self.superadmin
+
+    @property
+    def is_active(self):
+        return self.active
 
     def __repr__(self):
         return self.alias
