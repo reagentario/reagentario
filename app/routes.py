@@ -96,7 +96,7 @@ def register():
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
-        flash('Congratulations, you are now a registered user!')
+        flash('Congratulations, you are now a registered user, but your user need to be activated by admins!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
@@ -145,7 +145,7 @@ def edit_user(alias):
             form.active.data = user.active
             form.admin.data = user.admin
             form.superadmin.data = user.superadmin
-        return render_template('edit_user.html', title='Edit Profile',
+        return render_template('edit_user.html', title='Edit User',
                                form=form, user=user)
     else:
         flash('You cannot change data for user {}'.format(alias), 'danger')
@@ -177,13 +177,14 @@ def change_pw(alias):
 @app.route('/users', methods=['GET'])
 @login_required
 def users():
-    if not current_user.is_admin:
+    if not current_user.is_superadmin:
         return render_template('401.html')
     _users = User.query.all()
     return render_template('users.html', users=_users)
 
 
 @app.route('/list', methods=['GET', 'POST'])
+@login_required
 def list():
     """ list all reagents """
     form = SearchForm(csrf_enabled=False)
@@ -207,6 +208,7 @@ def list():
 
 
 @app.route('/list_locations', methods=['GET'])
+@login_required
 def list_locations():
     """ list all locations """
     locations = Locations.query.all()
@@ -251,6 +253,7 @@ def edit_location(id):
 
 
 @app.route('/list_location_content/<int:_id>/', methods=['GET', 'POST'])
+@login_required
 def list_location_content(_id):
     """ list content of a location """
     reagents = Inventory.query.filter(Inventory.location_id==_id).all()
@@ -266,6 +269,7 @@ def list_location_content(_id):
 
 
 @app.route('/show/<int:id>/')
+@login_required
 def show(id):
     """ show a specific reagent """
     reagent = Inventory.query.get_or_404(id)
@@ -273,6 +277,7 @@ def show(id):
 
 
 @app.route('/edit/<int:id>/', methods=['GET', 'POST'])
+@login_required
 def edit(id):
     """ edit a specific reagent"""
     reag = db.session.query(Inventory).filter(Inventory.id == id).first()
@@ -317,6 +322,7 @@ def edit(id):
 
 
 @app.route('/delete/<int:id>/', methods=['GET'])
+@login_required
 def delete(id):
     """ delete a specific reagent """
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
@@ -338,6 +344,7 @@ def delete(id):
 
 
 @app.route('/create_location', methods=['GET', 'POST'])
+@login_required
 def create_location():
     """ create a new location form """
     if request.method == 'POST':
@@ -360,6 +367,7 @@ def create_location():
 
 
 @app.route('/delete_location/<int:id>/', methods=['GET'])
+@login_required
 def delete_location(id):
     """ delete a specific reagent """
     location = db.session.query(Locations).filter(Locations.id == id).first()
@@ -386,6 +394,7 @@ def delete_location(id):
 
 
 @app.route('/create', methods=['GET', 'POST'])
+@login_required
 def create():
     """ create a new reagent form """
     title = "Add a new Reagent"
@@ -422,6 +431,7 @@ def create():
 
 
 @app.route('/order/<int:id>/', methods=['GET'])
+@login_required
 def order(id):
     """ set order for a reagent """
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
@@ -444,6 +454,7 @@ def order(id):
 
 
 @app.route('/view_orders/', methods=['GET'])
+@login_required
 def view_orders():
     """ view orders """
     orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
@@ -454,6 +465,7 @@ def view_orders():
 
 
 @app.route('/reset_order/<int:id>/', methods=['GET'])
+@login_required
 def reset_order(id):
     """ reset order for a specific reagent """
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
@@ -475,6 +487,7 @@ def reset_order(id):
 
 
 @app.route('/view_low_quantity/', methods=['GET'])
+@login_required
 def view_low_quantity():
     """ view list of reagent with low quantity """
     reag = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
@@ -485,6 +498,7 @@ def view_low_quantity():
 
 
 @app.route('/plus/<int:id>/')
+@login_required
 def plus(id):
     """ add 1 item of a specific reagent in lab """
     reagent = Inventory.query.get_or_404(id)
@@ -496,6 +510,7 @@ def plus(id):
 
 
 @app.route('/minus/<int:id>/')
+@login_required
 def minus(id):
     """ remove 1 item of a specific reagent in lab """
     reagent = Inventory.query.get_or_404(id)
@@ -511,6 +526,7 @@ def minus(id):
 
 
 @app.route('/move/<int:id>/')
+@login_required
 def move(id):
     """ move 1 item of a specific reagent from warehouse to lab """
     reagent = Inventory.query.get_or_404(id)
@@ -527,6 +543,7 @@ def move(id):
 
 
 @app.route('/add/<int:id>/')
+@login_required
 def add(id):
     """ add 1 item of a specific reagent to warehouse """
     reagent = Inventory.query.get_or_404(id)
@@ -538,6 +555,7 @@ def add(id):
 
 
 @app.route('/show_log/<int:id>/')
+@login_required
 def show_log(id):
     """ list logs """
     #form = SearchForm(csrf_enabled=False)
