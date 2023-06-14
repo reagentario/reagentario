@@ -6,7 +6,7 @@ from wtforms import StringField, TextAreaField, PasswordField, BooleanField, Sub
 from wtforms.validators import DataRequired, InputRequired, NumberRange, Email, EqualTo, Length
 
 class LoginForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
@@ -60,8 +60,8 @@ class SearchForm(FlaskForm):
     location = LocationField('Locations')
 
 class EditProfileForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired('Email is required')])
-    alias = StringField('Alias', validators=[DataRequired('Alias required')])
+    email = StringField('Email', validators=[DataRequired('Email is required'), Email()])
+    alias = StringField('Alias', validators=[DataRequired('Alias required'), Length(min=2, max=3)])
     active = BooleanField('Active')
     admin = BooleanField('Admin')
     superadmin = BooleanField('Superadmin')

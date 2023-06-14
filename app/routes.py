@@ -9,7 +9,7 @@ from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileFo
 from app.models import Inventory, Locations, User, InventoryView, UserView, Applog
 
 from sqlalchemy import inspect
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, PendingRollbackError
 
 from app.functions import add_log
 
@@ -130,14 +130,18 @@ def edit_user(alias):
         if not user:
             flash('Not existing user alias ' + alias, 'danger')
             return redirect(url_for('index'))
-        if form.validate_on_submit():
-            user.email = form.email.data
-            user.alias = form.alias.data
-            user.active = form.active.data
-            user.admin = form.admin.data
-            user.superadmin = form.superadmin.data
-            db.session.commit()
-            flash('Your changes have been saved.')
+        try:
+            if form.validate_on_submit():
+                user.email = form.email.data
+                user.alias = form.alias.data
+                user.active = form.active.data
+                user.admin = form.admin.data
+                user.superadmin = form.superadmin.data
+                db.session.commit()
+                flash('Your changes have been saved.')
+                return redirect(url_for('users'))
+        except IntegrityError:
+            flash('Email or alias already registered, user not updated', 'danger')
             return redirect(url_for('users'))
         if request.method == 'GET':
             form.email.data = user.email
@@ -233,23 +237,31 @@ def edit_location(id):
         flash('Not existing location', 'danger')
         return redirect(url_for('list_locations'))
 
-    if form.validate_on_submit():
-        location.name = form.name.data
-        location.short_name = form.short_name.data
-        existing_location = Locations.query.filter(Locations.name == location.name or Locations.short_name == location.short_name).first()
-        if existing_location:
-            # https://getbootstrap.com/docs/5.0/components/alerts/ colors
-            flash('A Location with this name ({}) or short_name ({}) already exists!'.format(location.name, location.short_name), 'danger')
-            return render_template('edit_location.html', title='Edit Location', id=id, form=form)
-        try:
-            db.session.commit()
-            flash('Your changes have been saved.')
-            return redirect(url_for('list_locations'))
-        except Exception as e:
-            flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
-            db.session.rollback()
-            return render_template('edit_location.html', title='Edit Location',
-                                   id=id, form=form)
+    try:
+        if form.validate_on_submit():
+            location.name = form.name.data
+            location.short_name = form.short_name.data
+            existing_location = Locations.query.filter(Locations.name == location.name or Locations.short_name == location.short_name).first()
+            if existing_location:
+                flash('A Location with this name ({}) or short_name ({}) already exists!'.format(location.name, location.short_name), 'danger')
+                return render_template('edit_location.html', title='Edit Location', id=id, form=form)
+            try:
+                db.session.commit()
+                flash('Your changes have been saved.')
+                return redirect(url_for('list_locations'))
+            except Exception as e:
+                flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
+                db.session.rollback()
+                return render_template('edit_location.html', title='Edit Location', id=id, form=form)
+    except IntegrityError:
+        flash('Error editing {}'.format(location.id, 'danger'))
+        db.session.rollback()
+        return render_template('edit_location.html', title='Edit Location', id=id, form=form)
+    except PendingRollbackError as e:
+        flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
+        db.session.rollback()
+        return render_template('edit_location.html', title='Edit Location', id=id, form=form)
+
     if request.method == 'GET':
         form.name.data = location.name
         form.short_name.data = location.short_name
