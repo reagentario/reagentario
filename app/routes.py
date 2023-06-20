@@ -1,17 +1,21 @@
 from datetime import datetime
 from flask import render_template, make_response, flash, redirect, url_for, request, session
 from flask_login import current_user, login_user, logout_user, login_required
+from flask_security import Security, current_user, auth_required, hash_password, SQLAlchemySessionUserDatastore
 from app import app
 from app import db
 from app import bcrypt
 from app import log
 from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm, EditLocationForm, RegistrationForm
-from app.models import Inventory, Locations, User, InventoryView, UserView, Applog
+from app.models import Inventory, Locations, User, Role, InventoryView, UserView, Applog
 
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError, PendingRollbackError
 
 from app.functions import add_log
+
+user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
+app.security = Security(app, user_datastore)
 
 
 #@app.route('/c')
@@ -45,6 +49,20 @@ from app.functions import add_log
 #            db.session.commit()
 #
 #    return render_template('index.html')
+
+
+# one time setup
+with app.app_context():
+    # Create User to test with
+    db.create_all()
+    if not app.security.datastore.find_user(email="test@me.com"):
+        app.security.datastore.create_user(email="test@me.com", password=hash_password("password"))
+    db.session.commit()
+
+@app.route('/c')
+def c():
+    if not app.security.datastore.find_user(email="test@me.com"):
+        app.security.datastore.create_user(email="test@me.com", password=hash_password("password"))
 
 
 @app.route('/')

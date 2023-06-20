@@ -1,21 +1,44 @@
 from app import db
-from app import login_manager
-from app import bcrypt
+#from app import login_manager
+#from app import bcrypt
 from flask_admin.contrib.sqla import ModelView
-from flask_login import UserMixin
-from sqlalchemy.orm import validates
+from flask_security import UserMixin, RoleMixin
+from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText
+from sqlalchemy.orm import validates, relationship, backref
+
+class RolesUsers(db.Model):
+    __tablename__ = "roles_users"
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer(), primary_key=True)
+    user_id = db.Column("user_id", Integer(), ForeignKey("user.id"))
+    role_id = db.Column("role_id", Integer(), ForeignKey("role.id"))
 
 
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+class Role(db.Model, RoleMixin):
+    __tablename__ = "role"
+    id = db.Column(db.Integer(), primary_key=True)
+    name = db.Column(db.String(80), unique=True)
+    description = db.Column(db.String(255))
+    permissions = db.Column(db.UnicodeText)
+
+
+class User(db.Model, UserMixin):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    active = db.Column(db.Boolean(), nullable=False, default=False)  # server_default='1')
     email = db.Column(db.String(255), nullable=False, unique=True)
-    password = db.Column(db.String(255))
-    # User information
-    alias = db.Column(db.String(3), nullable=False, unique=True)
-    admin = db.Column(db.Boolean(), nullable=False, default=False)
-    superadmin = db.Column(db.Boolean(), nullable=False, default=False)
+    username = db.Column(db.String(3), unique=True, nullable=False)
+    password = db.Column(db.String(255), nullable=False)
+    last_login_at = db.Column(db.DateTime())
+    current_login_at = db.Column(db.DateTime())
+    last_login_ip = db.Column(db.String(100))
+    current_login_ip = db.Column(db.String(100))
+    login_count = db.Column(db.Integer)
+    active = db.Column(db.Boolean(), nullable=False, default=False)
+    fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
+    confirmed_at = db.Column(db.DateTime())
+    roles = relationship('Role', secondary='roles_users',
+                         backref=backref('users', lazy='dynamic'))
+
 
     @validates('email')
     def validate_email(self, key, address):
@@ -33,14 +56,6 @@ class User(UserMixin, db.Model):
 
     def check_password_hash(self, password):
         return bcrypt.check_password_hash(self.password, password)
-
-    @property
-    def is_admin(self):
-        return self.admin
-
-    @property
-    def is_superadmin(self):
-        return self.superadmin
 
     @property
     def is_active(self):
@@ -83,7 +98,7 @@ class Inventory(db.Model):
 class Applog(db.Model):
     __tablename__ = 'applog'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref='user', lazy=True)
     product_id = db.Column(db.Integer, db.ForeignKey('inventory.id'))
     product = db.relationship('Inventory', backref='log', lazy=True)
