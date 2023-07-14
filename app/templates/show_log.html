@@ -25,7 +25,7 @@
         <td class="text-nowrap"> {{log.product.name|default("deleted from database")}}</a></td>
         {% endif %}
         <td class="text-nowrap"> {{log.product.location}} </td>
-        <td> {{log.user.alias}} </td>
+        <td> {{log.user.username}} </td>
         <td> {{log.event_detail}} </td>
     </tr>
     {% endfor %}

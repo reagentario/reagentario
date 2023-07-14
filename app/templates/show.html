@@ -71,7 +71,7 @@
             <td> <a href="/order/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/order.png') }}" style="width:64px"/></a></td>
             <td> <a href="/order/{{ reagent.id }}"> Order</a></td>
           </tr>
-          {% if current_user.is_admin and current_user.is_active %}
+          {% if current_user.has_role('admin') and current_user.is_active %}
           <tr>
             <td> <a href="/edit/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:64px"/></a></td>
             <td> <a href="/edit/{{ reagent.id }}"> Edit</a></td>

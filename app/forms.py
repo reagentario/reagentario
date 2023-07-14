@@ -55,38 +55,46 @@ class EditLocationForm(FlaskForm):
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
     submit = SubmitField('Save')
 
+
 class SearchForm(FlaskForm):
     name = StringField('Name')
     location = LocationField('Locations')
 
+
 class EditProfileForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired('Email is required'), Email()])
-    alias = StringField('Alias', validators=[DataRequired('Alias required'), Length(min=2, max=3)])
+    username = StringField('Username', validators=[DataRequired('Username is required'), Length(min=2, max=64)])
     active = BooleanField('Active')
-    admin = BooleanField('Admin')
-    superadmin = BooleanField('Superadmin')
     submit = SubmitField('Save')
     cancel = SubmitField('Cancel')
 
-class ChangePasswordForm(FlaskForm):
-      password = PasswordField('Password', validators=[DataRequired()])
-      password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+
+class EditRolesForm(FlaskForm):
+      admin = BooleanField('Admin')
+      superadmin = BooleanField('Superadmin')
       submit = SubmitField('Save')
       cancel = SubmitField('Cancel')
 
 
+class ChangePasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Save')
+    cancel = SubmitField('Cancel')
+
+
 class RegistrationForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    alias = StringField('Alias', validators=[DataRequired('Alias required'), Length(min=2, max=3)])
+    email = StringField('Email', validators=[DataRequired('Email is required'), Email()])
+    username = StringField('Username', validators=[DataRequired('Username is required'), Length(min=2, max=64)])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
     cancel = SubmitField('Cancel')
 
-    def validate_alias(self, alias):
-        user = User.query.filter_by(alias=alias.data).first()
+    def validate_username(self, username):
+        user = User.query.filter_by(username=username.data).first()
         if user is not None:
-            raise ValidationError('Alias already in use, choose a different one.')
+            raise ValidationError('Username already in use, choose a different one.')
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()

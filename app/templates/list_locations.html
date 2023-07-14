@@ -7,7 +7,7 @@
         <tr>
             <th>Name</th>
             <th>Short Name</th>
-            {% if current_user.is_admin and current_user.is_active %}
+            {% if current_user.has_role('admin') and current_user.is_active %}
             <th>Edit</th>
             <th>Delete</th>
             {% endif %}
@@ -18,7 +18,7 @@
         <tr>
             <td><a href="/list_location_content/{{location.id}}" class="btn btn-dark pull-right">{{"{}".format(location.name)}}</a></td>
             <td>{{location.short_name}}</td>
-            {% if current_user.is_admin and current_user.is_active %}
+            {% if current_user.has_role('admin') and current_user.is_active %}
             <td><a href="/edit_location/{{location.id}}" class="btn btn-success pull-right">Edit</a></td>
             <td><button type="button" class="btn btn-block btn-danger mb-6" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
             <div class="modal fade" id="loc{{ location.id }}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">

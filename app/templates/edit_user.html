@@ -2,10 +2,35 @@
 
 {% block body %}
 
-  {% from 'bootstrap5/form.html' import render_form %}
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.email.label }}<br>
+            {{ form.email(size=32) }}<br>
+            {% for error in form.email.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.username.label }}<br>
+            {{ form.username(size=64) }}<br>
+            {% for error in form.username.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.active.label }}
+            {{ form.active }}<br>
+            {% for error in form.active.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
 
-  {{ render_form(form, action=url_for('edit_user', alias=user.alias), role='form', method='post', form_type='horizontal', extra_classes='col-sm-3 btn-lg', button_map={'submit': 'success', 'cancel': 'secondary'}) }}
+        <p>{{ form.submit() }}  {{ form.cancel() }}</p>
+    </form>
 
-  <a href="/change_pw/{{ user.alias }}" class="btn btn-dark pull-right">CHANGE PASSWORD</a></td>
+    <a href="/change_pw/{{ user.username }}" class="btn btn-dark pull-right">CHANGE PASSWORD</a></td>
+    <br><br>
+    <a href="/edit_role/{{ user.username }}" class="btn btn-dark pull-right">SET USER ROLES</a></td>
 
-  {% endblock %}
+{% endblock %}

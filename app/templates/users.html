@@ -8,20 +8,22 @@
   <thead>
     <tr>
       <th>Email</th>
-      <th>Alias</th>
+      <th>Username</th>
       <th>Active</th>
-      <th>Admin</th>
-      <th>Superadmin</th>
+      <th>Roles</th>
     </tr>
   </thead>
   <tbody>
     {% for user in users %}
       <tr>
-        <td><a href="/edit_user/{{user.alias}}" class="btn btn-dark pull-right">{{"{}".format(user.email)}}</a></td>
-        <td> {{ user.alias }}</td>
+        <td><a href="/edit_user/{{user.username}}" class="btn btn-dark pull-right">{{"{}".format(user.email)}}</a></td>
+        <td> {{ user.username }}</td>
         <td> {{ user.is_active }}</td>
-        <td> {{ user.is_admin }}</td>
-        <td> {{ user.is_superadmin }}</td>
+        <td>
+        {% for role in user.roles %}
+        {{ role.name }}
+        {% endfor %}
+        </td>
       </tr>
       {% endfor %}
   </tbody>

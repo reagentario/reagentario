@@ -1,6 +1,6 @@
 from app import db
+from app import bcrypt
 #from app import login_manager
-#from app import bcrypt
 from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin
 from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText
@@ -9,33 +9,33 @@ from sqlalchemy.orm import validates, relationship, backref
 class RolesUsers(db.Model):
     __tablename__ = "roles_users"
     __table_args__ = {'extend_existing': True}
-    id = db.Column(db.Integer(), primary_key=True)
+    id = db.Column(Integer(), primary_key=True)
     user_id = db.Column("user_id", Integer(), ForeignKey("user.id"))
     role_id = db.Column("role_id", Integer(), ForeignKey("role.id"))
 
 
 class Role(db.Model, RoleMixin):
     __tablename__ = "role"
-    id = db.Column(db.Integer(), primary_key=True)
-    name = db.Column(db.String(80), unique=True)
-    description = db.Column(db.String(255))
-    permissions = db.Column(db.UnicodeText)
+    id = db.Column(Integer(), primary_key=True)
+    name = db.Column(String(80), unique=True)
+    description = db.Column(String(255))
+    permissions = db.Column(UnicodeText)
 
 
 class User(db.Model, UserMixin):
     __tablename__ = 'user'
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(255), nullable=False, unique=True)
-    username = db.Column(db.String(3), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    last_login_at = db.Column(db.DateTime())
-    current_login_at = db.Column(db.DateTime())
-    last_login_ip = db.Column(db.String(100))
-    current_login_ip = db.Column(db.String(100))
-    login_count = db.Column(db.Integer)
-    active = db.Column(db.Boolean(), nullable=False, default=False)
-    fs_uniquifier = db.Column(db.String(255), unique=True, nullable=False)
-    confirmed_at = db.Column(db.DateTime())
+    id = db.Column(Integer, primary_key=True)
+    email = db.Column(String(255), unique=True, nullable=False)
+    username = db.Column(String(64), unique=True)
+    password = db.Column(String(255), nullable=False)
+    last_login_at = db.Column(DateTime())
+    current_login_at = db.Column(DateTime())
+    last_login_ip = db.Column(String(100))
+    current_login_ip = db.Column(String(100))
+    login_count = db.Column(Integer)
+    active = db.Column(Boolean(), nullable=False, default=False)
+    fs_uniquifier = db.Column(String(64), unique=True, nullable=False)
+    confirmed_at = db.Column(DateTime())
     roles = relationship('Role', secondary='roles_users',
                          backref=backref('users', lazy='dynamic'))
 
@@ -45,11 +45,6 @@ class User(db.Model, UserMixin):
         if '@' not in address:
             raise ValueError("Failed simple email validation")
         return address
-
-    def __init__(self, email, password, alias):
-        self.email = email
-        self.password = bcrypt.generate_password_hash(password)
-        self.alias = alias
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password)
@@ -62,7 +57,7 @@ class User(db.Model, UserMixin):
         return self.active
 
     def __repr__(self):
-        return self.alias
+        return self.username
 
 
 class Locations(db.Model):

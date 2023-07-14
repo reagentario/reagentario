@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+    <h2>
+    User: {{ user.username }}
+    <hr>
+    </h2>
+
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <p>
+            {{ form.admin }}   {{ form.admin.label }}
+            {% for error in form.admin.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+        {{ form.superadmin }}   {{ form.superadmin.label }}
+            {% for error in form.superadmin.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.submit() }}   {{ form.cancel() }} </p>
+    </form>
+
+{% endblock %}

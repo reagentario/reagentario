@@ -1,12 +1,10 @@
 from datetime import datetime
 from flask import render_template, make_response, flash, redirect, url_for, request, session
-from flask_login import current_user, login_user, logout_user, login_required
-from flask_security import Security, current_user, auth_required, hash_password, SQLAlchemySessionUserDatastore
 from app import app
 from app import db
 from app import bcrypt
 from app import log
-from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, ChangePasswordForm, EditLocationForm, RegistrationForm
+from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, EditRolesForm, ChangePasswordForm, EditLocationForm, RegistrationForm
 from app.models import Inventory, Locations, User, Role, InventoryView, UserView, Applog
 
 from sqlalchemy import inspect
@@ -14,55 +12,28 @@ from sqlalchemy.exc import IntegrityError, PendingRollbackError
 
 from app.functions import add_log
 
-user_datastore = SQLAlchemySessionUserDatastore(db.session, User, Role)
+from flask_security import Security, SQLAlchemySessionUserDatastore, SQLAlchemyUserDatastore, current_user, auth_required, \
+                            hash_password, permissions_accepted, permissions_required, roles_accepted, login_required, roles_required, \
+                            RoleMixin, UserMixin
+
+user_datastore = SQLAlchemyUserDatastore(db, User, Role)
 app.security = Security(app, user_datastore)
-
-
-#@app.route('/c')
-#def c():
-#    with app.app_context():
-#
-#        # Create 'member@example.com' user with no roles
-#        if not User.query.filter(User.email == 'member@example.com').first():
-#            user = User(
-#                email='member@example.com',
-#                password='Password1',
-#                alias='ME'
-#            )
-#            db.session.add(user)
-#            db.session.commit()
-#
-#        # Create 'admin@example.com' user with 'Admin' and 'Agent' roles
-#        if not User.query.filter(User.email == 'admin@example.com').first():
-#            user = User(
-#                email='admin@example.com',
-#                password='Password1',
-#                alias='A1'
-#            )
-#            if not user.check_password_hash('Password1'):
-#                log.debug("ERROR creating user admin")
-#                return render_template('index.html')
-#            log.debug("created user admin")
-#            user.admin = True
-#            user.superadmin = True
-#            db.session.add(user)
-#            db.session.commit()
-#
-#    return render_template('index.html')
-
 
 # one time setup
 with app.app_context():
-    # Create User to test with
+    # Create users to test with
     db.create_all()
-    if not app.security.datastore.find_user(email="test@me.com"):
-        app.security.datastore.create_user(email="test@me.com", password=hash_password("password"))
+    if not app.security.datastore.find_user(email="user@test.com"):
+        app.security.datastore.create_user(email="user@test.com", password=hash_password("password"), username="User1", active=True)
+    if not app.security.datastore.find_role("admin"):
+          app.security.datastore.create_role(name="admin", description="admin role", permissions='admin')
+    if not app.security.datastore.find_role("superadmin"):
+          app.security.datastore.create_role(name="superadmin", description="superadmin role", permissions='superadmin')
+    if not app.security.datastore.find_user(email="admin@test.com"):
+        app.security.datastore.create_user(email="admin@test.com", password=hash_password("password"), username="Admin1", roles=['admin'], active=True)
+    if not app.security.datastore.find_user(email="admin2@test.com"):
+        app.security.datastore.create_user(email="admin2@test.com", password=hash_password("password"), username="Admin2", roles=['admin', 'superadmin'], active=True)
     db.session.commit()
-
-@app.route('/c')
-def c():
-    if not app.security.datastore.find_user(email="test@me.com"):
-        app.security.datastore.create_user(email="test@me.com", password=hash_password("password"))
 
 
 @app.route('/')
@@ -72,8 +43,8 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
+@app.route('/login2', methods=['GET', 'POST'])
+def login2():
     """ login form """
     if current_user.is_authenticated:
         flash('You are already logged in', 'info')
@@ -98,115 +69,156 @@ def login():
     return render_template('login.html', title='Sign In', form=form)
 
 
-@app.route('/logout')
-def logout():
-    """ logout """
-    logout_user()
-    flash('You have successfully logged out.', 'success')
-    return redirect(url_for('index'))
+#@app.route('/logout')
+#def logout():
+#    """ logout """
+#    logout_user()
+#    flash('You have successfully logged out.', 'success')
+#    return redirect(url_for('index'))
 
 
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    form = RegistrationForm()
-    if form.validate_on_submit():
-        user = User(email=form.email.data, alias=form.alias.data, password=form.password.data)
-        user.set_password(form.password.data)
-        db.session.add(user)
-        db.session.commit()
-        flash('Congratulations, you are now a registered user, but your user need to be activated by admins!')
-        return redirect(url_for('login'))
-    return render_template('register.html', title='Register', form=form)
+#@app.route('/register', methods=['GET', 'POST'])
+#def register():
+#    form = RegistrationForm()
+#    if form.validate_on_submit():
+#        user = User(email=form.email.data, username=form.username.data, password=form.password.data)
+#        user.set_password(form.password.data)
+#        db.session.add(user)
+#        db.session.commit()
+#        flash('Congratulations, you are now a registered user, but your user need to be activated by admins!')
+#        return redirect(url_for('login'))
+#    return render_template('register.html', title='Register', form=form)
 
 
 @app.route('/edit_profile', methods=['GET', 'POST'])
-@login_required
+@auth_required()
 def edit_profile():
     """ edit profile form """
     form = EditProfileForm()
-    if form.validate_on_submit():
-        current_user.email = form.email.data
-        current_user.alias = form.alias.data
-        db.session.commit()
-        flash('Your changes have been saved.')
+    try:
+        if form.validate_on_submit():
+            current_user.email = form.email.data
+            current_user.username = form.username.data
+            db.session.commit()
+            flash('Your changes have been saved.')
+            return redirect(url_for('edit_profile'))
+    except IntegrityError:
+        flash('Email or username already registered, user not updated', 'danger')
         return redirect(url_for('edit_profile'))
     if request.method == 'GET':
         form.email.data = current_user.email
-        form.alias.data = current_user.alias
+        form.username.data = current_user.username
 
     return render_template('edit_profile.html', title='Edit Profile',
                            form=form, user=current_user)
 
 
-@app.route('/edit_user/<alias>', methods=['GET', 'POST'])
-@login_required
-def edit_user(alias):
+@app.route('/edit_role/<username>', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('superadmin')
+def edit_role(username):
+    """ edit roles form """
+    form = EditRolesForm()
+    user = User.query.filter_by(username=username).first()
+    admin_role = user_datastore.find_role('admin')
+    superadmin_role = user_datastore.find_role('superadmin')
+    if not user:
+         flash('Not existing user username ' + username, 'danger')
+         return redirect(url_for('index'))
+    try:
+        if form.validate_on_submit():
+            if form.admin.data:
+                log.debug("admin set")
+                app.security.datastore.add_role_to_user(user, admin_role)
+            else:
+                app.security.datastore.remove_role_from_user(user, admin_role)
+            if form.superadmin.data:
+                log.debug("superadmin set")
+                app.security.datastore.add_role_to_user(user, superadmin_role)
+            else:
+                app.security.datastore.remove_role_from_user(user, superadmin_role)
+            db.session.commit()
+            flash('Your changes have been saved.')
+            return redirect(url_for('users'))
+        if request.method == 'GET':
+            if user.has_role('admin'):
+                form.admin.data = True
+            if user.has_role('superadmin'):
+                form.superadmin.data = True
+    except Exception as e:
+        flash('Error editing {} with error {}'.format(user.id, str(e)), 'danger')
+        db.session.rollback()
+        return render_template('edit_roles.html', title='Edit User Roles', user=user, form=form)
+
+    return render_template('edit_roles.html', title='Edit User Roles',
+            form=form, user=user)
+
+
+@app.route('/edit_user/<username>', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('superadmin')
+def edit_user(username):
     """ edit user form """
-    if current_user.alias == alias or current_user.is_superadmin:
+    if current_user.username == username or current_user.has_role('superadmin'):
         form = EditProfileForm()
-        user = User.query.filter_by(alias=alias).first()
+        user = User.query.filter_by(username=username).first()
         if not user:
-            flash('Not existing user alias ' + alias, 'danger')
+            flash('Not existing user username ' + username, 'danger')
             return redirect(url_for('index'))
         try:
             if form.validate_on_submit():
                 user.email = form.email.data
-                user.alias = form.alias.data
+                user.username = form.username.data
                 user.active = form.active.data
-                user.admin = form.admin.data
-                user.superadmin = form.superadmin.data
                 db.session.commit()
                 flash('Your changes have been saved.')
                 return redirect(url_for('users'))
         except IntegrityError:
-            flash('Email or alias already registered, user not updated', 'danger')
+            flash('Email or username already registered, user not updated', 'danger')
             return redirect(url_for('users'))
         if request.method == 'GET':
             form.email.data = user.email
-            form.alias.data = user.alias
+            form.username.data = user.username
             form.active.data = user.active
-            form.admin.data = user.admin
-            form.superadmin.data = user.superadmin
         return render_template('edit_user.html', title='Edit User',
                                form=form, user=user)
     else:
-        flash('You cannot change data for user {}'.format(alias), 'danger')
+        flash('You cannot change data for user {}'.format(username), 'danger')
         return redirect(url_for('users'))
 
 
-@app.route('/change_pw/<alias>', methods=['GET', 'POST'])
-@login_required
-def change_pw(alias):
+@app.route('/change_pw/<username>', methods=['GET', 'POST'])
+@auth_required()
+def change_pw(username):
     """ change password form """
-    if current_user.alias == alias or current_user.is_superadmin:
+    if current_user.username == username or current_user.has_role('superadmin'):
         form = ChangePasswordForm()
-        user = User.query.filter_by(alias=alias).first()
+        user = User.query.filter_by(username=username).first()
         if not user:
-            flash('Not existing user alias ' + alias, 'danger')
+            flash('Not existing user username ' + username, 'danger')
             return redirect(url_for('index'))
         if form.validate_on_submit():
-            user.password = bcrypt.generate_password_hash(form.password.data)
-            flash('Password changed for ' + alias, 'info')
+            user.password = hash_password(form.password.data)
+            flash('Password changed for ' + username, 'info')
             db.session.commit()
             return redirect(url_for('index'))
         return render_template('change_pw.html', title='Change Password',
                            form=form, user=user)
     else:
-        flash('You cannot change the password for user {}'.format(alias), 'danger')
+        flash('You cannot change the password for user {}'.format(username), 'danger')
         return redirect(url_for('index'))
 
 
 @app.route('/users', methods=['GET'])
-@login_required
+@auth_required()
+@roles_required('superadmin')
 def users():
-    if not current_user.is_superadmin:
-        return render_template('401.html')
     _users = User.query.all()
     return render_template('users.html', users=_users, title='Users')
 
 
 @app.route('/list', methods=['GET', 'POST'])
-@login_required
+@auth_required()
 def list():
     """ list all reagents """
     form = SearchForm(csrf_enabled=False)
@@ -230,7 +242,7 @@ def list():
 
 
 @app.route('/list_locations', methods=['GET'])
-@login_required
+@auth_required()
 def list_locations():
     """ list all locations """
     locations = Locations.query.all()
@@ -243,11 +255,10 @@ def list_locations():
 
 
 @app.route('/edit_location/<int:id>/', methods=['GET', 'POST'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def edit_location(id):
     """ edit location form """
-    if not current_user.is_admin:
-        return render_template('401.html')
 
     form = EditLocationForm()
     location = db.session.query(Locations).filter(Locations.id == id).first()
@@ -257,13 +268,15 @@ def edit_location(id):
 
     try:
         if form.validate_on_submit():
-            location.name = form.name.data
-            location.short_name = form.short_name.data
-            existing_location = Locations.query.filter(Locations.name == location.name or Locations.short_name == location.short_name).first()
+            # existing_location = Locations.query.filter(Locations.name == form.name.data or Locations.short_name == form.short_name.data).first()
+            existing_location = db.session.query(Locations).filter(Locations.name == form.name.data or Locations.short_name == form.short_name.data).first()
+            log.debug("location %s", existing_location)
             if existing_location:
-                flash('A Location with this name ({}) or short_name ({}) already exists!'.format(location.name, location.short_name), 'danger')
+                flash('A Location with this name ({}) or short_name ({}) already exists!'.format(form.name.data, form.short_name.data), 'danger')
                 return render_template('edit_location.html', title='Edit Location', id=id, form=form)
             try:
+                location.name = form.name.data
+                location.short_name = form.short_name.data
                 db.session.commit()
                 flash('Your changes have been saved.')
                 return redirect(url_for('list_locations'))
@@ -272,7 +285,7 @@ def edit_location(id):
                 db.session.rollback()
                 return render_template('edit_location.html', title='Edit Location', id=id, form=form)
     except IntegrityError:
-        flash('Error editing {}'.format(location.id, 'danger'))
+        flash('Error editing {}'.format(location.id), 'danger')
         db.session.rollback()
         return render_template('edit_location.html', title='Edit Location', id=id, form=form)
     except PendingRollbackError as e:
@@ -289,7 +302,7 @@ def edit_location(id):
 
 
 @app.route('/list_location_content/<int:_id>/', methods=['GET', 'POST'])
-@login_required
+@auth_required()
 def list_location_content(_id):
     """ list content of a location """
     reagents = Inventory.query.filter(Inventory.location_id==_id).all()
@@ -305,7 +318,7 @@ def list_location_content(_id):
 
 
 @app.route('/show/<int:id>/')
-@login_required
+@auth_required()
 def show(id):
     """ show a specific reagent """
     reagent = Inventory.query.get_or_404(id)
@@ -313,13 +326,10 @@ def show(id):
 
 
 @app.route('/edit/<int:id>/', methods=['GET', 'POST'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def edit(id):
     """ edit a specific reagent"""
-
-    if not current_user.is_admin:
-          return render_template('401.html')
-
     reag = db.session.query(Inventory).filter(Inventory.id == id).first()
     loc = [(loc.id, loc.name) for loc in Locations.query.all()]
     form = EditForm(csrf_enabled=False, exclude_fk=False, obj=reag)
@@ -358,11 +368,10 @@ def edit(id):
 
 
 @app.route('/delete/<int:id>/', methods=['GET'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def delete(id):
     """ delete a specific reagent """
-    if not current_user.is_admin:
-          return render_template('401.html')
 
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
     if reagent:
@@ -383,11 +392,10 @@ def delete(id):
 
 
 @app.route('/create_location', methods=['GET', 'POST'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def create_location():
     """ create a new location form """
-    if not current_user.is_admin:
-        return render_template('401.html')
 
     if request.method == 'POST':
         name = request.form['name']
@@ -409,11 +417,10 @@ def create_location():
 
 
 @app.route('/delete_location/<int:id>/', methods=['GET'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def delete_location(id):
     """ delete a location """
-    if not current_user.is_admin:
-          return render_template('401.html')
 
     location = db.session.query(Locations).filter(Locations.id == id).first()
     if location:
@@ -439,11 +446,10 @@ def delete_location(id):
 
 
 @app.route('/create', methods=['GET', 'POST'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def create():
     """ create a new reagent form """
-    if not current_user.is_admin:
-          return render_template('401.html')
 
     title = "Add a new Reagent"
     form = CreateForm(csrf_enabled=False)
@@ -479,7 +485,7 @@ def create():
 
 
 @app.route('/order/<int:id>/', methods=['GET'])
-@login_required
+@auth_required()
 def order(id):
     """ set order for a reagent """
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
@@ -502,11 +508,10 @@ def order(id):
 
 
 @app.route('/view_orders/', methods=['GET'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def view_orders():
     """ view orders """
-    if not current_user.is_admin:
-        return render_template('401.html')
 
     orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
     if orders.count() > 0:
@@ -516,11 +521,10 @@ def view_orders():
 
 
 @app.route('/reset_order/<int:id>/', methods=['GET'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def reset_order(id):
     """ reset order for a specific reagent """
-    if not current_user.is_admin:
-          return render_template('401.html')
 
     reagent = db.session.query(Inventory).filter(Inventory.id == id).first()
     if reagent:
@@ -541,11 +545,10 @@ def reset_order(id):
 
 
 @app.route('/view_low_quantity/', methods=['GET'])
-@login_required
+@auth_required()
+@roles_required('admin')
 def view_low_quantity():
     """ view list of reagent with low quantity """
-    if not current_user.is_admin:
-          return render_template('401.html')
 
     reag = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
     if reag.count() > 0:
@@ -555,7 +558,7 @@ def view_low_quantity():
 
 
 @app.route('/plus/<int:id>/')
-@login_required
+@auth_required()
 def plus(id):
     """ add 1 item of a specific reagent in lab """
     reagent = Inventory.query.get_or_404(id)
@@ -567,7 +570,7 @@ def plus(id):
 
 
 @app.route('/minus/<int:id>/')
-@login_required
+@auth_required()
 def minus(id):
     """ remove 1 item of a specific reagent in lab """
     reagent = Inventory.query.get_or_404(id)
@@ -583,7 +586,7 @@ def minus(id):
 
 
 @app.route('/move/<int:id>/')
-@login_required
+@auth_required()
 def move(id):
     """ move 1 item of a specific reagent from warehouse to lab """
     reagent = Inventory.query.get_or_404(id)
@@ -600,7 +603,7 @@ def move(id):
 
 
 @app.route('/add/<int:id>/')
-@login_required
+@auth_required()
 def add(id):
     """ add 1 item of a specific reagent to warehouse """
     reagent = Inventory.query.get_or_404(id)
@@ -612,11 +615,10 @@ def add(id):
 
 
 @app.route('/show_log/<int:id>/')
-@login_required
+@auth_required()
+@roles_required('admin')
 def show_log(id):
     """ list logs """
-    if not current_user.is_admin:
-        return render_template('401.html')
 
     #form = SearchForm(csrf_enabled=False)
 

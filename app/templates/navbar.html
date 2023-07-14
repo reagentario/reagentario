@@ -15,7 +15,7 @@
                 </li>
                 {% endif %}
 
-                {% if current_user.is_admin and current_user.is_active %}
+                {% if current_user.has_role('admin') and current_user.is_active %}
                 <li class="nav-item dropdown">
                     <a class="nav-link text-info dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -31,7 +31,7 @@
                 </li>
                 {% endif %}
 
-                {% if current_user.is_superadmin and current_user.is_active %}
+                {% if current_user.has_role('superadmin') and current_user.is_active %}
                 <li class="nav-item dropdown">
                     <a class="nav-link text-info dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">SuperAdmin</a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -46,14 +46,14 @@
             <ul class="navbar-nav me-start mb-2 mb-md-0">
                 {% if current_user.is_anonymous %}
                 <li class="nav-item">
-                  <a class="nav-link link.-warning" href="{{ url_for('login') }}">Click here to login</a>
+                  <a class="nav-link link.-warning" href="/login">Click here to login</a>
                 </li>
                 {% else %}
                 <li class="nav-item">
                   <a class="nav-link link-warning" href="{{ url_for('edit_profile') }}"> {{ current_user.email }} Profile</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link link-warning" href="{{ url_for('logout') }}">Logout</a>
+                  <a class="nav-link link-warning" href="{{ url_for('security.logout') }}">Logout</a>
                 </li>
                 {% endif %}
             </ul>
