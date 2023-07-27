@@ -69,27 +69,6 @@ def login2():
     return render_template('login.html', title='Sign In', form=form)
 
 
-#@app.route('/logout')
-#def logout():
-#    """ logout """
-#    logout_user()
-#    flash('You have successfully logged out.', 'success')
-#    return redirect(url_for('index'))
-
-
-#@app.route('/register', methods=['GET', 'POST'])
-#def register():
-#    form = RegistrationForm()
-#    if form.validate_on_submit():
-#        user = User(email=form.email.data, username=form.username.data, password=form.password.data)
-#        user.set_password(form.password.data)
-#        db.session.add(user)
-#        db.session.commit()
-#        flash('Congratulations, you are now a registered user, but your user need to be activated by admins!')
-#        return redirect(url_for('login'))
-#    return render_template('register.html', title='Register', form=form)
-
-
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @auth_required()
 def edit_profile():
@@ -619,15 +598,6 @@ def add(id):
 @roles_required('admin')
 def show_log(id):
     """ list logs """
-
-    #form = SearchForm(csrf_enabled=False)
-
-    #if request.method == 'POST':
-    #    name = request.form['name']
-    #    location = request.form['location']  #Locations.query.get_or_404(form.location.data)
-    #    reagents = Inventory.query.filter(db.and_(Inventory.name.like('%'+name+'%'), Inventory.location_id.like('%'+form.location.data+'%'))).all()
-    #    msg = location
-    #    return render_template('list.html', form=form, reagents=reagents, warning=msg)
 
     if request.method == 'GET':
         if id == 0:
