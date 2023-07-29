@@ -50,6 +50,7 @@ class EditForm(FlaskForm):
     submit = SubmitField('Save')
     cancel = SubmitField('Cancel')
 
+
 class EditLocationForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired('Name is required'), Length(min=2, max=128)])
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
@@ -72,6 +73,17 @@ class EditProfileForm(FlaskForm):
 class EditRolesForm(FlaskForm):
       admin = BooleanField('Admin')
       superadmin = BooleanField('Superadmin')
+      submit = SubmitField('Save')
+      cancel = SubmitField('Cancel')
+
+
+class CreateUserForm(FlaskForm):
+      email = StringField('Email', validators=[DataRequired('Email is required'), Email()])
+      username = StringField('Username', validators=[DataRequired('Username is required'), Length(min=2, max=64)])
+      password = PasswordField('Password', validators=[DataRequired()])
+      password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+      admin = BooleanField('Admin', default=False)
+      superadmin = BooleanField('Superadmin', default=False)
       submit = SubmitField('Save')
       cancel = SubmitField('Cancel')
 

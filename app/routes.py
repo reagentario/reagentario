@@ -4,7 +4,7 @@ from app import app
 from app import db
 from app import bcrypt
 from app import log
-from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, EditRolesForm, ChangePasswordForm, EditLocationForm, RegistrationForm
+from app.forms import LoginForm, CreateForm, SearchForm, EditForm, EditProfileForm, EditRolesForm, ChangePasswordForm, EditLocationForm, RegistrationForm, CreateUserForm
 from app.models import Inventory, Locations, User, Role, InventoryView, UserView, Applog
 
 from sqlalchemy import inspect
@@ -198,6 +198,7 @@ def users():
 
 @app.route('/list', methods=['GET', 'POST'])
 @auth_required()
+@login_required
 def list():
     """ list all reagents """
     form = SearchForm(csrf_enabled=False)
@@ -418,7 +419,7 @@ def delete_location(id):
             log.debug("ERROR not deleted location id %s", location.id)
             db.session.rollback()
     else:
-        flash('Error deleting location with id: ' + str(id), 'danger')
+        flash('Error deleting location with id: ' + str(location.id), 'danger')
         return redirect(url_for('list_locations'))
     return redirect(url_for('list_locations'))
 
@@ -610,6 +611,62 @@ def show_log(id):
         return render_template('show_log.html', logs=logs, title='Logs report')
     flash("No Logs Found for this reagent !", 'info')
     return render_template('show_log.html', title='Logs report')
+
+
+@app.route('/create_user', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('superadmin')
+def create_user():
+    """ create a new user """
+
+    form = CreateUserForm()
+
+    if request.method == 'POST':
+        email = request.form['email']
+        username = request.form['username']
+        password = hash_password(request.form['password'])
+        admin = form.data.get('admin')
+        superadmin = form.data.get('superadmin')
+        admin_role = user_datastore.find_role('admin')
+        superadmin_role = user_datastore.find_role('superadmin')
+        existing_user = User.query.filter(User.email == email or User.username == username).first()
+        if existing_user:
+            flash('A User with this email ({}) or username ({}) already exists!'.format(email, username), 'danger')
+            return render_template('create_user.html', title='Add a new user')
+        app.security.datastore.create_user(email=email, password=hash_password("password"), username=username, active=True)
+        user = User.query.filter_by(username=username).first()
+        if admin:
+            app.security.datastore.add_role_to_user(user, admin_role)
+        if superadmin:
+            app.security.datastore.add_role_to_user(user, superadmin_role)
+        db.session.commit()
+        return redirect(url_for('users'))
+    return render_template('create_user.html', title='Add a new user', form=form)
+
+
+@app.route('/delete_user/<int:id>/', methods=['GET'])
+@auth_required()
+@roles_required('superadmin')
+def delete_user(id):
+    """ delete a user """
+
+    user = db.session.query(User).filter(User.id == id).first()
+    if user:
+        try:
+            db.session.delete(user)
+            db.session.commit()
+            add_log(user.id, current_user.id, 'deleted user %s - %s' % (user.id, user.email))
+            flash("User deleted", 'info')
+            log.debug("deleted user id %s", user.id)
+        except Exception as e:
+            flash('Error deleting {} with error {}'.format(user.id, str(e)), 'danger')
+            log.debug("ERROR not deleted user id %s", user.id)
+            db.session.rollback()
+    else:
+        flash('Error deleting user with id: ' + str(user.id), 'danger')
+        return redirect(url_for('users'))
+    return redirect(url_for('users'))
+
 
 
 #Handling error 404 and displaying relevant web page

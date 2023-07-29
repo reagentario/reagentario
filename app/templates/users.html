@@ -11,12 +11,13 @@
       <th>Username</th>
       <th>Active</th>
       <th>Roles</th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     {% for user in users %}
       <tr>
-        <td><a href="/edit_user/{{user.username}}" class="btn btn-dark pull-right">{{"{}".format(user.email)}}</a></td>
+        <td><a href="/edit_user/{{ user.username }}" class="btn btn-dark pull-right">{{"{}".format(user.email)}}</a></td>
         <td> {{ user.username }}</td>
         <td> {{ user.is_active }}</td>
         <td>
@@ -24,6 +25,7 @@
         {{ role.name }}
         {% endfor %}
         </td>
+        <td><a href="/delete_user/{{ user.id }}" class="btn btn-danger pull-right"> DELETE </a></td>
       </tr>
       {% endfor %}
   </tbody>
