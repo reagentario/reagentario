@@ -103,16 +103,14 @@ def edit_role(id):
     superadmin_role = user_datastore.find_role('superadmin')
     if not user:
          flash('Not existing user id ' + id, 'danger')
-         return redirect(url_for('index'))
+         return redirect(url_for('users'))
     try:
         if form.validate_on_submit():
             if form.admin.data:
-                log.debug("admin set")
                 app.security.datastore.add_role_to_user(user, admin_role)
             else:
                 app.security.datastore.remove_role_from_user(user, admin_role)
             if form.superadmin.data:
-                log.debug("superadmin set")
                 app.security.datastore.add_role_to_user(user, superadmin_role)
             else:
                 app.security.datastore.remove_role_from_user(user, superadmin_role)
