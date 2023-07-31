@@ -92,17 +92,17 @@ def edit_profile():
                            form=form, user=current_user)
 
 
-@app.route('/edit_role/<username>', methods=['GET', 'POST'])
+@app.route('/edit_role/<int:id>/', methods=['GET', 'POST'])
 @auth_required()
 @roles_required('superadmin')
-def edit_role(username):
+def edit_role(id):
     """ edit roles form """
     form = EditRolesForm()
-    user = User.query.filter_by(username=username).first()
+    user = User.query.filter_by(id=id).first()
     admin_role = user_datastore.find_role('admin')
     superadmin_role = user_datastore.find_role('superadmin')
     if not user:
-         flash('Not existing user username ' + username, 'danger')
+         flash('Not existing user id ' + id, 'danger')
          return redirect(url_for('index'))
     try:
         if form.validate_on_submit():
@@ -133,16 +133,16 @@ def edit_role(username):
             form=form, user=user)
 
 
-@app.route('/edit_user/<username>', methods=['GET', 'POST'])
+@app.route('/edit_user/<int:id>/', methods=['GET', 'POST'])
 @auth_required()
 @roles_required('superadmin')
-def edit_user(username):
+def edit_user(id):
     """ edit user form """
-    if current_user.username == username or current_user.has_role('superadmin'):
+    if current_user.id == id or current_user.has_role('superadmin'):
         form = EditProfileForm()
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(id=id).first()
         if not user:
-            flash('Not existing user username ' + username, 'danger')
+            flash('Not existing user with id ' + id, 'danger')
             return redirect(url_for('index'))
         try:
             if form.validate_on_submit():
@@ -162,29 +162,29 @@ def edit_user(username):
         return render_template('edit_user.html', title='Edit User',
                                form=form, user=user)
     else:
-        flash('You cannot change data for user {}'.format(username), 'danger')
+        flash('You cannot change data for user {}'.format(id), 'danger')
         return redirect(url_for('users'))
 
 
-@app.route('/change_pw/<username>', methods=['GET', 'POST'])
+@app.route('/change_pw/<int:id>/', methods=['GET', 'POST'])
 @auth_required()
-def change_pw(username):
+def change_pw(id):
     """ change password form """
-    if current_user.username == username or current_user.has_role('superadmin'):
+    if current_user.id == id or current_user.has_role('superadmin'):
         form = ChangePasswordForm()
-        user = User.query.filter_by(username=username).first()
+        user = User.query.filter_by(id=id).first()
         if not user:
-            flash('Not existing user username ' + username, 'danger')
+            flash('Not existing user id ' + id, 'danger')
             return redirect(url_for('index'))
         if form.validate_on_submit():
             user.password = hash_password(form.password.data)
-            flash('Password changed for ' + username, 'info')
+            flash('Password changed for ' + user.email, 'info')
             db.session.commit()
             return redirect(url_for('index'))
         return render_template('change_pw.html', title='Change Password',
                            form=form, user=user)
     else:
-        flash('You cannot change the password for user {}'.format(username), 'danger')
+        flash('You cannot change the password for user {}'.format(id), 'danger')
         return redirect(url_for('index'))
 
 

@@ -3,6 +3,11 @@
 {% block body %}
 <br>
 
+<div class="text-center">
+<a href="/create_user" class="btn btn-success btn-lg pull-right">CREATE NEW USER</a></td>
+</div>
+<hr>
+
 {% if users %}
 <table id="myTable" class="table table-hover table-striped text-center">
   <thead>
@@ -17,7 +22,7 @@
   <tbody>
     {% for user in users %}
       <tr>
-        <td><a href="/edit_user/{{ user.username }}" class="btn btn-dark pull-right">{{"{}".format(user.email)}}</a></td>
+        <td><a href="/edit_user/{{ user.id }}" class="btn btn-primary pull-right">{{"{}".format(user.email)}}</a></td>
         <td> {{ user.username }}</td>
         <td> {{ user.is_active }}</td>
         <td>
@@ -31,6 +36,7 @@
   </tbody>
 </table>
 {% endif %}
+
 {% if warning %}
 <h2>{{ warning }}</h2>
 {% endif %}

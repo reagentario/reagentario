@@ -11,4 +11,6 @@
   {% from 'bootstrap5/form.html' import render_form %}
   {{ render_form(form, action=url_for('edit_location', id=id), role='form', method='post', form_type='horizontal') }}
 
+  <a href="/list_locations" class="go-back" data-bs-toggle="historyback">Torna indietro</a
+
 {% endblock %}
