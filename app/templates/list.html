@@ -22,7 +22,7 @@
       <tr style="color:black;">
     {% endif %}
         <td><a href="/show/{{reagent.id}}" class="btn btn-primary pull-right">{{"{}".format(reagent.name)}}</a></td>
-        <td> {{reagent.location.name}}</td>
+        <td><a href="/list_location_content/{{reagent.location.id}}" class="btn btn-primary pull-right">{{"{}".format(reagent.location.name)}}</a></td>
         <td> {{reagent.amount}}</td>
         <td> {{reagent.amount2}}</td>
         <td> {{reagent.size}}</td>
