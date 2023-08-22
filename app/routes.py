@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import render_template, make_response, flash, redirect, url_for, request, session
+from flask import render_template, make_response, flash, redirect, url_for, request, session, send_file
 from app import app
 from app import db
 from app import bcrypt
@@ -9,6 +9,8 @@ from app.models import Inventory, Locations, User, Role, InventoryView, UserView
 
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError, PendingRollbackError
+
+import csv
 
 from app.functions import add_log
 
@@ -665,7 +667,23 @@ def delete_user(id):
         return redirect(url_for('users'))
     return redirect(url_for('users'))
 
-
+@app.route('/export', methods=['GET'])
+@auth_required()
+@roles_required('superadmin')
+def export():
+    """ export reagents table as csv """
+    reagents = Inventory.query.all()
+    with open('inventory.csv', 'w', newline='') as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter = ',')
+        csvwriter.writerow(["Name", "Location", "amount lab", "amount deposit", "amount_limit", "size", "notes", "to be ordered"])
+        for r in reagents:
+            csvwriter.writerow([r.name, r.location_id, r.amount, r.amount2, r.amount_limit, r.size, r.notes, r.to_be_ordered])
+    try:
+        return send_file('../inventory.csv',
+                         mimetype='text/csv',
+                         as_attachment=True)
+    except Exception as e:
+        return str(e)
 
 #Handling error 404 and displaying relevant web page
 @app.errorhandler(404)
