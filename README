@@ -1,0 +1,29 @@
+per importare i dati in pythonanywhere:
+
+preparare un file csv formattato cosi':
+"Id", "Name", "Location", "amount lab", "amount deposit", "amount_limit", "size", "notes", "to be ordered"])
+1;"(+) -  Dibenzoyl - D - Tartaric Acid anidrus 99%";2;0;1;0;"10g";;0
+2;"1-Chloro-2-Nitrobenzene ";3;0;2;1;0;"250g";;0
+3;"1 - Decane solfuric acid";1;0;2;1;0;"25g";;0
+
+es. file esportato come csv da libreoffice (separatore di campo ","  separatore di testo """
+oppure con excel prepari il file xls e poi selezioni le colonne che contengono testo ed esegui questa macro:
+Sub virgolette()
+Dim c As Range
+For Each c In Selection
+If c.Value <> "" Then c.Value = "¿" & c.Value & "¿"
+Next
+End Sub
+
+poi fai trova/sostituisci e cambi il ¿ con ", esporti come csv ed eventualmente sostituisci i """ con "
+
+
+poi dalla console bash (non da quella mysql che da un errore di autorizzazione per load data local:
+
+mysql -h reagent.mysql.eu.pythonanywhere-services.com -u reagent 'reagent$default' -p --local-infile=1
+
+delete from inventory where id > 0;  (prima magari fai una copia come inventory_old)
+truncate table inventory;
+LOAD DATA LOCAL INFILE '/home/reagent/reagentario.csv' into table inventory FIELDS TERMINATED BY ';' ENCLOSED BY '"'  LINES TERMINATED BY '\n' IGNORE 1 ROWS;
+
+

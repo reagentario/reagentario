@@ -675,9 +675,9 @@ def export():
     reagents = Inventory.query.all()
     with open('inventory.csv', 'w', newline='') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter = ',')
-        csvwriter.writerow(["Name", "Location", "amount lab", "amount deposit", "amount_limit", "size", "notes", "to be ordered"])
+        csvwriter.writerow(["Id", "Name", "Location", "amount lab", "amount deposit", "amount_limit", "size", "notes", "to be ordered"])
         for r in reagents:
-            csvwriter.writerow([r.name, r.location_id, r.amount, r.amount2, r.amount_limit, r.size, r.notes, r.to_be_ordered])
+            csvwriter.writerow([r.id, r.name, r.location_id, r.amount, r.amount2, r.amount_limit, r.size, r.notes, r.to_be_ordered])
     try:
         return send_file('../inventory.csv',
                          mimetype='text/csv',
