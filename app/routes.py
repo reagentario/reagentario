@@ -45,32 +45,6 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/login2', methods=['GET', 'POST'])
-def login2():
-    """ login form """
-    if current_user.is_authenticated:
-        flash('You are already logged in', 'info')
-        return redirect(url_for('index'))
-
-    form = LoginForm()
-    if form.validate_on_submit():
-        email = request.form.get('email')
-        password = request.form.get('password')
-        existing_user = User.query.filter_by(email=email).first()
-        if not existing_user:
-            flash('Invalid username ' + str(email), 'danger')
-            return render_template('login.html', title='Sign In', form=form)
-        if not existing_user.check_password_hash(password):
-            flash('Invalid password. Please try again.', 'danger')
-            return render_template('login.html', title='Sign In', form=form)
-        login_user(existing_user, remember=form.remember_me.data, force=False)
-        flash('You have successfully logged in.', 'success')
-        return redirect(url_for('index'))
-    if form.errors:
-        flash(form.errors, 'danger')
-    return render_template('login.html', title='Sign In', form=form)
-
-
 @app.route('/edit_profile', methods=['GET', 'POST'])
 @auth_required()
 def edit_profile():
@@ -82,9 +56,12 @@ def edit_profile():
             current_user.username = form.username.data
             db.session.commit()
             flash('Your changes have been saved.')
+            log.debug('user %s updated', current_user)
+            ### TO BE FIXED
+            #save also   current_user.email, current_user.username))
             return redirect(url_for('edit_profile'))
     except IntegrityError:
-        flash('Email or username already registered, user not updated', 'danger')
+        flash('The email or username you choose is already registered, user not updated', 'danger')
         return redirect(url_for('edit_profile'))
     if request.method == 'GET':
         form.email.data = current_user.email
