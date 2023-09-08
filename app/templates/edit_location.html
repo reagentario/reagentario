@@ -9,7 +9,7 @@
 {% endif %}
 
   {% from 'bootstrap5/form.html' import render_form %}
-  {{ render_form(form, action=url_for('edit_location', id=id), role='form', method='post', form_type='horizontal') }}
+  {{ render_form(form, action=url_for('edit_location', _id=_id), role='form', method='post', form_type='horizontal') }}
 
   <a href="/list_locations" class="go-back btn btn-primary" data-bs-toggle="historyback">Cancel</a
 

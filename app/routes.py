@@ -231,7 +231,7 @@ def edit_location(_id):
             log.debug("location %s", existing_location)
             if existing_location:
                 flash('A Location with this name ({}) or short_name ({}) already exists!'.format(form.name.data, form.short_name.data), 'danger')
-                return render_template('edit_location.html', title='Edit Location', id=_id, form=form)
+                return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
             try:
                 location.name = form.name.data
                 location.short_name = form.short_name.data
@@ -242,21 +242,21 @@ def edit_location(_id):
             except Exception as e:
                 flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
                 db.session.rollback()
-                return render_template('edit_location.html', title='Edit Location', id=_id, form=form)
+                return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
     except IntegrityError:
         flash('Error editing {}'.format(location.id), 'danger')
         db.session.rollback()
-        return render_template('edit_location.html', title='Edit Location', id=_id, form=form)
+        return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
     except PendingRollbackError as e:
         flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
         db.session.rollback()
-        return render_template('edit_location.html', title='Edit Location', id=_id, form=form)
+        return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
 
     if request.method == 'GET':
         form.name.data = location.name
         form.short_name.data = location.short_name
         return render_template('edit_location.html', title='Edit Location',
-                            id=_id, form=form)
+                            _id=_id, form=form)
     return redirect(url_for('list_locations'))
 
 
@@ -321,9 +321,9 @@ def edit(_id):
             flash('Error updating %s' % str(e), 'danger')
             log.debug("ERROR not updated id %s", reag.id)
             db.session.rollback()
-        return redirect(url_for('show', id=_id))
+        return redirect(url_for('show', _id=_id))
 
-    return render_template('edit.html', id=_id, form=form, title='Edit reagent')
+    return render_template('edit.html', _id=_id, form=form, title='Edit reagent')
 
 
 @app.route('/delete/<int:_id>/', methods=['GET'])
@@ -346,7 +346,7 @@ def delete(_id):
             db.session.rollback()
     else:
         flash('Error deleting product with id: ' + str(_id), 'danger')
-        return redirect(url_for('show', id=_id))
+        return redirect(url_for('show', _id=_id))
     return redirect(url_for('list'))
 
 
@@ -462,9 +462,9 @@ def order(_id):
             log.debug("ERROR ordefing id %s", reagent.id)
             db.session.rollback()
     else:
-        flash('Error ordering product with id: ' + str(id), 'danger')
-        return redirect(url_for('show', id=_id))
-    return redirect(url_for('show', id=_id, title=reagent.name))
+        flash('Error ordering product with id: ' + str(_id), 'danger')
+        return redirect(url_for('show', _id=_id))
+    return redirect(url_for('show', _id=_id, title=reagent.name))
 
 
 @app.route('/view_orders/', methods=['GET'])
@@ -499,7 +499,7 @@ def reset_order(_id):
             db.session.rollback()
     else:
         flash('Error resetting order product with id: ' + str(_id), 'danger')
-        return redirect(url_for('show', id=_id))
+        return redirect(url_for('show', _id=_id))
     return redirect(url_for('view_orders'))
 
 
@@ -525,7 +525,7 @@ def plus(_id):
     db.session.commit()
     flash("Added 1 item to laboratory", 'info')
     add_log(reagent.id, current_user.id, 'added item %s - %s' % (reagent.id, reagent.name))
-    return redirect(url_for('show', id=_id))
+    return redirect(url_for('show', _id=_id))
 
 
 @app.route('/minus/<int:_id>/')
@@ -535,13 +535,13 @@ def minus(_id):
     reagent = Inventory.query.get_or_404(_id)
     if reagent.amount == 0:
         flash("No more items available in laboratory!", 'danger')
-        return redirect(url_for('show', id=_id))
+        return redirect(url_for('show', _id=_id))
     reagent.amount -= 1
     db.session.commit()
     flash("Removed one item from laboratory", 'info')
     add_log(reagent.id, current_user.id, 'removed item %s - %s' % (reagent.id, reagent.name))
 
-    return redirect(url_for('show', id=_id))
+    return redirect(url_for('show', _id=_id))
 
 
 @app.route('/move/<int:_id>/')
@@ -551,14 +551,14 @@ def move(_id):
     reagent = Inventory.query.get_or_404(_id)
     if reagent.amount2 == 0:
         flash("No more items available in the warehouse", 'danger')
-        return redirect(url_for('show', id=_id))
+        return redirect(url_for('show', _id=_id))
     else:
         reagent.amount2 -=1
         reagent.amount +=1
         db.session.commit()
         flash("Moved one item from warehouse to laboratory", 'info')
         add_log(reagent.id, current_user.id, 'moved from warehouse item %s - %s' % (reagent.id, reagent.name))
-        return redirect(url_for('show', id=_id))
+        return redirect(url_for('show', _id=_id))
 
 
 @app.route('/add/<int:_id>/')
@@ -570,7 +570,7 @@ def add(_id):
     db.session.commit()
     flash("Added 1 item to warehouse", 'info')
     add_log(reagent.id, current_user.id, 'added to warehouse item %s - %s' % (reagent.id, reagent.name))
-    return redirect(url_for('show', id=_id))
+    return redirect(url_for('show', _id=_id))
 
 
 @app.route('/show_log/<int:_id>/')
