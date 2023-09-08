@@ -56,9 +56,7 @@ def edit_profile():
             current_user.username = form.username.data
             db.session.commit()
             flash('Your changes have been saved.')
-            log.debug('user %s updated', current_user)
-            ### TO BE FIXED
-            #save also   current_user.email, current_user.username))
+            log.debug('user %s updated, new email: %s, new userame: %s', current_user.id, current_user.email, current_user.username)
             return redirect(url_for('edit_profile'))
     except IntegrityError:
         flash('The email or username you choose is already registered, user not updated', 'danger')
@@ -95,6 +93,7 @@ def edit_role(_id):
                 app.security.datastore.remove_role_from_user(user, superadmin_role)
             db.session.commit()
             flash('Your changes have been saved.')
+            log.debug('user %s updated, admin role: %s, superadmin role: %s', current_user.id, admin_role, superadmin_role)
             return redirect(url_for('users'))
         if request.method == 'GET':
             if user.has_role('admin'):
@@ -128,6 +127,7 @@ def edit_user(_id):
                 user.active = form.active.data
                 db.session.commit()
                 flash('Your changes have been saved.')
+                log.debug('user %s updated, email: %s, userame: %s, active: %s', user.id, user.email, user.username, user.active)
                 return redirect(url_for('users'))
         except IntegrityError:
             flash('Email or username already registered, user not updated', 'danger')
@@ -156,10 +156,11 @@ def change_pw(_id):
         if form.validate_on_submit():
             user.password = hash_password(form.password.data)
             flash('Password changed for ' + user.email, 'info')
+            log.debug('user %s password changed', user.email)
             db.session.commit()
             return redirect(url_for('index'))
-        return render_template('change_pw.html', title='Change Password',
-                           form=form, user=user)
+#        return render_template('change_pw.html', title='Change Password',
+#                           form=form, user=user)
     else:
         flash('You cannot change the password for user {}'.format(_id), 'danger')
         return redirect(url_for('index'))
@@ -236,6 +237,7 @@ def edit_location(_id):
                 location.short_name = form.short_name.data
                 db.session.commit()
                 flash('Your changes have been saved.')
+                log.debug('Location %s updated: name=%s, short_name=%s', location.id, location.name, location.short_name)
                 return redirect(url_for('list_locations'))
             except Exception as e:
                 flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
@@ -368,6 +370,7 @@ def create_location():
             return render_template('create_location.html', title='Add a new location')
         db.session.add(location)
         db.session.commit()
+        log.debug('created location %s: %s', location.id, location.name)
 
         return redirect(url_for('list_locations'))
     return render_template('create_location.html', title='Add a new location')
@@ -493,7 +496,6 @@ def reset_order(_id):
             log.debug("reset orders for id %s", reagent.id)
         except Exception as e:
             flash('Error reset ordering {} with error {}'.format(reagent.id, str(e)), 'danger')
-            log.debug("ERROR resetting order id %s", reagent.id)
             db.session.rollback()
     else:
         flash('Error resetting order product with id: ' + str(_id), 'danger')
@@ -631,12 +633,11 @@ def delete_user(_id):
         try:
             db.session.delete(user)
             db.session.commit()
-            add_log(user.id, current_user.id, 'deleted user %s - %s' % (user.id, user.email))
             flash("User deleted", 'info')
-            log.debug("deleted user id %s", user.id)
+            log.debug("deleted user %s by %s", user.email, current_user.id)
         except Exception as e:
             flash('Error deleting {} with error {}'.format(user.id, str(e)), 'danger')
-            log.debug("ERROR not deleted user id %s", user.id)
+            log.debug("ERROR deleting user id %s", user.id)
             db.session.rollback()
     else:
         flash('Error deleting user with id: ' + str(user.id), 'danger')
