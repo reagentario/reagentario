@@ -69,7 +69,7 @@ def edit_profile():
                            form=form, user=current_user)
 
 
-@app.route('/edit_role/<int:id>/', methods=['GET', 'POST'])
+@app.route('/edit_role/<int:_id>/', methods=['GET', 'POST'])
 @auth_required()
 @roles_required('superadmin')
 def edit_role(_id):
@@ -109,7 +109,7 @@ def edit_role(_id):
             form=form, user=user)
 
 
-@app.route('/edit_user/<int:id>/', methods=['GET', 'POST'])
+@app.route('/edit_user/<int:_id>/', methods=['GET', 'POST'])
 @auth_required()
 @roles_required('superadmin')
 def edit_user(_id):
@@ -143,7 +143,7 @@ def edit_user(_id):
         return redirect(url_for('users'))
 
 
-@app.route('/change_pw/<int:id>/', methods=['GET', 'POST'])
+@app.route('/change_pw/<int:_id>/', methods=['GET', 'POST'])
 @auth_required()
 def change_pw(_id):
     """ change password form """
@@ -212,7 +212,7 @@ def list_locations():
     return render_template('list_locations.html', warning=msg, title="Locations")
 
 
-@app.route('/edit_location/<int:id>/', methods=['GET', 'POST'])
+@app.route('/edit_location/<int:_id>/', methods=['GET', 'POST'])
 @auth_required()
 @roles_required('admin')
 def edit_location(_id):
@@ -276,7 +276,7 @@ def list_location_content(_id):
     return render_template('list.html', title=loc_name, warning=msg)
 
 
-@app.route('/show/<int:id>/')
+@app.route('/show/<int:_id>/')
 @auth_required()
 def show(_id):
     """ show a specific reagent """
@@ -284,7 +284,7 @@ def show(_id):
     return render_template('show.html', title=reagent.name, reagent=reagent)
 
 
-@app.route('/edit/<int:id>/', methods=['GET', 'POST'])
+@app.route('/edit/<int:_id>/', methods=['GET', 'POST'])
 @auth_required()
 @roles_required('admin')
 def edit(_id):
@@ -326,7 +326,7 @@ def edit(_id):
     return render_template('edit.html', id=_id, form=form, title='Edit reagent')
 
 
-@app.route('/delete/<int:id>/', methods=['GET'])
+@app.route('/delete/<int:_id>/', methods=['GET'])
 @auth_required()
 @roles_required('admin')
 def delete(_id):
@@ -376,7 +376,7 @@ def create_location():
     return render_template('create_location.html', title='Add a new location')
 
 
-@app.route('/delete_location/<int:id>/', methods=['GET'])
+@app.route('/delete_location/<int:_id>/', methods=['GET'])
 @auth_required()
 @roles_required('admin')
 def delete_location(_id):
@@ -444,7 +444,7 @@ def create():
     return render_template('create.html', form=form, title=title)
 
 
-@app.route('/order/<int:id>/', methods=['GET'])
+@app.route('/order/<int:_id>/', methods=['GET'])
 @auth_required()
 def order(_id):
     """ set order for a reagent """
@@ -480,7 +480,7 @@ def view_orders():
     return  render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
 
 
-@app.route('/reset_order/<int:id>/', methods=['GET'])
+@app.route('/reset_order/<int:_id>/', methods=['GET'])
 @auth_required()
 @roles_required('admin')
 def reset_order(_id):
@@ -516,7 +516,7 @@ def view_low_quantity():
     return  render_template('list.html', reagents=reag, title='Low quantity Report')
 
 
-@app.route('/plus/<int:id>/')
+@app.route('/plus/<int:_id>/')
 @auth_required()
 def plus(_id):
     """ add 1 item of a specific reagent in lab """
@@ -528,7 +528,7 @@ def plus(_id):
     return redirect(url_for('show', id=_id))
 
 
-@app.route('/minus/<int:id>/')
+@app.route('/minus/<int:_id>/')
 @auth_required()
 def minus(_id):
     """ remove 1 item of a specific reagent in lab """
@@ -544,7 +544,7 @@ def minus(_id):
     return redirect(url_for('show', id=_id))
 
 
-@app.route('/move/<int:id>/')
+@app.route('/move/<int:_id>/')
 @auth_required()
 def move(_id):
     """ move 1 item of a specific reagent from warehouse to lab """
@@ -561,7 +561,7 @@ def move(_id):
         return redirect(url_for('show', id=_id))
 
 
-@app.route('/add/<int:id>/')
+@app.route('/add/<int:_id>/')
 @auth_required()
 def add(_id):
     """ add 1 item of a specific reagent to warehouse """
@@ -573,7 +573,7 @@ def add(_id):
     return redirect(url_for('show', id=_id))
 
 
-@app.route('/show_log/<int:id>/')
+@app.route('/show_log/<int:_id>/')
 @auth_required()
 @roles_required('admin')
 def show_log(_id):
@@ -623,7 +623,7 @@ def create_user():
     return render_template('create_user.html', title='Add a new user', form=form)
 
 
-@app.route('/delete_user/<int:id>/', methods=['GET'])
+@app.route('/delete_user/<int:_id>/', methods=['GET'])
 @auth_required()
 @roles_required('superadmin')
 def delete_user(_id):
