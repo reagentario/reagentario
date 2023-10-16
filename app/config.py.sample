@@ -1,0 +1,46 @@
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Config(object):
+    SECRET_KEY='1dsjkhfasd8743mnkjhf8732ha0923kjcnb1nbv4v51c3hhgjhg23mnb100vjow1'
+    DEBUG = False # Turns on debugging features in Flask
+    MAIL_FROM_EMAIL = "mail@mail.com" # For use in application emails
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or \
+        'mysql+pymysql://dbuser:dbpassword@127.0.0.1:3306/dbname5'
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SECURITY_REGISTERABLE = False
+    SECURITY_CONFIRMABLE = False
+    SECURITY_CHANGEABLE = True
+    SECURITY_RECOVERABLE = True
+    SECURITY_PASSWORD_SALT='709723457754329875409238779899923800967'
+    SECURITY_USERNAME_ENABLE = False
+    SECURITY_USERNAME_MIN_LENGTH = 2
+    SECURITY_USERNAME_MAX_LENGTH = 8
+    SECURITY_PASSWORD_LENGTH_MIN = 8
+    SECURITY_EMAIL_SENDER = "mail@mail.com"
+    SECURITY_DEFAULT_REMEMBER_ME = False
+    SECURITY_SEND_REGISTER_EMAIL = True
+    SECURITY_TRACKABLE = True
+
+    REMEMBER_COOKIE_SAMESITE = "strict"
+    SESSION_COOKIE_SAMESITE = "strict"
+
+    BCRYPT_LOG_ROUNDS = 13
+    WTF_CSRF_ENABLED = True
+
+
+    MAIL_SERVER = '127.0.0.1'
+    MAIL_PORT = 25
+    MAIL_USE_TLS = False
+    #MAIL_USERNAME = 'username'
+    #MAIL_PASSWORD = 'password'
+
+    # Flask-User settings
+#   USER_APP_NAME = "Reagentario User Authentication"      # Shown in and email templates and page footers
+#   USER_ENABLE_EMAIL = True        # Enable email authentication
+#   USER_ENABLE_USERNAME = False    # Disable username authentication
+#   USER_EMAIL_SENDER_NAME = USER_APP_NAME
+#   USER_EMAIL_SENDER_EMAIL = "noreply@localhost"
+
+#   FLASK_ADMIN_SWATCH = 'cerulean'
