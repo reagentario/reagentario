@@ -3,5 +3,4 @@ config.py
 __pycache__
 TODO
 logfile.log
-migrations
 inventory.csv
