@@ -79,8 +79,8 @@ def edit_role(_id):
     admin_role = user_datastore.find_role('admin')
     superadmin_role = user_datastore.find_role('superadmin')
     if not user:
-         flash('Not existing user id ' + _id, 'danger')
-         return redirect(url_for('users'))
+        flash(f'Not existing user id {_id}', 'danger')
+        return redirect(url_for('users'))
     try:
         if form.validate_on_submit():
             if form.admin.data:
@@ -101,7 +101,7 @@ def edit_role(_id):
             if user.has_role('superadmin'):
                 form.superadmin.data = True
     except Exception as e:
-        flash('Error editing {} with error {}'.format(user.id, str(e)), 'danger')
+        flash(f'Error editing {user.id} with error {str(e)}', 'danger')
         db.session.rollback()
         return render_template('edit_roles.html', title='Edit User Roles', user=user, form=form)
 
@@ -118,7 +118,7 @@ def edit_user(_id):
         form = EditProfileForm()
         user = User.query.filter_by(id=_id).first()
         if not user:
-            flash('Not existing user with id ' + _id, 'danger')
+            flash(f'Not existing user with id {_id}', 'danger')
             return redirect(url_for('index'))
         try:
             if form.validate_on_submit():
@@ -139,7 +139,7 @@ def edit_user(_id):
         return render_template('edit_user.html', title='Edit User',
                                form=form, user=user)
     else:
-        flash('You cannot change data for user {}'.format(_id), 'danger')
+        flash(f'You cannot change data for user {_id}', 'danger')
         return redirect(url_for('users'))
 
 
@@ -151,18 +151,18 @@ def change_pw(_id):
         form = ChangePasswordForm()
         user = User.query.filter_by(id=_id).first()
         if not user:
-            flash('Not existing user id ' + _id, 'danger')
+            flash(f'Not existing user id {_id}', 'danger')
             return redirect(url_for('index'))
         if form.validate_on_submit():
             user.password = hash_password(form.password.data)
-            flash('Password changed for ' + user.email, 'info')
+            flash(f'Password changed for {user.email}', 'info')
             log.debug('user %s password changed', user.email)
             db.session.commit()
             return redirect(url_for('index'))
 #        return render_template('change_pw.html', title='Change Password',
 #                           form=form, user=user)
     else:
-        flash('You cannot change the password for user {}'.format(_id), 'danger')
+        flash(f'You cannot change the password for user {_id}', 'danger')
         return redirect(url_for('index'))
 
 
@@ -170,6 +170,7 @@ def change_pw(_id):
 @auth_required()
 @roles_required('superadmin')
 def users():
+    """ return list of users """
     _users = User.query.all()
     return render_template('users.html', users=_users, title='Users')
 
@@ -192,7 +193,7 @@ def list():
         reagents = Inventory.query.all()
 
     if len(reagents) > 0:
-        flash("Number of reagents: " + str(len(reagents)), 'info')
+        flash(f'Number of reagents: {str(len(reagents))}', 'info')
         return render_template('list.html', form=form, reagents=reagents)
     flash("No Reagents Found!")
     msg = 'No Reagents Found'
@@ -227,28 +228,33 @@ def edit_location(_id):
     try:
         if form.validate_on_submit():
             # existing_location = Locations.query.filter(Locations.name == form.name.data or Locations.short_name == form.short_name.data).first()
-            existing_location = db.session.query(Locations).filter(Locations.name == form.name.data or Locations.short_name == form.short_name.data).first()
+            existing_location = db.session.query(Locations).filter(
+                Locations.name == form.name.data or Locations.short_name == form.short_name.data
+                ).first()
             log.debug("location %s", existing_location)
             if existing_location:
-                flash('A Location with this name ({}) or short_name ({}) already exists!'.format(form.name.data, form.short_name.data), 'danger')
-                return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
+                flash(f'A Location with this name ({form.name.data}) or short_name ({form.short_name.data}) already exists!', 'danger')
+                return render_template('edit_location.html', title='Edit Location',
+                                       _id=_id, form=form)
             try:
                 location.name = form.name.data
                 location.short_name = form.short_name.data
                 db.session.commit()
                 flash('Your changes have been saved.')
-                log.debug('Location %s updated: name=%s, short_name=%s', location.id, location.name, location.short_name)
+                log.debug('Location %s updated: name=%s, short_name=%s', location.id, location.name,
+                          location.short_name)
                 return redirect(url_for('list_locations'))
             except Exception as e:
-                flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
+                flash(f'Error editing {location.id} with error {str(e)}', 'danger')
                 db.session.rollback()
-                return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
+                return render_template('edit_location.html', title='Edit Location',
+                                       _id=_id, form=form)
     except IntegrityError:
-        flash('Error editing {}'.format(location.id), 'danger')
+        flash(f'Error editing {location.id}', 'danger')
         db.session.rollback()
         return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
     except PendingRollbackError as e:
-        flash('Error editing {} with error {}'.format(location.id, str(e)), 'danger')
+        flash(f'Error editing {location.id} with error {str(e)}', 'danger')
         db.session.rollback()
         return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
 
@@ -269,7 +275,7 @@ def list_location_content(_id):
     loc_name = location.name
 
     if len(reagents) > 0:
-        flash("Number of reagents: " + str(len(reagents)), 'info')
+        flash(f'Number of reagents: {str(len(reagents))}', 'info')
         return render_template('list.html', title=loc_name, reagents=reagents)
     flash("No Reagents Found!")
     msg = 'No Reagents Found in this location'
@@ -315,10 +321,10 @@ def edit(_id):
             db.session.commit()
             for key in common_keys:
                 if str(r1[key]) != str(r2[key]):
-                    add_log(reag.id, current_user.id, 'updated item %s - %s: %s value changed from "%s" to "%s"' % (reag.id, reag.name, key, str(r1[key]), str(r2[key])))
-                    log.debug('updated item %s - %s: %s value changed from "%s" to "%s"' % (reag.id, reag.name, key, str(r1[key]), str(r2[key])))
+                    add_log(reag.id, current_user.id, f'updated item {reag.id} - {reag.name}: {key} value changed from "{str(r1[key])}" to "{str(r2[key])}"')
+                    log.debug(f'updated item {reag.id} - {reag.name}: {key} value changed from "{str(r1[key])}" to "{str(r2[key])}"')
         except Exception as e:
-            flash('Error updating %s' % str(e), 'danger')
+            flash(f'Error updating {str(e)}', 'danger')
             log.debug("ERROR not updated id %s", reag.id)
             db.session.rollback()
         return redirect(url_for('show', _id=_id))
@@ -341,11 +347,11 @@ def delete(_id):
             flash("Item deleted", 'info')
             log.debug("deleted id %s", reagent.id)
         except Exception as e:
-            flash('Error deleting {} with error {}'.format(reagent.id, str(e)), 'danger')
+            flash(f'Error deleting {reagent.id} with error {str(e)}', 'danger')
             log.debug("ERROR not deleted id %s", reagent.id)
             db.session.rollback()
     else:
-        flash('Error deleting product with id: ' + str(_id), 'danger')
+        flash(f'Error deleting product with id {_id}', 'danger')
         return redirect(url_for('show', _id=_id))
     return redirect(url_for('list'))
 
@@ -366,7 +372,7 @@ def create_location():
         ).first()
         if existing_location:
             # https://getbootstrap.com/docs/5.0/components/alerts/ colors
-            flash('A Location with this name ({}) or short_name ({}) already exists!'.format(name, short_name), 'danger')
+            flash(f'A Location with this name ({name}) or short_name ({short_name}) already exists!', 'danger')
             return render_template('create_location.html', title='Add a new location')
         db.session.add(location)
         db.session.commit()
@@ -386,20 +392,20 @@ def delete_location(_id):
     if location:
         reagents_in = Inventory.query.filter(Inventory.location_id==_id).all()
         if len(reagents_in) > 0:
-            flash("Location %s contains some reagents, it cannot be deleted" % location.name, 'danger')
+            flash(f"Location {location.name} contains some reagents, it cannot be deleted", 'danger')
             return redirect(url_for('list_locations'))
         try:
             db.session.delete(location)
             db.session.commit()
-            add_log(location.id, current_user.id, 'deleted location %s - %s' % (location.id, location.name))
+            add_log(location.id, current_user.id, f'deleted location {location.id} - {location.name}')
             flash("Location deleted", 'info')
             log.debug("deleted location id %s", location.id)
         except Exception as e:
-            flash('Error deleting {} with error {}'.format(location.id, str(e)), 'danger')
+            flash(f'Error deleting {location.id} with error {str(e)}', 'danger')
             log.debug("ERROR not deleted location id %s", location.id)
             db.session.rollback()
     else:
-        flash('Error deleting location with id: ' + str(location.id), 'danger')
+        flash(f'Error deleting location with id {str(location.id)}', 'danger')
         return redirect(url_for('list_locations'))
     return redirect(url_for('list_locations'))
 
@@ -458,11 +464,11 @@ def order(_id):
                    (reagent.id, reagent.name))
             log.debug("ordered id %s", reagent.id)
         except Exception as e:
-            flash('Error ordering {} with error {}'.format(reagent.id, str(e)), 'danger')
+            flash(f'Error ordering {reagent.id} with error {str(e)}', 'danger')
             log.debug("ERROR ordefing id %s", reagent.id)
             db.session.rollback()
     else:
-        flash('Error ordering product with id: ' + str(_id), 'danger')
+        flash(f'Error ordering product with id {str(_id)}', 'danger')
         return redirect(url_for('show', _id=_id))
     return redirect(url_for('show', _id=_id, title=reagent.name))
 
@@ -495,10 +501,10 @@ def reset_order(_id):
             add_log(reagent.id, current_user.id, 'reset orders for item %s - %s' % (reagent.id, reagent.name))
             log.debug("reset orders for id %s", reagent.id)
         except Exception as e:
-            flash('Error reset ordering {} with error {}'.format(reagent.id, str(e)), 'danger')
+            flash(f'Error reset ordering {reagent.id} with error {str(e)}', 'danger')
             db.session.rollback()
     else:
-        flash('Error resetting order product with id: ' + str(_id), 'danger')
+        flash(f'Error resetting order product with id: {str(_id)}', 'danger')
         return redirect(url_for('show', _id=_id))
     return redirect(url_for('view_orders'))
 
@@ -586,7 +592,7 @@ def show_log(_id):
             logs = Applog.query.filter(Applog.product_id==_id).all()
 
     if len(logs) > 0:
-        flash("Log rows: " + str(len(logs)), 'info')
+        flash(f'Log rows: {str(len(logs))}', 'info')
         return render_template('show_log.html', logs=logs, title='Logs report')
     flash("No Logs Found for this reagent !", 'info')
     return render_template('show_log.html', title='Logs report')
@@ -610,7 +616,7 @@ def create_user():
         superadmin_role = user_datastore.find_role('superadmin')
         existing_user = User.query.filter(User.email == email or User.username == username).first()
         if existing_user:
-            flash('A User with this email ({}) or username ({}) already exists!'.format(email, username), 'danger')
+            flash(f'A User with this email ({email}) or username ({username}) already exists!', 'danger')
             return render_template('create_user.html', title='Add a new user')
         app.security.datastore.create_user(email=email, password=hash_password("password"), username=username, active=True)
         user = User.query.filter_by(username=username).first()
@@ -636,11 +642,11 @@ def delete_user(_id):
             flash("User deleted", 'info')
             log.debug("deleted user %s by %s", user.email, current_user.id)
         except Exception as e:
-            flash('Error deleting {} with error {}'.format(user.id, str(e)), 'danger')
+            flash(f'Error deleting {user.id} with error {str(e)}', 'danger')
             log.debug("ERROR deleting user id %s", user.id)
             db.session.rollback()
     else:
-        flash('Error deleting user with id: ' + str(user.id), 'danger')
+        flash(f'Error deleting user with id: {str(user.id)}', 'danger')
         return redirect(url_for('users'))
     return redirect(url_for('users'))
 
