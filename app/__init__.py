@@ -12,6 +12,8 @@ from flask_mailman import Mail
 
 from .config import Config
 logging.basicConfig(filename='logfile.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+logw = logging.getLogger('werkzeug')
+logw.setLevel(logging.ERROR)
 
 # Create app
 app = Flask(__name__)
