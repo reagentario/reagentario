@@ -522,6 +522,7 @@ def view_low_quantity():
 
 @app.route('/plus/<int:_id>/')
 @auth_required()
+@roles_required('admin')
 def plus(_id):
     """ add 1 item of a specific reagent in lab """
     reagent = Inventory.query.get_or_404(_id)
@@ -534,6 +535,7 @@ def plus(_id):
 
 @app.route('/minus/<int:_id>/')
 @auth_required()
+@roles_required('admin')
 def minus(_id):
     """ remove 1 item of a specific reagent in lab """
     reagent = Inventory.query.get_or_404(_id)
@@ -550,6 +552,7 @@ def minus(_id):
 
 @app.route('/move/<int:_id>/')
 @auth_required()
+@roles_required('admin')
 def move(_id):
     """ move 1 item of a specific reagent from warehouse to lab """
     reagent = Inventory.query.get_or_404(_id)
@@ -566,6 +569,7 @@ def move(_id):
 
 @app.route('/add/<int:_id>/')
 @auth_required()
+@roles_required('admin')
 def add(_id):
     """ add 1 item of a specific reagent to warehouse """
     reagent = Inventory.query.get_or_404(_id)
