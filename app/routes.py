@@ -342,7 +342,7 @@ def delete(_id):
         try:
             db.session.delete(reagent)
             db.session.commit()
-            add_log(reagent.id, current_user.id, 'deleted item %s - %s' % (reagent.id, reagent.name))
+            add_log(reagent.id, current_user.id, f'deleted item {reagent.id} - {reagent.name}')
             flash("Item deleted", 'info')
             log.debug(f'deleted id {reagent.id}')
         except Exception as e:
@@ -459,8 +459,7 @@ def order(_id):
         try:
             db.session.commit()
             flash("Item ordered", 'info')
-            add_log(reagent.id, current_user.id, 'ordered item %s - %s' %
-                   (reagent.id, reagent.name))
+            add_log(reagent.id, current_user.id, f'ordered item {reagent.id} - {reagent.name}')
             log.debug(f'ordered id {reagent.id}')
         except Exception as e:
             flash(f'Error ordering {reagent.id} with error {str(e)}', 'danger')
@@ -497,7 +496,7 @@ def reset_order(_id):
         try:
             db.session.commit()
             flash("Item orders reset", 'info')
-            add_log(reagent.id, current_user.id, 'reset orders for item %s - %s' % (reagent.id, reagent.name))
+            add_log(reagent.id, current_user.id, f'reset orders for item {reagent.id} - {reagent.name}')
             log.debug(f'reset orders for id {reagent.id}')
         except Exception as e:
             flash(f'Error reset ordering {reagent.id} with error {str(e)}', 'danger')
@@ -529,7 +528,7 @@ def plus(_id):
     reagent.amount += 1
     db.session.commit()
     flash("Added 1 item to laboratory", 'info')
-    add_log(reagent.id, current_user.id, 'added item %s - %s' % (reagent.id, reagent.name))
+    add_log(reagent.id, current_user.id, f'added item {reagent.id}  {reagent.name}')
     return redirect(url_for('show', _id=_id))
 
 
@@ -544,7 +543,7 @@ def minus(_id):
     reagent.amount -= 1
     db.session.commit()
     flash("Removed one item from laboratory", 'info')
-    add_log(reagent.id, current_user.id, 'removed item %s - %s' % (reagent.id, reagent.name))
+    add_log(reagent.id, current_user.id, f'removed item {reagent.id} - {reagent.name}')
 
     return redirect(url_for('show', _id=_id))
 
@@ -557,13 +556,12 @@ def move(_id):
     if reagent.amount2 == 0:
         flash("No more items available in the warehouse", 'danger')
         return redirect(url_for('show', _id=_id))
-    else:
-        reagent.amount2 -=1
-        reagent.amount +=1
-        db.session.commit()
-        flash("Moved one item from warehouse to laboratory", 'info')
-        add_log(reagent.id, current_user.id, 'moved from warehouse item %s - %s' % (reagent.id, reagent.name))
-        return redirect(url_for('show', _id=_id))
+    reagent.amount2 -=1
+    reagent.amount +=1
+    db.session.commit()
+    flash("Moved one item from warehouse to laboratory", 'info')
+    add_log(reagent.id, current_user.id, f'moved from warehouse item {reagent.id} - {reagent.name}')
+    return redirect(url_for('show', _id=_id))
 
 
 @app.route('/add/<int:_id>/')
@@ -574,7 +572,7 @@ def add(_id):
     reagent.amount2 += 1
     db.session.commit()
     flash("Added 1 item to warehouse", 'info')
-    add_log(reagent.id, current_user.id, 'added to warehouse item %s - %s' % (reagent.id, reagent.name))
+    add_log(reagent.id, current_user.id, f'added to warehouse item {reagent.id} - {reagent.name}')
     return redirect(url_for('show', _id=_id))
 
 
