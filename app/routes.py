@@ -56,7 +56,7 @@ def edit_profile():
             current_user.username = form.username.data
             db.session.commit()
             flash('Your changes have been saved.')
-            log.debug('user %s updated, new email: %s, new userame: %s', current_user.id, current_user.email, current_user.username)
+            log.debug(f'user {current_user.id} updated, new email: {current_user.email}, new userame: {current_user.username}')
             return redirect(url_for('edit_profile'))
     except IntegrityError:
         flash('The email or username you choose is already registered, user not updated', 'danger')
@@ -93,7 +93,7 @@ def edit_role(_id):
                 app.security.datastore.remove_role_from_user(user, superadmin_role)
             db.session.commit()
             flash('Your changes have been saved.')
-            log.debug('user %s updated, admin role: %s, superadmin role: %s', current_user.id, admin_role, superadmin_role)
+            log.debug(f'user {current_user.id} updated, admin role: {admin_role}, superadmin role: {superadmin_role}')
             return redirect(url_for('users'))
         if request.method == 'GET':
             if user.has_role('admin'):
@@ -127,7 +127,7 @@ def edit_user(_id):
                 user.active = form.active.data
                 db.session.commit()
                 flash('Your changes have been saved.')
-                log.debug('user %s updated, email: %s, userame: %s, active: %s', user.id, user.email, user.username, user.active)
+                log.debug(f'user {user.id} updated, email: {user.email}, username: {user.username}, active: {user.active}')
                 return redirect(url_for('users'))
         except IntegrityError:
             flash('Email or username already registered, user not updated', 'danger')
@@ -156,7 +156,7 @@ def change_pw(_id):
         if form.validate_on_submit():
             user.password = hash_password(form.password.data)
             flash(f'Password changed for {user.email}', 'info')
-            log.debug('user %s password changed', user.email)
+            log.debug(f'user {user.email} password changed')
             db.session.commit()
             return redirect(url_for('index'))
 #        return render_template('change_pw.html', title='Change Password',
@@ -231,7 +231,7 @@ def edit_location(_id):
             existing_location = db.session.query(Locations).filter(
                 Locations.name == form.name.data or Locations.short_name == form.short_name.data
                 ).first()
-            log.debug("location %s", existing_location)
+            log.debug(f'location {existing_location}')
             if existing_location:
                 flash(f'A Location with this name ({form.name.data}) or short_name ({form.short_name.data}) already exists!', 'danger')
                 return render_template('edit_location.html', title='Edit Location',
@@ -241,8 +241,7 @@ def edit_location(_id):
                 location.short_name = form.short_name.data
                 db.session.commit()
                 flash('Your changes have been saved.')
-                log.debug('Location %s updated: name=%s, short_name=%s', location.id, location.name,
-                          location.short_name)
+                log.debug(f'Location {location.id} updated: name={location.name}, short_name={location.short_name}')
                 return redirect(url_for('list_locations'))
             except Exception as e:
                 flash(f'Error editing {location.id} with error {str(e)}', 'danger')
@@ -325,7 +324,7 @@ def edit(_id):
                     log.debug(f'updated item {reag.id} - {reag.name}: {key} value changed from "{str(r1[key])}" to "{str(r2[key])}"')
         except Exception as e:
             flash(f'Error updating {str(e)}', 'danger')
-            log.debug("ERROR not updated id %s", reag.id)
+            log.debug(f'ERROR - not updated id {reag.id}')
             db.session.rollback()
         return redirect(url_for('show', _id=_id))
 
@@ -345,10 +344,10 @@ def delete(_id):
             db.session.commit()
             add_log(reagent.id, current_user.id, 'deleted item %s - %s' % (reagent.id, reagent.name))
             flash("Item deleted", 'info')
-            log.debug("deleted id %s", reagent.id)
+            log.debug(f'deleted id {reagent.id}')
         except Exception as e:
             flash(f'Error deleting {reagent.id} with error {str(e)}', 'danger')
-            log.debug("ERROR not deleted id %s", reagent.id)
+            log.debug(f'ERROR not deleted id {reagent.id}')
             db.session.rollback()
     else:
         flash(f'Error deleting product with id {_id}', 'danger')
@@ -376,7 +375,7 @@ def create_location():
             return render_template('create_location.html', title='Add a new location')
         db.session.add(location)
         db.session.commit()
-        log.debug('created location %s: %s', location.id, location.name)
+        log.debug(f'created location {location.id} - {location.name}')
 
         return redirect(url_for('list_locations'))
     return render_template('create_location.html', title='Add a new location')
@@ -399,10 +398,10 @@ def delete_location(_id):
             db.session.commit()
             add_log(location.id, current_user.id, f'deleted location {location.id} - {location.name}')
             flash("Location deleted", 'info')
-            log.debug("deleted location id %s", location.id)
+            log.debug(f'deleted location id {location.id}')
         except Exception as e:
             flash(f'Error deleting {location.id} with error {str(e)}', 'danger')
-            log.debug("ERROR not deleted location id %s", location.id)
+            log.debug(f'ERROR - not deleted location id {location.id}')
             db.session.rollback()
     else:
         flash(f'Error deleting location with id {str(location.id)}', 'danger')
@@ -462,10 +461,10 @@ def order(_id):
             flash("Item ordered", 'info')
             add_log(reagent.id, current_user.id, 'ordered item %s - %s' %
                    (reagent.id, reagent.name))
-            log.debug("ordered id %s", reagent.id)
+            log.debug(f'ordered id {reagent.id}')
         except Exception as e:
             flash(f'Error ordering {reagent.id} with error {str(e)}', 'danger')
-            log.debug("ERROR ordefing id %s", reagent.id)
+            log.debug(f'ERROR ordefing id {reagent.id}')
             db.session.rollback()
     else:
         flash(f'Error ordering product with id {str(_id)}', 'danger')
@@ -499,7 +498,7 @@ def reset_order(_id):
             db.session.commit()
             flash("Item orders reset", 'info')
             add_log(reagent.id, current_user.id, 'reset orders for item %s - %s' % (reagent.id, reagent.name))
-            log.debug("reset orders for id %s", reagent.id)
+            log.debug(f'reset orders for id {reagent.id}')
         except Exception as e:
             flash(f'Error reset ordering {reagent.id} with error {str(e)}', 'danger')
             db.session.rollback()
@@ -640,10 +639,10 @@ def delete_user(_id):
             db.session.delete(user)
             db.session.commit()
             flash("User deleted", 'info')
-            log.debug("deleted user %s by %s", user.email, current_user.id)
+            log.debug(f'deleted user {user.email} by {current_user.id}')
         except Exception as e:
             flash(f'Error deleting {user.id} with error {str(e)}', 'danger')
-            log.debug("ERROR deleting user id %s", user.id)
+            log.debug(f'ERROR deleting user id {user.id}')
             db.session.rollback()
     else:
         flash(f'Error deleting user with id: {str(user.id)}', 'danger')
