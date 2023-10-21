@@ -45,136 +45,6 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/edit_profile', methods=['GET', 'POST'])
-@auth_required()
-def edit_profile():
-    """ edit profile form """
-    form = EditProfileForm()
-    try:
-        if form.validate_on_submit():
-            current_user.email = form.email.data
-            current_user.username = form.username.data
-            db.session.commit()
-            flash('Your changes have been saved.')
-            log.debug(f'user {current_user.id} updated, new email: {current_user.email}, new userame: {current_user.username}')
-            return redirect(url_for('edit_profile'))
-    except IntegrityError:
-        flash('The email or username you choose is already registered, user not updated', 'danger')
-        return redirect(url_for('edit_profile'))
-    if request.method == 'GET':
-        form.email.data = current_user.email
-        form.username.data = current_user.username
-
-    return render_template('edit_profile.html', title='Edit Profile',
-                           form=form, user=current_user)
-
-
-@app.route('/edit_role/<int:_id>/', methods=['GET', 'POST'])
-@auth_required()
-@roles_required('superadmin')
-def edit_role(_id):
-    """ edit roles form """
-    form = EditRolesForm()
-    user = User.query.filter_by(id=_id).first()
-    admin_role = user_datastore.find_role('admin')
-    superadmin_role = user_datastore.find_role('superadmin')
-    if not user:
-        flash(f'Not existing user id {_id}', 'danger')
-        return redirect(url_for('users'))
-    try:
-        if form.validate_on_submit():
-            if form.admin.data:
-                app.security.datastore.add_role_to_user(user, admin_role)
-            else:
-                app.security.datastore.remove_role_from_user(user, admin_role)
-            if form.superadmin.data:
-                app.security.datastore.add_role_to_user(user, superadmin_role)
-            else:
-                app.security.datastore.remove_role_from_user(user, superadmin_role)
-            db.session.commit()
-            flash('Your changes have been saved.')
-            log.debug(f'user {current_user.id} updated, admin role: {admin_role}, superadmin role: {superadmin_role}')
-            return redirect(url_for('users'))
-        if request.method == 'GET':
-            if user.has_role('admin'):
-                form.admin.data = True
-            if user.has_role('superadmin'):
-                form.superadmin.data = True
-    except Exception as e:
-        flash(f'Error editing {user.id} with error {str(e)}', 'danger')
-        db.session.rollback()
-        return render_template('edit_roles.html', title='Edit User Roles', user=user, form=form)
-
-    return render_template('edit_roles.html', title='Edit User Roles',
-            form=form, user=user)
-
-
-@app.route('/edit_user/<int:_id>/', methods=['GET', 'POST'])
-@auth_required()
-@roles_required('superadmin')
-def edit_user(_id):
-    """ edit user form """
-    if current_user.id == _id or current_user.has_role('superadmin'):
-        form = EditProfileForm()
-        user = User.query.filter_by(id=_id).first()
-        if not user:
-            flash(f'Not existing user with id {_id}', 'danger')
-            return redirect(url_for('index'))
-        try:
-            if form.validate_on_submit():
-                user.email = form.email.data
-                user.username = form.username.data
-                user.active = form.active.data
-                db.session.commit()
-                flash('Your changes have been saved.')
-                log.debug(f'user {user.id} updated, email: {user.email}, username: {user.username}, active: {user.active}')
-                return redirect(url_for('users'))
-        except IntegrityError:
-            flash('Email or username already registered, user not updated', 'danger')
-            return redirect(url_for('users'))
-        if request.method == 'GET':
-            form.email.data = user.email
-            form.username.data = user.username
-            form.active.data = user.active
-        return render_template('edit_user.html', title='Edit User',
-                               form=form, user=user)
-    else:
-        flash(f'You cannot change data for user {_id}', 'danger')
-        return redirect(url_for('users'))
-
-
-@app.route('/change_pw/<int:_id>/', methods=['GET', 'POST'])
-@auth_required()
-def change_pw(_id):
-    """ change password form """
-    if current_user.id == _id or current_user.has_role('superadmin'):
-        form = ChangePasswordForm()
-        user = User.query.filter_by(id=_id).first()
-        if not user:
-            flash(f'Not existing user id {_id}', 'danger')
-            return redirect(url_for('index'))
-        if form.validate_on_submit():
-            user.password = hash_password(form.password.data)
-            flash(f'Password changed for {user.email}', 'info')
-            log.debug(f'user {user.email} password changed')
-            db.session.commit()
-            return redirect(url_for('index'))
-#        return render_template('change_pw.html', title='Change Password',
-#                           form=form, user=user)
-    else:
-        flash(f'You cannot change the password for user {_id}', 'danger')
-        return redirect(url_for('index'))
-
-
-@app.route('/users', methods=['GET'])
-@auth_required()
-@roles_required('superadmin')
-def users():
-    """ return list of users """
-    _users = User.query.all()
-    return render_template('users.html', users=_users, title='Users')
-
-
 @app.route('/list', methods=['GET', 'POST'])
 @auth_required()
 @login_required
@@ -200,93 +70,51 @@ def list():
     return render_template('list.html', form=form, warning=msg)
 
 
-@app.route('/list_locations', methods=['GET'])
-@auth_required()
-def list_locations():
-    """ list all locations """
-    locations = Locations.query.all()
-
-    if len(locations) > 0:
-        return render_template('list_locations.html', locations=locations, title="Locations")
-    flash("No Locations Found!")
-    msg = 'No Locations Found'
-    return render_template('list_locations.html', warning=msg, title="Locations")
-
-
-@app.route('/edit_location/<int:_id>/', methods=['GET', 'POST'])
-@auth_required()
-@roles_required('admin')
-def edit_location(_id):
-    """ edit location form """
-
-    form = EditLocationForm()
-    location = db.session.query(Locations).filter(Locations.id == _id).first()
-    if not location:
-        flash('Not existing location', 'danger')
-        return redirect(url_for('list_locations'))
-
-    try:
-        if form.validate_on_submit():
-            # existing_location = Locations.query.filter(Locations.name == form.name.data or Locations.short_name == form.short_name.data).first()
-            existing_location = db.session.query(Locations).filter(
-                Locations.name == form.name.data or Locations.short_name == form.short_name.data
-                ).first()
-            log.debug(f'location {existing_location}')
-            if existing_location:
-                flash(f'A Location with this name ({form.name.data}) or short_name ({form.short_name.data}) already exists!', 'danger')
-                return render_template('edit_location.html', title='Edit Location',
-                                       _id=_id, form=form)
-            try:
-                location.name = form.name.data
-                location.short_name = form.short_name.data
-                db.session.commit()
-                flash('Your changes have been saved.')
-                log.debug(f'Location {location.id} updated: name={location.name}, short_name={location.short_name}')
-                return redirect(url_for('list_locations'))
-            except Exception as e:
-                flash(f'Error editing {location.id} with error {str(e)}', 'danger')
-                db.session.rollback()
-                return render_template('edit_location.html', title='Edit Location',
-                                       _id=_id, form=form)
-    except IntegrityError:
-        flash(f'Error editing {location.id}', 'danger')
-        db.session.rollback()
-        return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
-    except PendingRollbackError as e:
-        flash(f'Error editing {location.id} with error {str(e)}', 'danger')
-        db.session.rollback()
-        return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
-
-    if request.method == 'GET':
-        form.name.data = location.name
-        form.short_name.data = location.short_name
-        return render_template('edit_location.html', title='Edit Location',
-                            _id=_id, form=form)
-    return redirect(url_for('list_locations'))
-
-
-@app.route('/list_location_content/<int:_id>/', methods=['GET', 'POST'])
-@auth_required()
-def list_location_content(_id):
-    """ list content of a location """
-    reagents = Inventory.query.filter(Inventory.location_id==_id).all()
-    location = Locations.query.filter(Locations.id==_id).first()
-    loc_name = location.name
-
-    if len(reagents) > 0:
-        flash(f'Number of reagents: {str(len(reagents))}', 'info')
-        return render_template('list.html', title=loc_name, reagents=reagents)
-    flash("No Reagents Found!")
-    msg = 'No Reagents Found in this location'
-    return render_template('list.html', title=loc_name, warning=msg)
-
-
 @app.route('/show/<int:_id>/')
 @auth_required()
 def show(_id):
     """ show a specific reagent """
     reagent = Inventory.query.get_or_404(_id)
     return render_template('show.html', title=reagent.name, reagent=reagent)
+
+
+@app.route('/create', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('admin')
+def create():
+    """ create a new reagent form """
+
+    title = "Add a new Reagent"
+    form = CreateForm(csrf_enabled=False)
+    form.amount.data=0
+    form.amount2.data=0
+    form.amount_limit.data=0
+    form.to_be_ordered.data=0
+
+    if request.method == 'POST':
+        name = request.form['name']
+        location = Locations.query.get_or_404(form.location.data)
+        amount = request.form['amount']
+        amount2 = request.form['amount2']
+        size = request.form['size']
+        amount_limit = request.form['amount_limit']
+        notes = request.form['notes']
+        to_be_ordered = request.form['to_be_ordered']
+        reagent = Inventory(name=name,
+                          location=location,
+                          amount=amount,
+                          amount2=amount2,
+                          size=size,
+                          amount_limit=amount_limit,
+                          notes=notes,
+                          to_be_ordered=to_be_ordered)
+        db.session.add(reagent)
+        db.session.commit()
+        db.session.refresh(reagent)
+        add_log(reagent.id, current_user.id, 'created item %s - %s' % (reagent.id, reagent.name))
+        return redirect(url_for('list'))
+
+    return render_template('create.html', form=form, title=title)
 
 
 @app.route('/edit/<int:_id>/', methods=['GET', 'POST'])
@@ -353,171 +181,6 @@ def delete(_id):
         flash(f'Error deleting product with id {_id}', 'danger')
         return redirect(url_for('show', _id=_id))
     return redirect(url_for('list'))
-
-
-@app.route('/create_location', methods=['GET', 'POST'])
-@auth_required()
-@roles_required('admin')
-def create_location():
-    """ create a new location form """
-
-    if request.method == 'POST':
-        name = request.form['name']
-        short_name = request.form['short_name']
-        location = Locations(name=name,
-                          short_name=short_name)
-        existing_location = Locations.query.filter(
-            Locations.name == name or Locations.short_name == short_name
-        ).first()
-        if existing_location:
-            # https://getbootstrap.com/docs/5.0/components/alerts/ colors
-            flash(f'A Location with this name ({name}) or short_name ({short_name}) already exists!', 'danger')
-            return render_template('create_location.html', title='Add a new location')
-        db.session.add(location)
-        db.session.commit()
-        log.debug(f'created location {location.id} - {location.name}')
-
-        return redirect(url_for('list_locations'))
-    return render_template('create_location.html', title='Add a new location')
-
-
-@app.route('/delete_location/<int:_id>/', methods=['GET'])
-@auth_required()
-@roles_required('admin')
-def delete_location(_id):
-    """ delete a location """
-
-    location = db.session.query(Locations).filter(Locations.id == _id).first()
-    if location:
-        reagents_in = Inventory.query.filter(Inventory.location_id==_id).all()
-        if len(reagents_in) > 0:
-            flash(f"Location {location.name} contains some reagents, it cannot be deleted", 'danger')
-            return redirect(url_for('list_locations'))
-        try:
-            db.session.delete(location)
-            db.session.commit()
-            add_log(location.id, current_user.id, f'deleted location {location.id} - {location.name}')
-            flash("Location deleted", 'info')
-            log.debug(f'deleted location id {location.id}')
-        except Exception as e:
-            flash(f'Error deleting {location.id} with error {str(e)}', 'danger')
-            log.debug(f'ERROR - not deleted location id {location.id}')
-            db.session.rollback()
-    else:
-        flash(f'Error deleting location with id {str(location.id)}', 'danger')
-        return redirect(url_for('list_locations'))
-    return redirect(url_for('list_locations'))
-
-
-
-@app.route('/create', methods=['GET', 'POST'])
-@auth_required()
-@roles_required('admin')
-def create():
-    """ create a new reagent form """
-
-    title = "Add a new Reagent"
-    form = CreateForm(csrf_enabled=False)
-    form.amount.data=0
-    form.amount2.data=0
-    form.amount_limit.data=0
-    form.to_be_ordered.data=0
-
-    if request.method == 'POST':
-        name = request.form['name']
-        location = Locations.query.get_or_404(form.location.data)
-        amount = request.form['amount']
-        amount2 = request.form['amount2']
-        size = request.form['size']
-        amount_limit = request.form['amount_limit']
-        notes = request.form['notes']
-        to_be_ordered = request.form['to_be_ordered']
-        reagent = Inventory(name=name,
-                          location=location,
-                          amount=amount,
-                          amount2=amount2,
-                          size=size,
-                          amount_limit=amount_limit,
-                          notes=notes,
-                          to_be_ordered=to_be_ordered)
-        db.session.add(reagent)
-        db.session.commit()
-        db.session.refresh(reagent)
-        add_log(reagent.id, current_user.id, 'created item %s - %s' % (reagent.id, reagent.name))
-        return redirect(url_for('list'))
-
-    return render_template('create.html', form=form, title=title)
-
-
-@app.route('/order/<int:_id>/', methods=['GET'])
-@auth_required()
-def order(_id):
-    """ set order for a reagent """
-    reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
-    if reagent:
-        reagent.to_be_ordered += 1
-        try:
-            db.session.commit()
-            flash("Item ordered", 'info')
-            add_log(reagent.id, current_user.id, f'ordered item {reagent.id} - {reagent.name}')
-            log.debug(f'ordered id {reagent.id}')
-        except Exception as e:
-            flash(f'Error ordering {reagent.id} with error {str(e)}', 'danger')
-            log.debug(f'ERROR ordefing id {reagent.id}')
-            db.session.rollback()
-    else:
-        flash(f'Error ordering product with id {str(_id)}', 'danger')
-        return redirect(url_for('show', _id=_id))
-    return redirect(url_for('show', _id=_id, title=reagent.name))
-
-
-@app.route('/view_orders/', methods=['GET'])
-@auth_required()
-@roles_required('admin')
-def view_orders():
-    """ view orders """
-
-    orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
-    if orders.count() > 0:
-        return render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
-    flash('No orders pending', 'info')
-    return  render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
-
-
-@app.route('/reset_order/<int:_id>/', methods=['GET'])
-@auth_required()
-@roles_required('admin')
-def reset_order(_id):
-    """ reset order for a specific reagent """
-
-    reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
-    if reagent:
-        reagent.to_be_ordered = 0
-        try:
-            db.session.commit()
-            flash("Item orders reset", 'info')
-            add_log(reagent.id, current_user.id, f'reset orders for item {reagent.id} - {reagent.name}')
-            log.debug(f'reset orders for id {reagent.id}')
-        except Exception as e:
-            flash(f'Error reset ordering {reagent.id} with error {str(e)}', 'danger')
-            db.session.rollback()
-    else:
-        flash(f'Error resetting order product with id: {str(_id)}', 'danger')
-        return redirect(url_for('show', _id=_id))
-    return redirect(url_for('view_orders'))
-
-
-@app.route('/view_low_quantity/', methods=['GET'])
-@auth_required()
-@roles_required('admin')
-def view_low_quantity():
-    """ view list of reagent with low quantity """
-
-    reag = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
-    if reag.count() > 0:
-        return render_template('list.html', reagents=reag, title="Low Quantity Report")
-    flash('No reagents below minimum stock limits', 'info')
-    return  render_template('list.html', reagents=reag, title='Low quantity Report')
 
 
 @app.route('/plus/<int:_id>/')
@@ -599,6 +262,340 @@ def show_log(_id):
     return render_template('show_log.html', title='Logs report')
 
 
+@app.route('/order/<int:_id>/', methods=['GET'])
+@auth_required()
+def order(_id):
+    """ set order for a reagent """
+    reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
+    if reagent:
+        reagent.to_be_ordered += 1
+        try:
+            db.session.commit()
+            flash("Item ordered", 'info')
+            add_log(reagent.id, current_user.id, f'ordered item {reagent.id} - {reagent.name}')
+            log.debug(f'ordered id {reagent.id}')
+        except Exception as e:
+            flash(f'Error ordering {reagent.id} with error {str(e)}', 'danger')
+            log.debug(f'ERROR ordefing id {reagent.id}')
+            db.session.rollback()
+    else:
+        flash(f'Error ordering product with id {str(_id)}', 'danger')
+        return redirect(url_for('show', _id=_id))
+    return redirect(url_for('show', _id=_id, title=reagent.name))
+
+
+@app.route('/view_orders/', methods=['GET'])
+@auth_required()
+@roles_required('admin')
+def view_orders():
+    """ view orders """
+
+    orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
+    if orders.count() > 0:
+        return render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
+    flash('No orders pending', 'info')
+    return  render_template('view_orders.html', reagents=orders, title='Reagents to be ordered')
+
+
+@app.route('/reset_order/<int:_id>/', methods=['GET'])
+@auth_required()
+@roles_required('admin')
+def reset_order(_id):
+    """ reset order for a specific reagent """
+
+    reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
+    if reagent:
+        reagent.to_be_ordered = 0
+        try:
+            db.session.commit()
+            flash("Item orders reset", 'info')
+            add_log(reagent.id, current_user.id, f'reset orders for item {reagent.id} - {reagent.name}')
+            log.debug(f'reset orders for id {reagent.id}')
+        except Exception as e:
+            flash(f'Error reset ordering {reagent.id} with error {str(e)}', 'danger')
+            db.session.rollback()
+    else:
+        flash(f'Error resetting order product with id: {str(_id)}', 'danger')
+        return redirect(url_for('show', _id=_id))
+    return redirect(url_for('view_orders'))
+
+
+@app.route('/view_low_quantity/', methods=['GET'])
+@auth_required()
+@roles_required('admin')
+def view_low_quantity():
+    """ view list of reagent with low quantity """
+
+    reag = db.session.query(Inventory).filter((Inventory.amount+Inventory.amount2)<Inventory.amount_limit)
+    if reag.count() > 0:
+        return render_template('list.html', reagents=reag, title="Low Quantity Report")
+    flash('No reagents below minimum stock limits', 'info')
+    return  render_template('list.html', reagents=reag, title='Low quantity Report')
+
+
+@app.route('/list_locations', methods=['GET'])
+@auth_required()
+def list_locations():
+    """ list all locations """
+    locations = Locations.query.all()
+
+    if len(locations) > 0:
+        return render_template('list_locations.html', locations=locations, title="Locations")
+    flash("No Locations Found!")
+    msg = 'No Locations Found'
+    return render_template('list_locations.html', warning=msg, title="Locations")
+
+
+@app.route('/list_location_content/<int:_id>/', methods=['GET', 'POST'])
+@auth_required()
+def list_location_content(_id):
+    """ list content of a location """
+    reagents = Inventory.query.filter(Inventory.location_id==_id).all()
+    location = Locations.query.filter(Locations.id==_id).first()
+    loc_name = location.name
+
+    if len(reagents) > 0:
+        flash(f'Number of reagents: {str(len(reagents))}', 'info')
+        return render_template('list.html', title=loc_name, reagents=reagents)
+    flash("No Reagents Found!")
+    msg = 'No Reagents Found in this location'
+    return render_template('list.html', title=loc_name, warning=msg)
+
+
+@app.route('/create_location', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('admin')
+def create_location():
+    """ create a new location form """
+
+    if request.method == 'POST':
+        name = request.form['name']
+        short_name = request.form['short_name']
+        location = Locations(name=name,
+                          short_name=short_name)
+        existing_location = Locations.query.filter(
+            Locations.name == name or Locations.short_name == short_name
+        ).first()
+        if existing_location:
+            # https://getbootstrap.com/docs/5.0/components/alerts/ colors
+            flash(f'A Location with this name ({name}) or short_name ({short_name}) already exists!', 'danger')
+            return render_template('create_location.html', title='Add a new location')
+        db.session.add(location)
+        db.session.commit()
+        log.debug(f'created location {location.id} - {location.name}')
+
+        return redirect(url_for('list_locations'))
+    return render_template('create_location.html', title='Add a new location')
+
+
+@app.route('/delete_location/<int:_id>/', methods=['GET'])
+@auth_required()
+@roles_required('admin')
+def delete_location(_id):
+    """ delete a location """
+
+    location = db.session.query(Locations).filter(Locations.id == _id).first()
+    if location:
+        reagents_in = Inventory.query.filter(Inventory.location_id==_id).all()
+        if len(reagents_in) > 0:
+            flash(f"Location {location.name} contains some reagents, it cannot be deleted", 'danger')
+            return redirect(url_for('list_locations'))
+        try:
+            db.session.delete(location)
+            db.session.commit()
+            add_log(location.id, current_user.id, f'deleted location {location.id} - {location.name}')
+            flash("Location deleted", 'info')
+            log.debug(f'deleted location id {location.id}')
+        except Exception as e:
+            flash(f'Error deleting {location.id} with error {str(e)}', 'danger')
+            log.debug(f'ERROR - not deleted location id {location.id}')
+            db.session.rollback()
+    else:
+        flash(f'Error deleting location with id {str(location.id)}', 'danger')
+        return redirect(url_for('list_locations'))
+    return redirect(url_for('list_locations'))
+
+
+@app.route('/edit_location/<int:_id>/', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('admin')
+def edit_location(_id):
+    """ edit location form """
+
+    form = EditLocationForm()
+    location = db.session.query(Locations).filter(Locations.id == _id).first()
+    if not location:
+        flash('Not existing location', 'danger')
+        return redirect(url_for('list_locations'))
+
+    try:
+        if form.validate_on_submit():
+            # existing_location = Locations.query.filter(Locations.name == form.name.data or Locations.short_name == form.short_name.data).first()
+            existing_location = db.session.query(Locations).filter(
+                Locations.name == form.name.data or Locations.short_name == form.short_name.data
+                ).first()
+            log.debug(f'location {existing_location}')
+            if existing_location:
+                flash(f'A Location with this name ({form.name.data}) or short_name ({form.short_name.data}) already exists!', 'danger')
+                return render_template('edit_location.html', title='Edit Location',
+                                       _id=_id, form=form)
+            try:
+                location.name = form.name.data
+                location.short_name = form.short_name.data
+                db.session.commit()
+                flash('Your changes have been saved.')
+                log.debug(f'Location {location.id} updated: name={location.name}, short_name={location.short_name}')
+                return redirect(url_for('list_locations'))
+            except Exception as e:
+                flash(f'Error editing {location.id} with error {str(e)}', 'danger')
+                db.session.rollback()
+                return render_template('edit_location.html', title='Edit Location',
+                                       _id=_id, form=form)
+    except IntegrityError:
+        flash(f'Error editing {location.id}', 'danger')
+        db.session.rollback()
+        return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
+    except PendingRollbackError as e:
+        flash(f'Error editing {location.id} with error {str(e)}', 'danger')
+        db.session.rollback()
+        return render_template('edit_location.html', title='Edit Location', _id=_id, form=form)
+
+    if request.method == 'GET':
+        form.name.data = location.name
+        form.short_name.data = location.short_name
+        return render_template('edit_location.html', title='Edit Location',
+                            _id=_id, form=form)
+    return redirect(url_for('list_locations'))
+
+
+@app.route('/edit_profile', methods=['GET', 'POST'])
+@auth_required()
+def edit_profile():
+    """ edit profile form """
+    form = EditProfileForm()
+    try:
+        if form.validate_on_submit():
+            current_user.email = form.email.data
+            current_user.username = form.username.data
+            db.session.commit()
+            flash('Your changes have been saved.')
+            log.debug(f'user {current_user.id} updated, new email: {current_user.email}, new userame: {current_user.username}')
+            return redirect(url_for('edit_profile'))
+    except IntegrityError:
+        flash('The email or username you choose is already registered, user not updated', 'danger')
+        return redirect(url_for('edit_profile'))
+    if request.method == 'GET':
+        form.email.data = current_user.email
+        form.username.data = current_user.username
+
+    return render_template('edit_profile.html', title='Edit Profile',
+                           form=form, user=current_user)
+
+
+@app.route('/change_pw/<int:_id>/', methods=['GET', 'POST'])
+@auth_required()
+def change_pw(_id):
+    """ change password form """
+    if current_user.id == _id or current_user.has_role('superadmin'):
+        form = ChangePasswordForm()
+        user = User.query.filter_by(id=_id).first()
+        if not user:
+            flash(f'Not existing user id {_id}', 'danger')
+            return redirect(url_for('index'))
+        if form.validate_on_submit():
+            user.password = hash_password(form.password.data)
+            flash(f'Password changed for {user.email}', 'info')
+            log.debug(f'user {user.email} password changed')
+            db.session.commit()
+            return redirect(url_for('index'))
+    else:
+        flash(f'You cannot change the password for user {_id}', 'danger')
+        return redirect(url_for('index'))
+
+
+@app.route('/users', methods=['GET'])
+@auth_required()
+@roles_required('superadmin')
+def users():
+    """ return list of users """
+    _users = User.query.all()
+    return render_template('users.html', users=_users, title='Users')
+
+
+@app.route('/edit_role/<int:_id>/', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('superadmin')
+def edit_role(_id):
+    """ edit roles form """
+    form = EditRolesForm()
+    user = User.query.filter_by(id=_id).first()
+    admin_role = user_datastore.find_role('admin')
+    superadmin_role = user_datastore.find_role('superadmin')
+    if not user:
+        flash(f'Not existing user id {_id}', 'danger')
+        return redirect(url_for('users'))
+    try:
+        if form.validate_on_submit():
+            if form.admin.data:
+                app.security.datastore.add_role_to_user(user, admin_role)
+            else:
+                app.security.datastore.remove_role_from_user(user, admin_role)
+            if form.superadmin.data:
+                app.security.datastore.add_role_to_user(user, superadmin_role)
+            else:
+                app.security.datastore.remove_role_from_user(user, superadmin_role)
+            db.session.commit()
+            flash('Your changes have been saved.')
+            log.debug(f'user {current_user.id} updated, admin role: {admin_role}, superadmin role: {superadmin_role}')
+            return redirect(url_for('users'))
+        if request.method == 'GET':
+            if user.has_role('admin'):
+                form.admin.data = True
+            if user.has_role('superadmin'):
+                form.superadmin.data = True
+    except Exception as e:
+        flash(f'Error editing {user.id} with error {str(e)}', 'danger')
+        db.session.rollback()
+        return render_template('edit_roles.html', title='Edit User Roles', user=user, form=form)
+
+    return render_template('edit_roles.html', title='Edit User Roles',
+            form=form, user=user)
+
+
+@app.route('/edit_user/<int:_id>/', methods=['GET', 'POST'])
+@auth_required()
+@roles_required('superadmin')
+def edit_user(_id):
+    """ edit user form """
+    if current_user.id == _id or current_user.has_role('superadmin'):
+        form = EditProfileForm()
+        user = User.query.filter_by(id=_id).first()
+        if not user:
+            flash(f'Not existing user with id {_id}', 'danger')
+            return redirect(url_for('index'))
+        try:
+            if form.validate_on_submit():
+                user.email = form.email.data
+                user.username = form.username.data
+                user.active = form.active.data
+                db.session.commit()
+                flash('Your changes have been saved.')
+                log.debug(f'user {user.id} updated, email: {user.email}, username: {user.username}, active: {user.active}')
+                return redirect(url_for('users'))
+        except IntegrityError:
+            flash('Email or username already registered, user not updated', 'danger')
+            return redirect(url_for('users'))
+        if request.method == 'GET':
+            form.email.data = user.email
+            form.username.data = user.username
+            form.active.data = user.active
+        return render_template('edit_user.html', title='Edit User',
+                               form=form, user=user)
+    else:
+        flash(f'You cannot change data for user {_id}', 'danger')
+        return redirect(url_for('users'))
+
+
 @app.route('/create_user', methods=['GET', 'POST'])
 @auth_required()
 @roles_required('superadmin')
@@ -650,6 +647,7 @@ def delete_user(_id):
         flash(f'Error deleting user with id: {str(user.id)}', 'danger')
         return redirect(url_for('users'))
     return redirect(url_for('users'))
+
 
 @app.route('/export', methods=['GET'])
 @auth_required()
