@@ -731,9 +731,8 @@ def edit_user(_id):
         return render_template(
             "edit_user.html", title="Edit User", form=form, user=user
         )
-    else:
-        flash(f"You cannot change data for user {_id}", "danger")
-        return redirect(url_for("users"))
+    flash(f"You cannot change data for user {_id}", "danger")
+    return redirect(url_for("users"))
 
 
 @app.route("/create_user", methods=["GET", "POST"])
