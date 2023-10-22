@@ -32,5 +32,11 @@ fsqla.FsModels.set_db_info(db)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
-from app import routes, models
+from app import models, reagent, user, location, errors
 from app.models import User
+
+@app.route("/")
+@app.route("/index")
+def index():
+    """index"""
+    return render_template("index.html")
