@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
 {% block body %}
+
+{% if form.errors %}
+{{ form.errors }}
+{% endif %}
+
 <h1>Set new password for user {{ user.username }} - {{ user.email }}</h1>
     <form action="" method="post">
         {{ form.hidden_tag() }}
@@ -20,7 +25,7 @@
         </p>
 
 
-        <p>{{ form.submit() }}</p>
+        <p>{{ form.submit() }} {{ form.cancel() }} </p>
 
     </form>
 

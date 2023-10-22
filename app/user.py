@@ -113,18 +113,21 @@ def edit_profile():
 def change_pw(_id):
     """change password form"""
     if current_user.id == _id or current_user.has_role("superadmin"):
-        form = ChangePasswordForm()
+        form = ChangePasswordForm(csrf_enabled=False)
         user = User.query.filter_by(id=_id).first()
         if not user:
             flash(f"Not existing user id {_id}", "danger")
             return redirect(url_for("index"))
+
         if form.validate_on_submit():
             user.password = hash_password(form.password.data)
             flash(f"Password changed for {user.email}", "info")
             log.debug(f"user {user.email} password changed")
             db.session.commit()
             return redirect(url_for("index"))
-
+        return render_template(
+            "change_pw.html", title="Change password", form=form, user=user
+        )
     else:
         flash(f"You cannot change the password for user {_id}", "danger")
         return redirect(url_for("index"))
@@ -247,7 +250,7 @@ def create_user():
             return render_template("create_user.html", title="Add a new user")
         app.security.datastore.create_user(
             email=email,
-            password=hash_password(password),
+            password=password,
             username=username,
             active=True,
         )
