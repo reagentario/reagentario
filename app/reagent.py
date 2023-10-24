@@ -18,7 +18,7 @@ from app.forms import (
     SearchForm,
     EditForm,
 )
-from app.models import Inventory, Locations, User, Role, Applog
+from app.models import Inventory, Locations, Applog
 from app.functions import add_log
 
 from sqlalchemy import inspect

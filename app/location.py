@@ -147,7 +147,6 @@ def edit_location(_id):
                 )
                 .first()
             )
-            log.debug(f"location {existing_location}")
             if existing_location:
                 flash(
                     f"A Location with this name ({form.name.data}) or short_name ({form.short_name.data}) already exists!",
