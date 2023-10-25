@@ -155,12 +155,8 @@ def edit(_id):
                         current_user.id,
                         f'updated item {reag.id} - {reag.name}: {key} value changed from "{str(r1[key])}" to "{str(r2[key])}"',
                     )
-                    log.debug(
-                        f'updated item {reag.id} - {reag.name}: {key} value changed from "{str(r1[key])}" to "{str(r2[key])}"'
-                    )
         except Exception as e:
             flash(f"Error updating {str(e)}", "danger")
-            log.debug(f"ERROR - not updated id {reag.id}")
             db.session.rollback()
         return redirect(url_for("show", _id=_id))
 
@@ -184,10 +180,8 @@ def delete(_id):
                 f"deleted item {reagent.id} - {reagent.name}",
             )
             flash("Item deleted", "info")
-            log.debug(f"deleted id {reagent.id}")
         except Exception as e:
             flash(f"Error deleting {reagent.id} with error {str(e)}", "danger")
-            log.debug(f"ERROR not deleted id {reagent.id}")
             db.session.rollback()
     else:
         flash(f"Error deleting product with id {_id}", "danger")
@@ -297,10 +291,8 @@ def order(_id):
                 current_user.id,
                 f"ordered item {reagent.id} - {reagent.name}",
             )
-            log.debug(f"ordered id {reagent.id}")
         except Exception as e:
             flash(f"Error ordering {reagent.id} with error {str(e)}", "danger")
-            log.debug(f"ERROR ordering id {reagent.id}")
             db.session.rollback()
     else:
         flash(f"Error ordering product with id {str(_id)}", "danger")
@@ -342,7 +334,6 @@ def reset_order(_id):
                 current_user.id,
                 f"reset orders for item {reagent.id} - {reagent.name}",
             )
-            log.debug(f"reset orders for id {reagent.id}")
         except Exception as e:
             flash(f"Error reset ordering {reagent.id} with error {str(e)}", "danger")
             db.session.rollback()

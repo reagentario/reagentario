@@ -83,7 +83,7 @@ def create_location():
             return render_template("create_location.html", title="Add a new location")
         db.session.add(location)
         db.session.commit()
-        log.debug(f"created location {location.id} - {location.name}")
+        log.debug(f"created location {location.id} - {location.name} by user {current_user.id}")
 
         return redirect(url_for("list_locations"))
     return render_template("create_location.html", title="Add a new location")
@@ -113,10 +113,9 @@ def delete_location(_id):
                 f"deleted location {location.id} - {location.name}",
             )
             flash("Location deleted", "info")
-            log.debug(f"deleted location id {location.id}")
+            log.debug(f"deleted location id {location.id} by user {current_user.id}")
         except Exception as e:
             flash(f"Error deleting {location.id} with error {str(e)}", "danger")
-            log.debug(f"ERROR - not deleted location id {location.id}")
             db.session.rollback()
     else:
         flash(f"Error deleting location with id {str(location.id)}", "danger")
@@ -161,7 +160,7 @@ def edit_location(_id):
                 db.session.commit()
                 flash("Your changes have been saved.")
                 log.debug(
-                    f"Location {location.id} updated: name={location.name}, short_name={location.short_name}"
+                    f"Location {location.id} updated by user {current_user.id}: name={location.name}, short_name={location.short_name}"
                 )
                 return redirect(url_for("list_locations"))
             except Exception as e:

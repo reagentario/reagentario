@@ -88,7 +88,7 @@ def edit_profile():
             current_user.email = form.email.data
             current_user.username = form.username.data
             db.session.commit()
-            flash("Your changes have been saved.")
+            flash("Your changes have been saved.", "info")
             log.debug(
                 f"user {current_user.id} updated, new email: {current_user.email}, new userame: {current_user.username}"
             )
@@ -122,15 +122,15 @@ def change_pw(_id):
         if form.validate_on_submit():
             user.password = hash_password(form.password.data)
             flash(f"Password changed for {user.email}", "info")
-            log.debug(f"user {user.email} password changed")
+            log.debug(f"user {user.email} password changed by user {current_user.id}")
             db.session.commit()
-            return redirect(url_for("index"))
+            return redirect(url_for("users"))
         return render_template(
             "change_pw.html", title="Change password", form=form, user=user
         )
     else:
         flash(f"You cannot change the password for user {_id}", "danger")
-        return redirect(url_for("index"))
+        return redirect(url_for("users"))
 
 
 @app.route("/users", methods=["GET"])
@@ -165,7 +165,7 @@ def edit_role(_id):
             else:
                 app.security.datastore.remove_role_from_user(user, superadmin_role)
             db.session.commit()
-            flash("Your changes have been saved.")
+            flash("Your changes have been saved.", "info")
             log.debug(
                 f"user {current_user.id} updated, admin role: {admin_role}, superadmin role: {superadmin_role}"
             )
@@ -197,16 +197,16 @@ def edit_user(_id):
         user = User.query.filter_by(id=_id).first()
         if not user:
             flash(f"Not existing user with id {_id}", "danger")
-            return redirect(url_for("index"))
+            return redirect(url_for("users"))
         try:
             if form.validate_on_submit():
                 user.email = form.email.data
                 user.username = form.username.data
                 user.active = form.active.data
                 db.session.commit()
-                flash("Your changes have been saved.")
+                flash("Your changes have been saved.", "info")
                 log.debug(
-                    f"user {user.id} updated, email: {user.email}, username: {user.username}, active: {user.active}"
+                    f"user {user.id} updated by user {current_user.id}, email: {user.email}, username: {user.username}, active: {user.active}"
                 )
                 return redirect(url_for("users"))
         except IntegrityError:
@@ -260,7 +260,7 @@ def create_user():
         if superadmin:
             app.security.datastore.add_role_to_user(user, superadmin_role)
         db.session.commit()
-        log.debug(f"created user {email}")
+        log.debug(f"created user {email} by user {current_user.id}")
         return redirect(url_for("users"))
     return render_template("create_user.html", title="Add a new user", form=form)
 
@@ -279,7 +279,6 @@ def delete_user(_id):
             log.debug(f"deleted user {user.email} by {current_user.id}")
         except Exception as e:
             flash(f"Error deleting {user.id} with error {str(e)}", "danger")
-            log.debug(f"ERROR deleting user id {user.id}")
             db.session.rollback()
     else:
         flash(f"Error deleting user with id: {str(user.id)}", "danger")
