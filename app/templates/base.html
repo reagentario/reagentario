@@ -26,10 +26,11 @@
           <hr>
           {% block body %}{% endblock %}
         </div>
-        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/jquery-3.6.0.min.js') }}"></script>
-        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/jquery.dataTables.js') }}"></script>
-        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/dataTables.bootstrap5.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/datatables.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/pdfmake.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/vfs_fonts.js') }}"></script>
+
         {% block scripts %}
           <script>
             $(document).ready(function () {
