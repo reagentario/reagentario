@@ -26,19 +26,29 @@
           <hr>
           {% block body %}{% endblock %}
         </div>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/jquery-3.7.0.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/bootstrap.bundle.js') }}"></script>
-        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/datatables.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/jszip.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/pdfmake.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/vfs_fonts.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/jquery.dataTables.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/dataTables.bootstrap5.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/dataTables.buttons.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.bootstrap5.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.html5.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.print.js') }}"></script>
 
         {% block scripts %}
           <script>
             $(document).ready(function () {
                           $('#myTable').DataTable( {
                 "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
-                "order": [[ 0, 'asc' ], [ 1, 'asc' ]]
+                "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
+                "dom": 'Bfrtip',
+                "buttons": [ 'excel', 'pdf' ],
                                       })
             });
+
           </script>
         {% endblock %}
         <hr>
