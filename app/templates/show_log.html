@@ -3,7 +3,7 @@
 {% block body %}
 
 {% if logs %}
-<table id="myTable" class="table table-hover table-striped text-center">
+<table id="myTable" class="table table-hover table-striped table-bordered text-center">
   <thead>
     <tr>
       <th class="text-nowrap">Date</th>
@@ -20,7 +20,7 @@
         <td class="text-nowrap"> {{log.event_time}} </td>
         <td> {{log.product.id}} </td>
         {% if log.product.id %}
-        <td><a href="/show/{{log.product.id}}" class="btn btn-primary pull-right">{{"{}".format(log.product.name|default("item deleted from database"))}}</a></td>
+        <td><a href="/show/{{log.product.id}}">{{"{}".format(log.product.name|default("item deleted from database"))}}</a></td>
         {% else %}
         <td class="text-nowrap"> {{log.product.name|default("deleted from database")}}</a></td>
         {% endif %}
