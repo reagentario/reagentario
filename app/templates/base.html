@@ -4,7 +4,8 @@
       <title>Reagentario</title>
       <!-- for datatables css and js see:  https://datatables.net/download/ -->
       <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
-      <link href="{{ url_for('static', filename='css/datatables.css') }}">
+      <link href="{{ url_for('static', filename='css/datatables.css') }}" rel="stylesheet">
+      <meta charset="utf-8" />
     </head>
     <body>
         {% include 'header.html' %}
@@ -50,11 +51,9 @@
                   'pageLength',
                   { extend: 'excelHtml5', exportOptions: { columns: ':visible' }},
                   { extend: 'pdfHtml5', exportOptions: { columns: ':visible' }},
-                  'colvis' ],
-                "paging": true
-                                      })
+                  'colvis']
+                          })
             });
-
           </script>
         {% endblock %}
         <hr>
