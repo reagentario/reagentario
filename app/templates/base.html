@@ -35,6 +35,7 @@
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/dataTables.bootstrap5.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/dataTables.buttons.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.bootstrap5.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.colVis.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.html5.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.print.js') }}"></script>
 
@@ -44,8 +45,13 @@
                           $('#myTable').DataTable( {
                 "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
                 "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
-                "dom": 'Bfrtip',
-                "buttons": [ 'excel', 'pdf' ],
+                "dom": 'frtipB',
+                "buttons": [
+                  'pageLength',
+                  { extend: 'excelHtml5', exportOptions: { columns: ':visible' }},
+                  { extend: 'pdfHtml5', exportOptions: { columns: ':visible' }},
+                  'colvis' ],
+                "paging": true
                                       })
             });
 
