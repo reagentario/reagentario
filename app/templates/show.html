@@ -5,13 +5,13 @@
 <center>
   <table class="table-3">
     <tr>
-      <td id="top" class="w-75">
+      <td id="top" class="col-md-7">
         <div>
           {% if reagent %}
-          <table class="table table-hover table-striped table-bordered border-dark text-center ">
+          <table class="table table-hover table-striped table-bordered border-dark text-center align-middle">
             <tbody>
               <tr>
-                <td class="w-25">Name</td>
+                <td class="text-nowrap">Name</td>
                 <td>{{ reagent.name }}</td>
               </tr>
               <tr>
@@ -48,42 +48,43 @@
         </div>
       </td>
 
-      <td width=100px></td>
+      <td width=50px></td>
+
       <td>
-        <table class="table-sm table-bordered border-dark text-center">
-          <tr>
+        <table class="table-sm table-bordered border-dark text-center align-middle">
+          <tr height="64px">
             <td> <a href="/move/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/move.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/move/{{ reagent.id }}"> Move 1 item from warehouse to lab</a></td>
+            <td> <a href="/move/{{ reagent.id }}" class="btn btn-primary"> Move 1 item from warehouse to lab</a></td>
           </tr>
           <tr>
             <td> <a href="/plus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/plus.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/plus/{{ reagent.id }}"> Add 1 item in laboratory</a></td>
+            <td> <a href="/plus/{{ reagent.id }}" class="btn btn-primary"> Add 1 item in laboratory</a></td>
           </tr>
           <tr>
             <td> <a href="/minus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/minus.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/minus/{{ reagent.id }}"> Remove 1 item from laboratory</a></td>
+            <td> <a href="/minus/{{ reagent.id }}" class="btn btn-primary"> Remove 1 item from laboratory</a></td>
           </tr>
           <tr>
             <td> <a href="/add/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/add.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/add/{{ reagent.id }}"> Add 1 item to warehouse</a></td>
+            <td> <a href="/add/{{ reagent.id }}" class="btn btn-primary"> Add 1 item to warehouse</a></td>
           </tr>
           <tr>
             <td> <a href="/order/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/order.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/order/{{ reagent.id }}"> Order</a></td>
+            <td> <a href="/order/{{ reagent.id }}" class="btn btn-primary"> Order</a></td>
           </tr>
           {% if current_user.has_role('admin') and current_user.is_active %}
           <tr>
             <td> <a href="/edit/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/edit/{{ reagent.id }}"> Edit</a></td>
+            <td> <a href="/edit/{{ reagent.id }}" class="btn btn-primary"> Edit</a></td>
           </tr>
           <tr>
             <td> <a href="/show_log/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/log.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/show_log/{{ reagent.id }}"> Log</a></td>
+            <td> <a href="/show_log/{{ reagent.id }}" class="btn btn-primary"> Log</a></td>
           </tr>
           {% if reagent.amount==0 and reagent.amount2==0 %}
           <tr>
             <td> <a href="/delete/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/delete/{{ reagent.id }}"> Delete</a></td>
+            <td> <a href="/delete/{{ reagent.id }}" class="btn btn-primary"> Delete</a></td>
           </tr>
           {% endif %}
           {% endif %}
