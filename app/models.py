@@ -84,7 +84,7 @@ class Inventory(db.Model):
     amount_limit = db.Column(db.Integer, default=0)
     size = db.Column(db.String(16), nullable=False)
     notes = db.Column(db.String(512))
-    to_be_ordered = db.Column(db.Integer, default=0)
+    order = db.Column(db.Integer, default=0)
 
     def __repr__(self):
         return self.name #'<Reagent {}>'.format(self.name)
