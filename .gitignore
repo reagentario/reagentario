@@ -4,3 +4,4 @@ __pycache__
 TODO
 logfile.log
 inventory.csv
+migrations
