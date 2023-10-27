@@ -34,7 +34,7 @@ class CreateForm(FlaskForm):
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
     amount_limit = IntegerField('Minimum stock', validators=[NumberRange(min=0, max=1000000)])
     notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 36}, validators=[Length(min=0, max=512)])
-    to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
+    order = IntegerField('Order', validators=[NumberRange(min=0, max=1000)])
     submit = SubmitField()
 
 
@@ -46,7 +46,7 @@ class EditForm(FlaskForm):
     size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
     amount_limit = IntegerField('Minimum stock', validators=[NumberRange(min=0, max=1000000)])
     notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 24}, validators=[Length(min=0, max=512)])
-    to_be_ordered = IntegerField('To Be Ordered', validators=[NumberRange(min=0, max=1000)])
+    order = IntegerField('Order', validators=[NumberRange(min=0, max=1000)])
     submit = SubmitField('Save')
     cancel = SubmitField('Cancel')
 

@@ -12,7 +12,7 @@
       <th>Warehouse Amount</th>
       <th>Size</th>
       <th>Amount Limit</th>
-      <th>To be ordered</th>
+      <th>Order</th>
       <th>Reset Order</th>
     </tr>
   </thead>
@@ -29,7 +29,7 @@
         <td> {{reagent.amount2}}</td>
         <td> {{reagent.size}}</td>
         <td> {{reagent.amount_limit}}</td>
-        <td> {{reagent.to_be_ordered}}</td>
+        <td> {{reagent.order}}</td>
         <td> <a href="/reset_order/{{ reagent.id}}"</a>Reset Order</td>
       </tr>
       {% endfor %}

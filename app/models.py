@@ -107,7 +107,7 @@ class Applog(db.Model):
 class InventoryView(ModelView):
     column_display_pk = True # optional, to see the IDs in the list
     column_hide_backrefs = True
-    column_list = ('id', 'name', 'location', 'amount', 'amount2', 'amount_limit', 'size', 'notes', 'to_be_ordered')
+    column_list = ('id', 'name', 'location', 'amount', 'amount2', 'amount_limit', 'size', 'notes', 'order')
     form_excluded_columns = ('log')
 
 

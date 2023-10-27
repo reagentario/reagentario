@@ -85,7 +85,7 @@ def create():
     form.amount.data = 0
     form.amount2.data = 0
     form.amount_limit.data = 0
-    form.to_be_ordered.data = 0
+    form.order.data = 0
 
     if request.method == "POST":
         name = request.form["name"]
@@ -95,7 +95,7 @@ def create():
         size = request.form["size"]
         amount_limit = request.form["amount_limit"]
         notes = request.form["notes"]
-        to_be_ordered = request.form["to_be_ordered"]
+        order = request.form["order"]
         reagent = Inventory(
             name=name,
             location=location,
@@ -104,7 +104,7 @@ def create():
             size=size,
             amount_limit=amount_limit,
             notes=notes,
-            to_be_ordered=to_be_ordered,
+            order=order,
         )
         db.session.add(reagent)
         db.session.commit()
@@ -140,7 +140,7 @@ def edit(_id):
         reag.size = request.form["size"]
         reag.amount_limit = request.form["amount_limit"]
         reag.notes = request.form["notes"]
-        reag.to_be_ordered = request.form["to_be_ordered"]
+        reag.order = request.form["order"]
 
         r2 = reag.__dict__.copy()
         k1 = set(r1.keys())
@@ -282,7 +282,7 @@ def order(_id):
     """set order for a reagent"""
     reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
     if reagent:
-        reagent.to_be_ordered += 1
+        reagent.order += 1
         try:
             db.session.commit()
             flash("Item ordered", "info")
@@ -306,7 +306,7 @@ def order(_id):
 def view_orders():
     """view orders"""
 
-    orders = db.session.query(Inventory).filter(Inventory.to_be_ordered > 0)
+    orders = db.session.query(Inventory).filter(Inventory.order > 0)
     if orders.count() > 0:
         return render_template(
             "view_orders.html", reagents=orders, title="Reagents to be ordered"
@@ -325,7 +325,7 @@ def reset_order(_id):
 
     reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
     if reagent:
-        reagent.to_be_ordered = 0
+        reagent.order = 0
         try:
             db.session.commit()
             flash("Item orders reset", "info")
@@ -390,7 +390,7 @@ def export():
                     r.amount_limit,
                     r.size,
                     r.notes,
-                    r.to_be_ordered,
+                    r.order,
                 ]
             )
     try:
