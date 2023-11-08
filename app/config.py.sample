@@ -36,11 +36,7 @@ class Config(object):
     #MAIL_USERNAME = 'username'
     #MAIL_PASSWORD = 'password'
 
-    # Flask-User settings
-#   USER_APP_NAME = "Reagentario User Authentication"      # Shown in and email templates and page footers
-#   USER_ENABLE_EMAIL = True        # Enable email authentication
-#   USER_ENABLE_USERNAME = False    # Disable username authentication
-#   USER_EMAIL_SENDER_NAME = USER_APP_NAME
-#   USER_EMAIL_SENDER_EMAIL = "noreply@localhost"
 
-#   FLASK_ADMIN_SWATCH = 'cerulean'
+    # create test users defined in user.py
+    CREATE_USERS = False
+

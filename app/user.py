@@ -59,22 +59,34 @@ with app.app_context():
         app.security.datastore.create_role(
             name="superadmin", description="superadmin role", permissions="superadmin"
         )
-    if not app.security.datastore.find_user(email="admin@test.com"):
-        app.security.datastore.create_user(
-            email="admin@test.com",
-            password=hash_password("password"),
-            username="Admin1",
-            roles=["admin"],
-            active=True,
-        )
-    if not app.security.datastore.find_user(email="admin2@test.com"):
-        app.security.datastore.create_user(
-            email="admin2@test.com",
-            password=hash_password("password"),
-            username="Admin2",
-            roles=["admin", "superadmin"],
-            active=True,
-        )
+
+    if app.config['CREATE_USERS']:
+
+        if not app.security.datastore.find_user(email="user@test.com"):
+            app.security.datastore.create_user(
+                email="user@test.com",
+                password=hash_password("password"),
+                username="User1",
+                active=True,
+            )
+
+
+        if not app.security.datastore.find_user(email="admin@test.com"):
+            app.security.datastore.create_user(
+                email="admin@test.com",
+                password=hash_password("password"),
+                username="Admin1",
+                roles=["admin"],
+                active=True,
+            )
+        if not app.security.datastore.find_user(email="admin3test.com"):
+            app.security.datastore.create_user(
+                email="admin3@test.com",
+                password=hash_password("password"),
+                username="Admin3",
+                roles=["admin", "superadmin"],
+                active=True,
+            )
     db.session.commit()
 
 
