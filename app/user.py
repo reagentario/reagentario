@@ -44,24 +44,17 @@ app.security = Security(app, user_datastore)
 with app.app_context():
     # Create users to test with
     db.create_all()
-    if not app.security.datastore.find_user(email="user@test.com"):
-        app.security.datastore.create_user(
-            email="user@test.com",
-            password=hash_password("password"),
-            username="User1",
-            active=True,
-        )
     if not app.security.datastore.find_role("admin"):
         app.security.datastore.create_role(
             name="admin", description="admin role", permissions="admin"
         )
+
     if not app.security.datastore.find_role("superadmin"):
         app.security.datastore.create_role(
             name="superadmin", description="superadmin role", permissions="superadmin"
         )
 
     if app.config['CREATE_USERS']:
-
         if not app.security.datastore.find_user(email="user@test.com"):
             app.security.datastore.create_user(
                 email="user@test.com",
@@ -69,7 +62,6 @@ with app.app_context():
                 username="User1",
                 active=True,
             )
-
 
         if not app.security.datastore.find_user(email="admin@test.com"):
             app.security.datastore.create_user(
@@ -79,11 +71,12 @@ with app.app_context():
                 roles=["admin"],
                 active=True,
             )
-        if not app.security.datastore.find_user(email="admin3test.com"):
+
+        if not app.security.datastore.find_user(email="admin2@test.com"):
             app.security.datastore.create_user(
-                email="admin3@test.com",
+                email="admin2@test.com",
                 password=hash_password("password"),
-                username="Admin3",
+                username="Admin2",
                 roles=["admin", "superadmin"],
                 active=True,
             )
