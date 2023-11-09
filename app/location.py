@@ -54,7 +54,6 @@ def list_location_content(_id):
     loc_name = location.name
 
     if len(reagents) > 0:
-        flash(f"Number of reagents: {str(len(reagents))}", "info")
         return render_template("list.html", title=loc_name, reagents=reagents)
     flash("No Reagents Found!")
     msg = "No Reagents Found in this location"
@@ -137,7 +136,6 @@ def edit_location(_id):
 
     try:
         if form.validate_on_submit():
-            # existing_location = Locations.query.filter(Locations.name == form.name.data or Locations.short_name == form.short_name.data).first()
             existing_location = (
                 db.session.query(Locations)
                 .filter(

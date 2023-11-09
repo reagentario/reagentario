@@ -59,7 +59,6 @@ def list():
         reagents = Inventory.query.all()
 
     if len(reagents) > 0:
-        flash(f"Number of reagents: {str(len(reagents))}", "info")
         return render_template("list.html", form=form, reagents=reagents)
     flash("No Reagents Found!")
     msg = "No Reagents Found"
