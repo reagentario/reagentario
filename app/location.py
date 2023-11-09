@@ -142,6 +142,9 @@ def edit_location(_id):
                     Locations.name == form.name.data
                     or Locations.short_name == form.short_name.data
                 )
+                .filter(
+                    Locations.id != _id
+                )
                 .first()
             )
             if existing_location:
