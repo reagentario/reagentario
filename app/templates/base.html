@@ -43,18 +43,43 @@
         {% block scripts %}
           <script>
             $(document).ready(function () {
-                          $('#myTable').DataTable( {
+              $('#myTable').DataTable( {
                 "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
                 "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
                 "dom": 'frtipB',
                 "buttons": [
                   'pageLength',
                   { extend: 'excelHtml5', exportOptions: { columns: ':visible' }},
-                  { extend: 'pdfHtml5', exportOptions: { columns: ':visible' }},
+                  { extend: 'pdfHtml5',
+                    exportOptions: {
+                      columns: ':visible'
+                    }
+                  },
                   'colvis']
-                          })
+              })
             });
           </script>
+
+
+          <script>
+              $(document).ready(function () {
+                $('#locationTable').DataTable( {
+                  "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
+                  "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
+                  "dom": 'frtipB',
+                  "buttons": [
+                    'pageLength',
+                    { extend: 'excelHtml5', exportOptions: { columns: ':visible' }},
+                    { extend: 'pdfHtml5',
+                      exportOptions: {
+                        columns: ':visible'
+                      }
+                    },
+                    'colvis']
+                })
+              });
+            </script>
+
         {% endblock %}
         <hr>
         {% include "footer.html" %}
