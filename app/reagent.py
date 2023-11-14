@@ -284,11 +284,11 @@ def order(_id):
         reagent.order += 1
         try:
             db.session.commit()
-            flash("Item ordered", "info")
+            flash(f"Set order for 1 unit of item {reagent.name}", "info")
             add_log(
                 reagent.id,
                 current_user.id,
-                f"ordered item {reagent.id} - {reagent.name}",
+                f"Set order for item {reagent.id} - {reagent.name}",
             )
         except Exception as e:
             flash(f"Error ordering {reagent.id} with error {str(e)}", "danger")
@@ -308,11 +308,11 @@ def view_orders():
     orders = db.session.query(Inventory).filter(Inventory.order > 0)
     if orders.count() > 0:
         return render_template(
-            "view_orders.html", reagents=orders, title="Reagents to be ordered"
+            "view_orders.html", reagents=orders, title="Reagents to be purchased"
         )
     flash("No orders pending", "info")
     return render_template(
-        "view_orders.html", reagents=orders, title="Reagents to be ordered"
+        "view_orders.html", reagents=orders, title="Reagents to be purchased"
     )
 
 
@@ -375,7 +375,7 @@ def export():
                 "amount_limit",
                 "size",
                 "notes",
-                "to be ordered",
+                "to be purchased",
             ]
         )
         for r in reagents:
