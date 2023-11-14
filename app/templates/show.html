@@ -12,11 +12,11 @@
             <tbody>
               <tr>
                 <td class="text-nowrap">Name</td>
-                <td>{{ reagent.name }}</td>
+                <td><b>{{ reagent.name }}</b></td>
               </tr>
               <tr>
                 <td>Location</td>
-                <td><a href="/list_location_content/{{reagent.location.id}}" class="btn btn-primary pull-right">{{"{}".format(reagent.location.name)}}</a></td>
+                <td><a href="/list_location_content/{{reagent.location.id}}" class="btn btn-primary pull-right w-100">{{"{}".format(reagent.location.name)}}</a></td>
               </tr>
               <tr>
                 <td>Amount in lab</td>
@@ -54,37 +54,37 @@
         <table class="table-sm table-bordered border-dark text-center align-middle">
           <tr height="64px">
             <td> <a href="/move/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/move.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/move/{{ reagent.id }}" class="btn btn-primary"> Move 1 item from warehouse to lab</a></td>
+            <td> <a href="/move/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Move 1 item from warehouse to lab</a></td>
           </tr>
           <tr>
             <td> <a href="/plus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/plus.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/plus/{{ reagent.id }}" class="btn btn-primary"> Add 1 item in laboratory</a></td>
+            <td> <a href="/plus/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Add 1 item in laboratory</a></td>
           </tr>
           <tr>
             <td> <a href="/minus/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/minus.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/minus/{{ reagent.id }}" class="btn btn-primary"> Remove 1 item from laboratory</a></td>
+            <td> <a href="/minus/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Remove 1 item from laboratory</a></td>
           </tr>
           <tr>
             <td> <a href="/add/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/add.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/add/{{ reagent.id }}" class="btn btn-primary"> Add 1 item to warehouse</a></td>
+            <td> <a href="/add/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Add 1 item to warehouse</a></td>
           </tr>
           <tr>
             <td> <a href="/order/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/order.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/order/{{ reagent.id }}" class="btn btn-primary"> Order</a></td>
+            <td> <a href="/order/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Order</a></td>
           </tr>
           {% if current_user.has_role('admin') and current_user.is_active %}
           <tr>
             <td> <a href="/edit/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/edit/{{ reagent.id }}" class="btn btn-primary"> Edit</a></td>
+            <td> <a href="/edit/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Edit</a></td>
           </tr>
           <tr>
             <td> <a href="/show_log/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/log.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/show_log/{{ reagent.id }}" class="btn btn-primary"> Log</a></td>
+            <td> <a href="/show_log/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Log</a></td>
           </tr>
           {% if reagent.amount==0 and reagent.amount2==0 %}
           <tr>
             <td> <a href="/delete/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/delete/{{ reagent.id }}" class="btn btn-primary"> Delete</a></td>
+            <td> <a href="/delete/{{ reagent.id }}" class="btn btn-lg btn-primary w-100"> Delete</a></td>
           </tr>
           {% endif %}
           {% endif %}

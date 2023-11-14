@@ -3,7 +3,7 @@
 {% block body %}
 
 {% if reagents %}
-<table id="myTable" class="table table-hover table-striped table-bordered border-black border-opacity-75 border-1 text-center">
+<table id="myTable" class="table table-sm table-hover table-striped table-bordered border-black border-opacity-75 border-1 text-center">
   <thead>
     <tr>
       <th>Name</th>
@@ -16,15 +16,15 @@
   <tbody>
     {% for reagent in reagents %}
     {% if (reagent.amount+reagent.amount2)<reagent.amount_limit %}
-      <tr style="color:red;">
+      <tr style="color: red; --bs-table-color: red; --bs-table-striped-color: red;">
     {% else %}
-      <tr style="color:black;">
+      <tr>
     {% endif %}
         <td class="text-start"><a href="/show/{{reagent.id}}" class="link-primary link-underline-light link-underline-opacity-0">{{"{}".format(reagent.name)}}</a></td>
         <td><a href="/list_location_content/{{reagent.location.id}}" class="link-primary link-underline-light link-underline-opacity-0">{{"{}".format(reagent.location.name)}}</a></td>
-        <td> {{reagent.amount}}</td>
-        <td> {{reagent.amount2}}</td>
-        <td> {{reagent.size}}</td>
+        <td>{{reagent.amount}}</td>
+        <td>{{reagent.amount2}}</td>
+        <td>{{reagent.size}}</td>
       </tr>
       {% endfor %}
   </tbody>

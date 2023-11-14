@@ -2,7 +2,7 @@
 
 {% block body %}
 {% if locations %}
-<table id="locationTable" class="table table-hover table-striped table-bordered  border-black border-opacity-75 border-1 text-center">
+<table id="locationTable" class="table table-sm table-hover table-striped table-bordered  border-black border-opacity-75 border-1 text-center">
     <thead>
         <tr>
             <th>Name</th>
@@ -16,11 +16,11 @@
     <tbody>
         {% for location in locations %}
         <tr>
-            <td><a href="/list_location_content/{{location.id}}" class="btn btn-primary pull-right">{{"{}".format(location.name)}}</a></td>
+            <td><a href="/list_location_content/{{location.id}}" class="btn btn-sm btn-primary pull-right w-100">{{"{}".format(location.name)}}</a></td>
             <td>{{location.short_name}}</td>
             {% if current_user.has_role('admin') and current_user.is_active %}
-            <td><a href="/edit_location/{{location.id}}" class="btn btn-success pull-right">Edit</a></td>
-            <td><button type="button" class="btn btn-block btn-danger mb-6" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
+            <td><a href="/edit_location/{{location.id}}" class="btn btn-sm btn-success pull-right w-100">Edit</a></td>
+            <td><button type="button" class="btn btn-sm btn-block btn-danger mb-6 w-100" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
             <div class="modal fade" id="loc{{ location.id }}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
 				<div class="modal-dialog modal-dialog-centered">
 					<div class="modal-content">
