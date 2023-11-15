@@ -17,7 +17,7 @@
         {% for location in locations %}
         <tr>
             <td><a href="/list_location_content/{{location.id}}" class="btn btn-sm btn-primary pull-right w-100">{{"{}".format(location.name)}}</a></td>
-            <td>{{location.short_name}}</td>
+            <td class="align-middle">{{location.short_name}}</td>
             {% if current_user.has_role('admin') and current_user.is_active %}
             <td><a href="/edit_location/{{location.id}}" class="btn btn-sm btn-success pull-right w-100">Edit</a></td>
             <td><button type="button" class="btn btn-sm btn-block btn-danger mb-6 w-100" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
