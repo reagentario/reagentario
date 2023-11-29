@@ -20,9 +20,9 @@
     {% else %}
       <tr>
     {% endif %}
-        <td class="text-start align-middle"><a href="/show/{{reagent.id}}" class="btn btn-dark btn-sm w-100">{{"{}".format(reagent.name)}}</a></td>
+        <td class="align-middle"><a href="/show/{{reagent.id}}" class="btn btn-dark btn-sm w-100 text-start">{{"{}".format(reagent.name)}}</a></td>
         <td class="align-middle">{{reagent.size}}</td>
-        <td class="align-middle"><a href="/list_location_content/{{reagent.location.id}}" class="btn btn-primary btn-sm w-100">{{"{}".format(reagent.location.name)}}</a></td>
+        <td class="align-middle"><a href="/list_location_content/{{reagent.location.id}}" class="btn btn-primary btn-sm w-100 text-start">{{"{}".format(reagent.location.name)}}</a></td>
         <td class="align-middle">{{reagent.amount}}</td>
         <td class="align-middle">{{reagent.amount2}}</td>
       </tr>
