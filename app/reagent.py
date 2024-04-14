@@ -1,4 +1,5 @@
 import csv
+import os
 
 from flask import (
     render_template,
@@ -363,7 +364,7 @@ def view_low_quantity():
 def export():
     """export reagents table as csv"""
     reagents = Inventory.query.all()
-    with open("inventory.csv", "w", newline="", encoding="utf-8") as csvfile:
+    with open((os.path.join(app.config['APP_ROOT'], 'inventory.csv')), "w", newline="", encoding="utf-8") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=",")
         csvwriter.writerow(
             [
@@ -393,6 +394,6 @@ def export():
                 ]
             )
     try:
-        return send_file("../inventory.csv", mimetype="text/csv", as_attachment=True)
+        return send_file("inventory.csv", mimetype="text/csv", as_attachment=True)
     except Exception as e:
         return str(e)
