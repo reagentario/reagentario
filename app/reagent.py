@@ -353,9 +353,9 @@ def view_low_quantity():
         (Inventory.amount + Inventory.amount2) < Inventory.amount_limit
     )
     if reag.count() > 0:
-        return render_template("list.html", reagents=reag, title="Low Quantity Report")
+        return render_template("list_low.html", reagents=reag, title="Low Quantity Report")
     flash("No reagents below minimum stock limits", "info")
-    return render_template("list.html", reagents=reag, title="Low quantity Report")
+    return render_template("list_low.html", reagents=reag, title="Low quantity Report")
 
 
 @app.route("/export", methods=["GET"])
