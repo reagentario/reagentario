@@ -18,21 +18,23 @@
   </thead>
   <tbody>
     {% for reagent in reagents %}
-    {% if (reagent.amount+reagent.amount2)<reagent.amount_limit %}
-      <tr style="color:red">
-    {% else %}
-      <tr style="color:black">
-    {% endif %}
-        <td onclick="window.location='/show/{{reagent.id}}';">{{reagent.name}}</td>
-        <td> {{reagent.location.name}}</td>
-        <td> {{reagent.amount}}</td>
-        <td> {{reagent.amount2}}</td>
-        <td> {{reagent.size}}</td>
-        <td> {{reagent.amount_limit}}</td>
-        <td> {{reagent.order}}</td>
-        <td> <a href="/reset_order/{{ reagent.id}}"</a>Reset Order</td>
-      </tr>
-      {% endfor %}
+      {% if current_user.has_role(reagent.location.department.short_name) %}
+        {% if (reagent.amount+reagent.amount2)<reagent.amount_limit %}
+          <tr style="color:red">
+        {% else %}
+          <tr style="color:black">
+        {% endif %}
+          <td onclick="window.location='/show/{{reagent.id}}';">{{reagent.name}}</td>
+          <td> {{reagent.location.name}}</td>
+          <td> {{reagent.amount}}</td>
+          <td> {{reagent.amount2}}</td>
+          <td> {{reagent.size}}</td>
+          <td> {{reagent.amount_limit}}</td>
+          <td> {{reagent.order}}</td>
+          <td> <a href="/reset_order/{{ reagent.id}}"</a>Reset Order</td>
+          </tr>
+      {% endif %}
+    {% endfor %}
   </tbody>
 </table>
 {% endif %}

@@ -54,7 +54,17 @@ with app.app_context():
             name="superadmin", description="superadmin role", permissions="superadmin"
         )
 
-    if app.config['CREATE_USERS']:
+    if not app.security.datastore.find_role("QC"):
+        app.security.datastore.create_role(
+            name="QC", description="QC dept", permissions="QC"
+        )
+
+    if not app.security.datastore.find_role("VL"):
+        app.security.datastore.create_role(
+            name="VL", description="VL dept", permissions="VL"
+        )
+
+    if app.config["CREATE_USERS"]:
         if not app.security.datastore.find_user(email="user@test.com"):
             app.security.datastore.create_user(
                 email="user@test.com",
@@ -156,6 +166,8 @@ def edit_role(_id):
     user = User.query.filter_by(id=_id).first()
     admin_role = user_datastore.find_role("admin")
     superadmin_role = user_datastore.find_role("superadmin")
+    qc_role = user_datastore.find_role("QC")
+    vl_role = user_datastore.find_role("VL")
     if not user:
         flash(f"Not existing user id {_id}", "danger")
         return redirect(url_for("users"))
@@ -169,10 +181,18 @@ def edit_role(_id):
                 app.security.datastore.add_role_to_user(user, superadmin_role)
             else:
                 app.security.datastore.remove_role_from_user(user, superadmin_role)
+            if form.qc.data:
+                app.security.datastore.add_role_to_user(user, qc_role)
+            else:
+                app.security.datastore.remove_role_from_user(user, qc_role)
+            if form.vl.data:
+                app.security.datastore.add_role_to_user(user, vl_role)
+            else:
+                app.security.datastore.remove_role_from_user(user, vl_role)
             db.session.commit()
             flash("Your changes have been saved.", "info")
             log.debug(
-                f"user {current_user.id} updated, admin role: {admin_role}, superadmin role: {superadmin_role}"
+                f"user {current_user.id} updated, admin role: {form.admin.data}, superadmin role: {form.superadmin.data}, qc role: {form.qc.data}, vl role: {form.vl.data}"
             )
             return redirect(url_for("users"))
         if request.method == "GET":
@@ -180,6 +200,11 @@ def edit_role(_id):
                 form.admin.data = True
             if user.has_role("superadmin"):
                 form.superadmin.data = True
+            if user.has_role("QC"):
+                form.qc.data = True
+            if user.has_role("VL"):
+                form.vl.data = True
+
     except Exception as e:
         flash(f"Error editing {user.id} with error {str(e)}", "danger")
         db.session.rollback()
@@ -242,8 +267,13 @@ def create_user():
         password = hash_password(request.form["password"])
         admin = form.data.get("admin")
         superadmin = form.data.get("superadmin")
+        qc = form.data.get("qc")
+        vl = form.data.get("vl")
         admin_role = user_datastore.find_role("admin")
         superadmin_role = user_datastore.find_role("superadmin")
+        qc_role = user_datastore.find_role("QC")
+        vl_role = user_datastore.find_role("VL")
+
         existing_user = User.query.filter(
             User.email == email or User.username == username
         ).first()
@@ -252,7 +282,9 @@ def create_user():
                 f"A User with this email ({email}) or username ({username}) already exists!",
                 "danger",
             )
-            return render_template("create_user.html", title="Add a new user")
+            return render_template(
+                "create_user.html", title="Add a new user", form=form
+            )
         app.security.datastore.create_user(
             email=email,
             password=password,
@@ -264,6 +296,11 @@ def create_user():
             app.security.datastore.add_role_to_user(user, admin_role)
         if superadmin:
             app.security.datastore.add_role_to_user(user, superadmin_role)
+        if qc:
+            app.security.datastore.add_role_to_user(user, qc_role)
+        if vl:
+            app.security.datastore.add_role_to_user(user, vl_role)
+
         db.session.commit()
         log.debug(f"created user {email} by user {current_user.id}")
         return redirect(url_for("users"))

@@ -1,23 +1,20 @@
 {% extends 'base.html' %}
 
+<h1 style="width: 100%">{% block title %} Add a New Location {% endblock %}</h1>
+
 {% block body %}
-    <form method="post">
-        <p>
-            <label for="name">Name</label>
-            <input type="text" name="name"
-                   placeholder="Name">
-            </input>
-        </p>
 
-        <p>
-            <label for="short_name">Short Name</label>
-            <input type="text" name="short_name"
-                   placeholder="Short Name">
-            </input>
-        </p>
+  {% from 'bootstrap5/form.html' import render_form %}
+  <div class="container-sm">
+    <div class="row md-6">
+      <div class="col-8">
 
-        <p>
-            <button type="submit">Submit</button>
-        </p>
-    </form>
+      {{ render_form(form, action=url_for('create_location'), role='form', method='post', form_type='horizontal', button_map={'submit': 'success', 'cancel': 'secondary'}) }}
+
+      </div>
+    </div>
+  </div>
+
+
+
 {% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <form method="post">
+        <p>
+            <label for="name">Name</label>
+            <input type="text" name="name"
+                   placeholder="Name">
+            </input>
+        </p>
+
+        <p>
+            <label for="short_name">Short Name</label>
+            <input type="text" name="short_name"
+                   placeholder="Short Name">
+            </input>
+        </p>
+
+        <p>
+            <label for="department">Department</label>
+            <input type="text" name="department"
+                   placeholder="Department">
+            </input>
+        </p>
+
+        <p>
+            <button type="submit">Submit</button>
+        </p>
+    </form>
+{% endblock %}

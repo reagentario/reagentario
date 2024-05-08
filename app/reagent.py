@@ -106,6 +106,14 @@ def create():
             notes=notes,
             order=order,
         )
+
+        if not current_user.has_role(location.department.short_name):
+            flash(
+                f"You have not permission to add a reagent in a location pertaining to {location.department.name}",
+                "danger",
+            )
+            return redirect(url_for("create"))
+
         db.session.add(reagent)
         db.session.commit()
         db.session.refresh(reagent)
@@ -129,6 +137,14 @@ def edit(_id):
     form = EditForm(csrf_enabled=False, exclude_fk=False, obj=reag)
     form.location.choices = loc
     form.location.data = reag.location.id
+
+    if not current_user.has_role(reag.location.department.short_name):
+        flash(
+            f"You have not permission to edit a reagent in a location pertaining to {reag.location.department.name}",
+            "danger",
+        )
+        return redirect(url_for("show", _id=_id))
+
     r1 = reag.__dict__.copy()
 
     if form.validate_on_submit():
@@ -141,7 +157,6 @@ def edit(_id):
         reag.amount_limit = request.form["amount_limit"]
         reag.notes = request.form["notes"]
         reag.order = request.form["order"]
-
         r2 = reag.__dict__.copy()
         k1 = set(r1.keys())
         k2 = set(r2.keys())
@@ -171,6 +186,13 @@ def delete(_id):
 
     reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
     if reagent:
+        if not current_user.has_role(reagent.location.department.short_name):
+            flash(
+                f"You have not permission to delete a reagent in a location pertaining to {reagent.location.department.name}",
+                "danger",
+            )
+            return redirect(url_for("show", _id=_id))
+
         try:
             db.session.delete(reagent)
             db.session.commit()
@@ -195,6 +217,15 @@ def delete(_id):
 def plus(_id):
     """add 1 item of a specific reagent in lab"""
     reagent = Inventory.query.get_or_404(_id)
+
+    if not current_user.has_role(reagent.location.department.short_name):
+        flash(
+            f"You have not permission to add a reagent in a location pertaining to {reagent.location.department.name}",
+            "danger",
+        )
+        return redirect(url_for("show", _id=_id))
+
+
     reagent.amount += 1
     db.session.commit()
     flash("Added 1 item to laboratory", "info")
@@ -208,6 +239,14 @@ def plus(_id):
 def minus(_id):
     """remove 1 item of a specific reagent in lab"""
     reagent = Inventory.query.get_or_404(_id)
+
+    if not current_user.has_role(reagent.location.department.short_name):
+        flash(
+            f"You have not permission to remove a reagent in a location pertaining to {reagent.location.department.name}",
+            "danger",
+        )
+        return redirect(url_for("show", _id=_id))
+
     if reagent.amount == 0:
         flash("No more items available in laboratory!", "danger")
         return redirect(url_for("show", _id=_id))
@@ -225,9 +264,18 @@ def minus(_id):
 def move(_id):
     """move 1 item of a specific reagent from warehouse to lab"""
     reagent = Inventory.query.get_or_404(_id)
+
+    if not current_user.has_role(reagent.location.department.short_name):
+        flash(
+            f"You have not permission to move a reagent in a location pertaining to {reagent.location.department.name}",
+            "danger",
+        )
+        return redirect(url_for("show", _id=_id))
+
     if reagent.amount2 == 0:
         flash("No more items available in the warehouse", "danger")
         return redirect(url_for("show", _id=_id))
+
     reagent.amount2 -= 1
     reagent.amount += 1
     db.session.commit()
@@ -246,6 +294,14 @@ def move(_id):
 def add(_id):
     """add 1 item of a specific reagent to warehouse"""
     reagent = Inventory.query.get_or_404(_id)
+
+    if not current_user.has_role(reagent.location.department.short_name):
+        flash(
+            f"You have not permission to add a reagent in a location pertaining to {reagent.location.department.name}",
+            "danger",
+        )
+        return redirect(url_for("show", _id=_id))
+
     reagent.amount2 += 1
     db.session.commit()
     flash("Added 1 item to warehouse", "info")
@@ -282,6 +338,13 @@ def order(_id):
     """set order for a reagent"""
     reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
     if reagent:
+        if not current_user.has_role(reagent.location.department.short_name):
+            flash(
+                f"You have not permission to order a reagent in a location pertaining to {reagent.location.department.name}",
+                "danger",
+            )
+            return redirect(url_for("show", _id=_id))
+
         reagent.order += 1
         try:
             db.session.commit()
@@ -325,6 +388,13 @@ def reset_order(_id):
 
     reagent = db.session.query(Inventory).filter(Inventory.id == _id).first()
     if reagent:
+        if not current_user.has_role(reagent.location.department.short_name):
+            flash(
+                f"You have not permission to reset order for a reagent in a location pertaining to {reagent.location.department.name}",
+                "danger",
+            )
+            return redirect(url_for("show", _id=_id))
+
         reagent.order = 0
         try:
             db.session.commit()

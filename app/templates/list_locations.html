@@ -7,6 +7,7 @@
         <tr>
             <th>Name</th>
             <th>Short Name</th>
+            <th>Department</th>
             {% if current_user.has_role('admin') and current_user.is_active %}
             <th>Edit</th>
             <th>Delete</th>
@@ -18,6 +19,7 @@
         <tr>
             <td><a href="/list_location_content/{{location.id}}" class="btn btn-sm btn-primary pull-right w-100">{{"{}".format(location.name)}}</a></td>
             <td class="align-middle">{{location.short_name}}</td>
+            <td class="align-middle">{{location.department}}</td>
             {% if current_user.has_role('admin') and current_user.is_active %}
             <td><a href="/edit_location/{{location.id}}" class="btn btn-sm btn-success pull-right w-100">Edit</a></td>
             <td><button type="button" class="btn btn-sm btn-block btn-danger mb-6 w-100" data-bs-toggle="modal" data-bs-target="#loc{{ location.id }}">Delete</button>
@@ -29,10 +31,10 @@
 							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 						</div>
 						<div class="modal-body">
-                          <p>Are you sure you want to delete location {{ location.name }} ? </p>
+              <p>Are you sure you want to delete location {{ location.name }} ? </p>
 						</div>
 						<div class="modal-footer">
-                            <a class="btn btn-secondary" href="/delete_location/{{ location.id }}">Yes, proceed</a>
+              <a class="btn btn-secondary" href="/delete_location/{{ location.id }}">Yes, proceed</a>
 							<button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">No, go back</button>
 						</div>
 					</div>

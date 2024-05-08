@@ -6,6 +6,7 @@
       <link href="{{ url_for('static', filename='css/bootstrap.css') }}" rel="stylesheet">
       <link href="{{ url_for('static', filename='css/datatables.css') }}" rel="stylesheet">
       <meta charset="utf-8" />
+      {# {{ bootstrap.load_css() }} #}
     </head>
     <body>
         {% include 'header.html' %}
@@ -45,7 +46,7 @@
             $(document).ready(function () {
               $('#myTable').DataTable( {
                 "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
-                "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
+                "order": [[ 0, 'asc' ], [ 1, 'asc' ], [ 2, 'asc']],
                 "dom": 'frtipB',
                 "buttons": [
                   'pageLength',
@@ -65,7 +66,7 @@
               $(document).ready(function () {
                 $('#locationTable').DataTable( {
                   "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
-                  "order": [[ 0, 'asc' ], [ 1, 'asc' ]],
+                  "order": [[ 0, 'asc' ], [ 1, 'asc' ], [ 2, 'asc']],
                   "dom": 'frtipB',
                   "buttons": [
                     'pageLength',

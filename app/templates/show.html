@@ -52,7 +52,7 @@
 
       <td>
         <table class="table-sm table-bordered border-dark text-center align-middle">
-          {% if current_user.has_role('admin') and current_user.is_active %}
+          {% if current_user.has_role('admin') and current_user.is_active and current_user.has_role(reagent.location.department.short_name) %}
           <tr height="64px">
             <td> <a href="/move/{{ reagent.id }}"> <img src="{{ url_for('static', filename='images/move.png') }}" style="width:64px"/></a></td>
             <td> <a href="/move/{{ reagent.id }}" class="btn btn-lg btn-warning w-100"> Move 1 item from warehouse to lab</a></td>

@@ -21,6 +21,18 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
+        <p>
+            {{ form.qc }}   {{ form.qc.label }}
+            {% for error in form.qc.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+        {{ form.vl }}   {{ form.vl.label }}
+            {% for error in form.vl.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
         <p>{{ form.submit() }}   {{ form.cancel() }} </p>
     </form>
 

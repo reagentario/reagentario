@@ -66,7 +66,7 @@ class Locations(db.Model):
     name = db.Column(db.String(128), index=True, unique=True)
     short_name = db.Column(db.String(8), index=True, unique=True)
     department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
-    department = db.relationship('Department', backref='department', lazy=True)
+    department = db.relationship('Departments', backref='department', lazy=True)
 
     def __repr__(self):
         return self.name
@@ -75,7 +75,7 @@ class Locations(db.Model):
         return self.name
 
 
-class Department(db.Model):
+class Departments(db.Model):
     __tablename__ = 'departments'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(128), index=True, unique=True)

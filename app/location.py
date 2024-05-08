@@ -11,9 +11,10 @@ from app import app
 from app import db
 from app import log
 from app.forms import (
+    CreateLocationForm,
     EditLocationForm,
 )
-from app.models import Inventory, Locations
+from app.models import Inventory, Locations, Departments
 
 from app.functions import add_log
 
@@ -66,10 +67,20 @@ def list_location_content(_id):
 def create_location():
     """create a new location form"""
 
+    form = CreateLocationForm(csrf_enabled=False)
+
     if request.method == "POST":
         name = request.form["name"]
         short_name = request.form["short_name"]
-        location = Locations(name=name, short_name=short_name)
+        department = Departments.query.get_or_404(form.department.data)
+
+        if not current_user.has_role(department.short_name):
+            flash(
+                f"You have not permission to create a location for {department}",
+                "danger",
+            )
+            return render_template("create_location.html", form=form, title="Add a new location")
+
         existing_location = Locations.query.filter(
             Locations.name == name or Locations.short_name == short_name
         ).first()
@@ -79,13 +90,20 @@ def create_location():
                 f"A Location with this name ({name}) or short_name ({short_name}) already exists!",
                 "danger",
             )
-            return render_template("create_location.html", title="Add a new location")
+            return render_template("create_location.html", form=form, title="Add a new location")
+
+        location = Locations(
+            name=name,
+            short_name=short_name,
+            department=department,
+        )
         db.session.add(location)
         db.session.commit()
+        db.session.refresh(location)
         log.debug(f"created location {location.id} - {location.name} by user {current_user.id}")
 
         return redirect(url_for("list_locations"))
-    return render_template("create_location.html", title="Add a new location")
+    return render_template("create_location.html", form=form, title="Add a new location")
 
 
 @app.route("/delete_location/<int:_id>/", methods=["GET"])
@@ -95,7 +113,16 @@ def delete_location(_id):
     """delete a location"""
 
     location = db.session.query(Locations).filter(Locations.id == _id).first()
+
     if location:
+
+        if not current_user.has_role(location.department.short_name):
+            flash(
+                f"You have not permission to delete a location for {location.department.name}",
+                "danger",
+            )
+            return redirect(url_for("list_locations"))
+
         reagents_in = Inventory.query.filter(Inventory.location_id == _id).all()
         if len(reagents_in) > 0:
             flash(
@@ -127,14 +154,25 @@ def delete_location(_id):
 @roles_required("admin")
 def edit_location(_id):
     """edit location form"""
-
-    form = EditLocationForm()
-    location = db.session.query(Locations).filter(Locations.id == _id).first()
-    if not location:
-        flash("Not existing location", "danger")
-        return redirect(url_for("list_locations"))
-
     try:
+        loc = db.session.query(Locations).filter(Locations.id == _id).first()
+        if not loc:
+            flash("Not existing location", "danger")
+            return redirect(url_for("list_locations"))
+
+        if not current_user.has_role(loc.department.short_name):
+            flash(
+                f"You have not permission to edit a location for {loc.department.name}",
+                "danger",
+            )
+            return redirect(url_for("list_locations"))
+
+        dept = [(dept.id, dept.name) for dept in Departments.query.all()]
+        form = EditLocationForm(csrf_enabled=False, exclude_fk=False, obj=loc)
+        form.department.choices = dept
+        form.department.data = loc.department.id
+        l1 = loc.__dict__.copy()
+
         if form.validate_on_submit():
             existing_location = (
                 db.session.query(Locations)
@@ -142,9 +180,7 @@ def edit_location(_id):
                     Locations.name == form.name.data
                     or Locations.short_name == form.short_name.data
                 )
-                .filter(
-                    Locations.id != _id
-                )
+                .filter(Locations.id != _id)
                 .first()
             )
             if existing_location:
@@ -155,38 +191,41 @@ def edit_location(_id):
                 return render_template(
                     "edit_location.html", title="Edit Location", _id=_id, form=form
                 )
+
+            dept_selected = request.form["department"]
+            loc.name = request.form["name"]
+            loc.short_name = request.form["short_name"]
+            loc.department = Departments.query.get(dept_selected)
+
+            l2 = loc.__dict__.copy()
+            k1 = set(l1.keys())
+            k2 = set(l2.keys())
+            common_keys = set(k1).intersection(set(k2))
             try:
-                location.name = form.name.data
-                location.short_name = form.short_name.data
                 db.session.commit()
                 flash("Your changes have been saved.")
-                log.debug(
-                    f"Location {location.id} updated by user {current_user.id}: name={location.name}, short_name={location.short_name}"
-                )
-                return redirect(url_for("list_locations"))
+
+                for key in common_keys:
+                    if str(l1[key]) != str(l2[key]):
+                        log.debug(
+                            loc.id,
+                            current_user.id,
+                            f'updated item {loc.id} - {loc.name}: {key} value changed from "{str(l1[key])}" to "{str(l2[key])}" by user {current_user.email}',
+                        )
             except Exception as e:
-                flash(f"Error editing {location.id} with error {str(e)}", "danger")
+                flash(f"Error updating {loc.id} with error {str(e)}", "danger")
                 db.session.rollback()
                 return render_template(
                     "edit_location.html", title="Edit Location", _id=_id, form=form
                 )
-    except IntegrityError:
-        flash(f"Error editing {location.id}", "danger")
-        db.session.rollback()
-        return render_template(
-            "edit_location.html", title="Edit Location", _id=_id, form=form
-        )
-    except PendingRollbackError as e:
-        flash(f"Error editing {location.id} with error {str(e)}", "danger")
-        db.session.rollback()
-        return render_template(
-            "edit_location.html", title="Edit Location", _id=_id, form=form
-        )
 
-    if request.method == "GET":
-        form.name.data = location.name
-        form.short_name.data = location.short_name
+            return redirect(url_for("list_locations"))
+
+        return render_template("edit_location.html", _id=_id, form=form, title="Edit location")
+
+    except Exception as e:
+        flash(f"Error updating {loc.id} with error {str(e)}", "danger")
+        db.session.rollback()
         return render_template(
             "edit_location.html", title="Edit Location", _id=_id, form=form
         )
-    return redirect(url_for("list_locations"))
