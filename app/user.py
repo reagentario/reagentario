@@ -318,9 +318,9 @@ def delete_user(_id):
             db.session.delete(user)
             db.session.commit()
             flash("User deleted", "info")
-            log.debug(f"deleted user {user.email} by {current_user.id}")
+            log.debug(f"deleted user id {user.id} (email: {user.email}) by user {current_user.id} (email: {current_user.email})")
         except Exception as e:
-            flash(f"Error deleting {user.id} with error {str(e)}", "danger")
+            flash(f"Error deleting user id {str(user.id)} with error {str(e)}", "danger")
             db.session.rollback()
     else:
         flash(f"Error deleting user with id: {str(user.id)}", "danger")

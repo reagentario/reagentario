@@ -100,7 +100,7 @@ def create_location():
         db.session.add(location)
         db.session.commit()
         db.session.refresh(location)
-        log.debug(f"created location {location.id} - {location.name} by user {current_user.id}")
+        log.debug(f"created location id {location.id} (name: {location.name}) by user id {current_user.id} (email: {current_user.email})")
 
         return redirect(url_for("list_locations"))
     return render_template("create_location.html", form=form, title="Add a new location")
@@ -138,10 +138,10 @@ def delete_location(_id):
                 current_user.id,
                 f"deleted location {location.id} - {location.name}",
             )
-            flash("Location deleted", "info")
-            log.debug(f"deleted location id {location.id} by user {current_user.id}")
+            flash(f"Location {location.name} deleted", "info")
+            log.debug(f"deleted location id {location.id} (name: {location.name}) by user id {current_user.id} (email: {current_user.email})")
         except Exception as e:
-            flash(f"Error deleting {location.id} with error {str(e)}", "danger")
+            flash(f"Error deleting location {location.name} with error {str(e)}", "danger")
             db.session.rollback()
     else:
         flash(f"Error deleting location with id {str(location.id)}", "danger")
@@ -213,7 +213,7 @@ def edit_location(_id):
                             f'updated item {loc.id} - {loc.name}: {key} value changed from "{str(l1[key])}" to "{str(l2[key])}" by user {current_user.email}',
                         )
             except Exception as e:
-                flash(f"Error updating {loc.id} with error {str(e)}", "danger")
+                flash(f"Error updating location id {str(loc.id)} with error {str(e)}", "danger")
                 db.session.rollback()
                 return render_template(
                     "edit_location.html", title="Edit Location", _id=_id, form=form
@@ -224,7 +224,7 @@ def edit_location(_id):
         return render_template("edit_location.html", _id=_id, form=form, title="Edit location")
 
     except Exception as e:
-        flash(f"Error updating {loc.id} with error {str(e)}", "danger")
+        flash(f"Error updating location id {str(loc.id)} with error {str(e)}", "danger")
         db.session.rollback()
         return render_template(
             "edit_location.html", title="Edit Location", _id=_id, form=form
