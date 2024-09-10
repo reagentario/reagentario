@@ -94,6 +94,10 @@ def create():
         amount2 = request.form["amount2"]
         size = request.form["size"]
         amount_limit = request.form["amount_limit"]
+        product_code = request.form["product_code"]
+        supplier = request.form["supplier"]
+        batch = request.form["batch"]
+        expiry_date = request.form["expiry_date"]
         notes = request.form["notes"]
         order = request.form["order"]
         reagent = Inventory(
@@ -103,6 +107,10 @@ def create():
             amount2=amount2,
             size=size,
             amount_limit=amount_limit,
+            product_code=product_code,
+            supplier=supplier,
+            batch=batch,
+            expiry_date=expiry_date,
             notes=notes,
             order=order,
         )
@@ -155,6 +163,10 @@ def edit(_id):
         reag.amount2 = request.form["amount2"]
         reag.size = request.form["size"]
         reag.amount_limit = request.form["amount_limit"]
+        reag.product_code = request.form["product_code"]
+        reag.supplier = request.form["supplier"]
+        reag.batch = request.form["batch"]
+        reag.expiry_date = request.form["expiry_date"]
         reag.notes = request.form["notes"]
         reag.order = request.form["order"]
         r2 = reag.__dict__.copy()
@@ -426,6 +438,21 @@ def view_low_quantity():
         return render_template("list_low.html", reagents=reag, title="Low Quantity Report")
     flash("No reagents below minimum stock limits", "info")
     return render_template("list_low.html", reagents=reag, title="Low quantity Report")
+
+
+@app.route("/view_zero_quantity/", methods=["GET"])
+@auth_required()
+@roles_required("admin")
+def view_zero_quantity():
+    """view list of reagent with zero quantity"""
+
+    reag = db.session.query(Inventory).filter(
+        (Inventory.amount + Inventory.amount2) == 0
+    )
+    if reag.count() > 0:
+        return render_template("list_zero.html", reagents=reag, title="Zero Quantity Report")
+    flash("No reagents with zero amount", "info")
+    return render_template("list_zero.html", reagents=reag, title="Zero Quantity Report")
 
 
 @app.route("/export", methods=["GET"])

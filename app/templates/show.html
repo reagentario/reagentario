@@ -27,12 +27,29 @@
                 <td>{{ reagent.amount2 }}</td>
               </tr>
               <tr>
+                <td>Minimum stock</td>
+                <td>{{ reagent.amount_limit }}</td>
+              </tr>
+              <tr>
+              <tr>
                 <td>Size</td>
                 <td>{{ reagent.size }}</td>
               </tr>
               <tr>
-                <td>Minimum stock</td>
-                <td>{{ reagent.amount_limit }}</td>
+                <td>Product Code</td>
+                <td>{{ reagent.product_code if reagent.product_code is not none else ''  }}</td>
+              </tr>
+              <tr>
+                <td>Supplier</td>
+                <td>{{ reagent.supplier if reagent.supplier is not none else ''  }}</td>
+              </tr>
+              <tr>
+                <td>Batch</td>
+                <td>{{ reagent.batch if reagent.batch is not none else '' }}</td>
+              </tr>
+              <tr>
+                <td>Expiry Date</td>
+                <td>{{ reagent.expiry_date if reagent.expiry_date is not none else '' }}</td>
               </tr>
               <tr>
                 <td>Notes</td>

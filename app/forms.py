@@ -2,7 +2,7 @@ from app import app
 from app import db
 from app.models import Inventory, Locations, Departments, User
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, ValidationError
+from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SubmitField, SelectField, IntegerField, ValidationError, DateField
 from wtforms.validators import DataRequired, InputRequired, NumberRange, Email, EqualTo, Length
 
 class LoginForm(FlaskForm):
@@ -45,8 +45,12 @@ class CreateForm(FlaskForm):
     location = LocationField('Location',  validators=[InputRequired()])
     amount = IntegerField('Amount in lab', validators=[NumberRange(min=0, max=1000000)])
     amount2 = IntegerField('Amount in warehouse', validators=[NumberRange(min=0, max=1000000)])
-    size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
+    size = StringField('Size', validators=[Length(max=16)])
     amount_limit = IntegerField('Minimum stock', validators=[NumberRange(min=0, max=1000000)])
+    product_code = StringField('Product Code', validators=[Length(max=64)])
+    supplier = StringField('Supplier', validators=[Length(max=64)])
+    batch = StringField('Batch', validators=[Length(max=64)])
+    expiry_date = StringField('Expiry Date', validators=[Length(max=16)])
     notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 36}, validators=[Length(min=0, max=512)])
     order = IntegerField('Order', validators=[NumberRange(min=0, max=1000)])
     submit = SubmitField()
@@ -64,8 +68,12 @@ class EditForm(FlaskForm):
     location = SelectField('Location', validators=[InputRequired()], coerce=int)
     amount = IntegerField('Amount in lab', validators=[NumberRange(min=0, max=1000000)])
     amount2 = IntegerField('Amount in warehouse', validators=[NumberRange(min=0, max=1000000)])
-    size = StringField('Size', validators=[InputRequired(), Length(min=2, max=16)])
+    size = StringField('Size', validators=[InputRequired(), Length(min=1, max=16)])
     amount_limit = IntegerField('Minimum stock', validators=[NumberRange(min=0, max=1000000)])
+    product_code = StringField('Product Code', validators=[Length(max=64)])
+    supplier = StringField('Supplier', validators=[Length(max=64)])
+    batch = StringField('Batch', validators=[Length(max=64)])
+    expiry_date = StringField('Expiry Date', validators=[Length(max=16)])
     notes = TextAreaField('Notes', render_kw={"rows": 4, "cols": 24}, validators=[Length(min=0, max=512)])
     order = IntegerField('Order', validators=[NumberRange(min=0, max=1000)])
     submit = SubmitField('Save')

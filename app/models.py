@@ -5,6 +5,7 @@ from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin
 from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText
 from sqlalchemy.orm import validates, relationship, backref
+from datetime import datetime
 
 class RolesUsers(db.Model):
     __tablename__ = "roles_users"
@@ -94,10 +95,14 @@ class Inventory(db.Model):
     name = db.Column(db.String(256), index=True, unique=False, nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
     location = db.relationship('Locations', backref='location', lazy=True)
+    product_code = db.Column(db.String(64))
+    supplier = db.Column(db.String(64))
+    batch = db.Column(db.String(64))
+    expiry_date = db.Column(db.String(16))
     amount = db.Column(db.Integer, default=0)
     amount2 = db.Column(db.Integer, default=0)
     amount_limit = db.Column(db.Integer, default=0)
-    size = db.Column(db.String(16), nullable=False)
+    size = db.Column(db.String(16))
     notes = db.Column(db.String(512))
     order = db.Column(db.Integer, default=0)
 

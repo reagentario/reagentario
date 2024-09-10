@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% if reagents %}
+<table id="myTable" class="table table-sm table-hover table-striped table-bordered border-black border-opacity-75 border-1 text-center">
+  <thead>
+    <tr>
+      <th class="text-center">Name</th>
+      <th class="text-center">Size</th>
+      <th class="text-center">Location</th>
+      <th class="text-center">Lab Amount</th>
+      <th class="text-center">Stock Amount</th>
+      <th class="text-center">Limit Amount</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for reagent in reagents %}
+      {% if current_user.has_role(reagent.location.department.short_name) %}
+        {% if (reagent.amount+reagent.amount2)==0 %}
+          <tr style="color: red; --bs-table-color: red; --bs-table-striped-color: red;">
+        {% else %}
+          <tr>
+        {% endif %}
+          <td class="align-middle"><a href="/show/{{reagent.id}}" class="btn btn-light btn-sm w-100 text-start">{{"{}".format(reagent.name)}}</a></td>
+          <td class="align-middle">{{reagent.size}}</td>
+          <td class="align-middle"><a href="/list_location_content/{{reagent.location.id}}" class="btn btn-light btn-sm w-100 text-start">{{"{}".format(reagent.location.name)}}</a></td>
+          <td class="align-middle">{{reagent.amount}}</td>
+          <td class="align-middle">{{reagent.amount2}}</td>
+          <td class="align-middle">{{reagent.amount_limit}}</td>
+          </tr>
+      {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% if warning %}
+<h2>{{ warning }}</h2>
+{% endif %}
+
+{% endblock %}
