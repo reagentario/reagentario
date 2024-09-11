@@ -68,7 +68,7 @@ class EditForm(FlaskForm):
     location = SelectField('Location', validators=[InputRequired()], coerce=int)
     amount = IntegerField('Amount in lab', validators=[NumberRange(min=0, max=1000000)])
     amount2 = IntegerField('Amount in warehouse', validators=[NumberRange(min=0, max=1000000)])
-    size = StringField('Size', validators=[InputRequired(), Length(min=0, max=16)])
+    size = StringField('Size', validators=[Length(max=16)])
     amount_limit = IntegerField('Minimum stock', validators=[NumberRange(min=0, max=1000000)])
     product_code = StringField('Product Code', validators=[Length(max=64)])
     supplier = StringField('Supplier', validators=[Length(max=64)])
