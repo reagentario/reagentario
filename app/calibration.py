@@ -299,8 +299,6 @@ def set_calibration_date(_id):
             )
             return redirect(url_for("show_calibration", _id=_id))
 
-
-        #calib.next_calibration_date = calculate_next_calibration_date(_id)
         calib.last_calibration_date = date.today()
 
         try:
@@ -338,5 +336,4 @@ def datedelta(next_cal, tolerance):
             return "orange"
         if next_cal<(date.today() + timedelta(days=30)):
             return "lightgreen"
-
     return "white"

@@ -6,29 +6,26 @@
                 <li class="nav-item">
                   <a class="nav-link text-warning" href="{{ url_for('index') }}">Index</a>
                 </li>
+
                 {% if current_user.is_active %}
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="/list">Reagents List</a>
+                  <a class="nav-link text-warning" href="/list">Reagents List</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-warning" href="/list_locations">Locations list</a>
+                  <a class="nav-link text-warning" href="/list_locations">Locations list</a>
                 </li>
-               <li class="nav-item">
-                    <a class="nav-link text-warning" href="/list_calibrations">Calibrations list</a>
-               </li>
-               <li class="nav-item dropdown">
+                {% endif %}
+
+                {% if current_user.has_role('admin') and current_user.is_active %}
+                <li class="nav-item dropdown">
                   <a class="nav-link text-info dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Calibrations</a>
                   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="/list_calibrations">Calibrations list</a>
                     <a class="dropdown-item" href="/list_calibrations_this_month">Calibrations expiring this month</a>
                     <a class="dropdown-item" href="/list_calibrations_next_month">Calibrations expiring next month</a>
                   </ul>
-               </li>
+                </li>
 
-
-                {% endif %}
-
-                {% if current_user.has_role('admin') and current_user.is_active %}
                 <li class="nav-item dropdown">
                     <a class="nav-link text-info dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
