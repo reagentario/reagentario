@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<center>
+  <table class="table-3">
+    <tr>
+      <td id="top" class="col-md-7">
+        <div>
+          {% if calibration %}
+          <table class="table table-hover table-striped table-bordered border-dark text-center align-middle">
+            <tbody>
+              <tr>
+                <td class="text-nowrap">Name</td>
+                <td><b>{{ calibration.name }}</b></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Apparatus</td>
+                <td><b>{{ calibration.apparatus }}</b></td>
+              </tr>
+              <tr>
+                <td class="text-nowrap">Description</td>
+                <td><b>{{ calibration.description }}</b></td>
+              </tr>
+              <tr>
+                <td>Department</td>
+                <td>{{ calibration.department.name }}</td>
+              </tr>
+              <tr>
+                <td>Initial Check Date</td>
+                <td>{{ calibration.initial_check_date }}</td>
+              </tr>
+              <tr>
+                <td>Frequency</td>
+                <td>{{ calibration.frequency }}</td>
+              </tr>
+              <tr>
+                <td>Tolerance</td>
+                <td>{{ calibration.tolerance }}</td>
+              </tr>
+              <tr>
+              <tr>
+                <td>Last Calibration Date</td>
+                <td>{{ calibration.last_calibration_date }}</td>
+              </tr>
+              <tr>
+                <td>Next Calibration Date</td>
+                <td>{{ calibration.next_calibration_date }}</td>
+              </tr>
+              <tr>
+                <td>Notes</td>
+                <td>{{ calibration.notes }}</td>
+              </tr>
+            </tbody>
+          {% endif %}
+          </table>
+        </div>
+      </td>
+
+      <td width=50px></td>
+
+      <td>
+        <table class="table-sm table-bordered border-dark text-center align-middle">
+          {% if current_user.has_role('admin') and current_user.is_active and current_user.has_role(calibration.department.short_name) %}
+          <tr height="64px">
+            <td> <a href="/set_calibration_date/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/plus.png') }}" style="width:64px"/></a></td>
+            <td> <a href="/set_calibration_date/{{ calibration.id }}" class="btn btn-lg btn-warning w-100">Set Calibration Date</a></td>
+          </tr>
+          <tr>
+            <td> <a href="/edit_calibration/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:64px"/></a></td>
+            <td> <a href="/edit_calibration/{{ calibration.id }}" class="btn btn-lg btn-success w-100"> Edit</a></td>
+          </tr>
+          <tr>
+            <td> <a href="/show_calibration_log/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/log.png') }}" style="width:64px"/></a></td>
+            <td> <a href="/show_calibration_log/{{ calibration.id }}" class="btn btn-lg btn-info w-100"> Log</a></td>
+          </tr>
+          {% if calibration.amount==0 and calibration.amount2==0 %}
+          <tr>
+            <td> <a href="/delete_calibration/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:64px"/></a></td>
+            <td> <a href="/delete_calibration/{{ calibration.id }}" class="btn btn-lg btn-danger w-100"> Delete</a></td>
+          </tr>
+          {% endif %}
+          {% endif %}
+        </table>
+      </td>
+    </tr>
+  </table>
+</center>
+
+{% endblock %}

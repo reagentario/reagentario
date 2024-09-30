@@ -39,8 +39,9 @@
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.bootstrap5.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.colVis.js') }}"></script>
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.html5.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.html5.styles.min.js') }}"></script>
+        <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.html5.styles.templates.min.js') }}"></script>a
         <script type="text/javascript" charset="utf8" src="{{ url_for('static', filename='js/buttons.print.js') }}"></script>
-
         {% block scripts %}
           <script>
             $(document).ready(function () {
@@ -80,6 +81,78 @@
                 })
               });
             </script>
+
+          <script>
+              $(document).ready(function () {
+                var currentDate = new Date()
+                var day = currentDate.getDate()
+                var month = currentDate.getMonth() + 1
+                var year = currentDate.getFullYear()
+                var d1 = month + "-" + year
+                var d = day + "-" + month + "-" + year;
+
+                $('#calibrationTable').DataTable( {
+                  "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
+                  "order": [[ 8, 'asc' ], [ 1, 'asc' ], [ 0, 'asc']],
+                  "dom": 'frtipB',
+                  "buttons": [
+                    'pageLength',
+                    { extend: 'excelHtml5',
+                      filename: 'Calibrations',   // 'Calibrations_'+d,
+                      title: 'Calibration '+d1,
+                      footer: false,
+                      exportOptions: {
+                        columns: ':visible',
+                        modifier: {
+                          page: 'current'
+                        }
+                      },
+                      //insertCells: [
+                      //  {
+                      //    cells: 'sh',
+                      //    content: '',
+                      //    pushRow: true,
+                      //  }
+                      //],
+                      pageStyle: {
+                        sheetPr: {
+                          pageSetUpPr: {
+                            fitToPage: 1
+                          }
+                        },
+                        pageSetup: {
+                          orientation: "landscape",
+                          fitToWidth: "1",
+                          fitToHeight: "0",
+                        },
+                        repeatHeading: true,
+                      },
+                      excelStyles: [
+                        {
+                          template: "blue_medium",
+                        },
+                        {
+                          cells: "s:",
+                          style: {
+                            alignment: {
+                              vertical: "center",
+                              horizontal: "center",
+                              wrapText: true,
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    { extend: 'pdfHtml5',
+                      exportOptions: {
+                        columns: ':visible'
+                      }
+                    },
+                    'colvis']
+                })
+              });
+            </script>
+
 
             <script>
               $(document).ready(function () {

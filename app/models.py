@@ -110,6 +110,28 @@ class Inventory(db.Model):
         return self.name #'<Reagent {}>'.format(self.name)
 
 
+class Calibrations(db.Model):
+    __tablename__ = 'calibrations'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256), index=True, unique=False, nullable=False)
+    apparatus = db.Column(db.String(256))
+    description = db.Column(db.String(256))
+    department_id = db.Column(db.Integer, db.ForeignKey('departments.id'))
+    department = db.relationship('Departments', backref='departments', lazy=True)
+    initial_check_date = db.Column(db.Date)
+    frequency = db.Column(db.Integer, default=0)
+    tolerance = db.Column(db.Integer, default=0)
+    last_calibration_date = db.Column(db.Date)
+    next_calibration_date = db.Column(db.Date)
+    notes = db.Column(db.String(512))
+
+    def __repr__(self):
+        return self.name
+
+    def __str__(self):
+          return self.name
+
+
 class Applog(db.Model):
     __tablename__ = 'applog'
     id = db.Column(db.Integer, primary_key=True)
@@ -124,6 +146,20 @@ class Applog(db.Model):
           return self.event_detail
 
 
+class CalibrationsLog(db.Model):
+    __tablename__ = 'calibrationlog'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref='user_i', lazy=True)
+    calibration_id = db.Column(db.Integer, db.ForeignKey('calibrations.id'))
+    calibration = db.relationship('Calibrations', backref='calibrationlog', lazy=True)
+    event_time = db.Column(db.DateTime)
+    event_detail = db.Column(db.String(512))
+
+    def __repr__(self):
+        return self.event_detail
+
+
 class InventoryView(ModelView):
     column_display_pk = True # optional, to see the IDs in the list
     column_hide_backrefs = True
@@ -135,3 +171,11 @@ class UserView(ModelView):
     column_display_pk = True # optional, to see the IDs in the list
     column_exclude_list = ['password', ]
     form_excluded_columns = ('password')
+
+
+class CalibrationView(ModelView):
+    column_display_pk = True # optional, to see the IDs in the list
+    column_hide_backrefs = True
+    column_list = ('id', 'name', 'apparatus', 'description', 'department', 'installation_date', 'frequency', 'tolerance', 'last_calibration', 'note')
+    form_excluded_columns = ('calibrationlog')
+

@@ -63,6 +63,19 @@ class CreateLocationForm(FlaskForm):
     submit = SubmitField()
 
 
+class CreateCalibrationForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=256)])
+    apparatus = StringField('Apparatus', validators=[DataRequired(), Length(min=0, max=256)])
+    description = StringField('Description', validators=[Length(min=0, max=256)])
+    department = DepartmentField('Department',  validators=[InputRequired()])
+    initial_check_date = DateField('Initial Check Date', validators=[InputRequired()])
+    frequency = IntegerField('Frequency', validators=[DataRequired()])
+    tolerance = IntegerField('Tolerance', validators=[DataRequired()])
+    last_calibration_date = DateField('Last Calibration Date', validators=[InputRequired()])
+    notes = StringField('Notes', validators=[Length(min=0, max=512)])
+    submit = SubmitField()
+
+
 class EditForm(FlaskForm):
     name = StringField('Name', validators=[DataRequired(), Length(min=3, max=256)])
     location = SelectField('Location', validators=[InputRequired()], coerce=int)
@@ -85,6 +98,21 @@ class EditLocationForm(FlaskForm):
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
     department = SelectField('Department', validators=[InputRequired()], coerce=int)
     submit = SubmitField('Save')
+
+
+class EditCalibrationForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired(), Length(min=2, max=256)])
+    apparatus = StringField('Apparatus', validators=[DataRequired(), Length(min=0, max=256)])
+    description = StringField('Description', validators=[Length(min=0, max=256)])
+    department = SelectField('Department',  validators=[InputRequired()], coerce=int)
+    initial_check_date = DateField('Initial Check Date', validators=[InputRequired()])
+    frequency = IntegerField('Frequency', validators=[DataRequired()])
+    tolerance = IntegerField('Tolerance', validators=[DataRequired()])
+    last_calibration_date = DateField('Last Calibration Date')
+    #next_calibration_date = DateField('Next Calibration Date')
+    notes = StringField('Notes', validators=[Length(min=0, max=512)])
+    submit = SubmitField('Save')
+    cancel = SubmitField('Cancel')
 
 
 class EditDepartmentForm(FlaskForm):

@@ -32,7 +32,7 @@ fsqla.FsModels.set_db_info(db)
 bcrypt = Bcrypt(app)
 migrate = Migrate(app, db)
 
-from app import models, reagent, user, location, department, errors
+from app import models, reagent, user, location, department, errors, calibration
 from app.models import User
 
 @app.route("/")

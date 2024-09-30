@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+<h1 style="width: 100%">{% block title %} Add a New Reagent {% endblock %}</h1>
+
+{% block body %}
+
+  {% from 'bootstrap5/form.html' import render_form %}
+  <div class="container-sm">
+    <div class="row md-6">
+      <div class="col-8">
+
+      {{ render_form(form, action=url_for('create_calibration'), role='form', method='post', form_type='horizontal', button_map={'submit': 'success', 'cancel': 'secondary'}) }}
+
+      </div>
+    </div>
+  </div>
+
+
+
+{% endblock %}

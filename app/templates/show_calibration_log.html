@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% if logs %}
+<table id="logTable" class="table table-hover table-striped table-bordered text-center">
+  <thead>
+    <tr>
+      <th class="text-nowrap">Date</th>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Department</th>
+      <th>User</th>
+      <th>Detail</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for log in logs %}
+    <tr>
+        <td class="text-nowrap"> {{log.event_time}} </td>
+        <td> {{log.calibration.id}} </td>
+        {% if log.calibration.id %}
+        <td><a href="/show_calibration/{{log.calibration.id}}">{{"{}".format(log.calibration.name|default("item deleted from database"))}}</a></td>
+        {% else %}
+        <td class="text-nowrap"> {{log.calibration.name|default("deleted from database")}}</a></td>
+        {% endif %}
+        <td class="text-nowrap"> {{log.calibration.department}} </td>
+        <td> {{log.user.username}} </td>
+        <td> {{log.event_detail}} </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% if warning %}
+<h2>{{ warning }}</h2>
+{% endif %}
+
+{% endblock %}
