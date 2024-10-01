@@ -240,7 +240,7 @@ def plus(_id):
 
     reagent.amount += 1
     db.session.commit()
-    flash("Added 1 item to laboratory", "info")
+    # flash("Added 1 item to laboratory", "info")
     add_log(reagent.id, current_user.id, f"added itemid {reagent.id} - {reagent.name}")
     return redirect(url_for("show", _id=_id))
 
@@ -264,7 +264,7 @@ def minus(_id):
         return redirect(url_for("show", _id=_id))
     reagent.amount -= 1
     db.session.commit()
-    flash("Removed one item from laboratory", "info")
+    # flash("Removed 1 item from laboratory", "info")
     add_log(reagent.id, current_user.id, f"removed itemid {reagent.id} - {reagent.name}")
 
     return redirect(url_for("show", _id=_id))
@@ -291,7 +291,7 @@ def move(_id):
     reagent.amount2 -= 1
     reagent.amount += 1
     db.session.commit()
-    flash("Moved one item from warehouse to laboratory", "info")
+    # flash("Moved one item from warehouse to laboratory", "info")
     add_log(
         reagent.id,
         current_user.id,
@@ -316,7 +316,7 @@ def add(_id):
 
     reagent.amount2 += 1
     db.session.commit()
-    flash("Added 1 item to warehouse", "info")
+    # flash("Added 1 item to warehouse", "info")
     add_log(
         reagent.id,
         current_user.id,
