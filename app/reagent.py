@@ -140,7 +140,7 @@ def create():
 @roles_required("admin")
 def edit(_id):
     """edit a specific reagent"""
-    reag = db.session.query(Inventory).filter(Inventory.id == _id).first()
+    reag = db.session.query(Inventory).filter(Inventory.id == _id).first_or_404()
     loc = [(loc.id, loc.name) for loc in Locations.query.all()]
     form = EditForm(csrf_enabled=False, exclude_fk=False, obj=reag)
     form.location.choices = loc
@@ -474,7 +474,7 @@ def export():
                 "product code",
                 "supplier",
                 "batch",
-                "expiry date"
+                "expiry date",
                 "size",
                 "notes",
                 "to be purchased",

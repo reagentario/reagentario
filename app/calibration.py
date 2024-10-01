@@ -47,7 +47,9 @@ def list_calibrations():
         calibrations = Calibrations.query.all()
 
     if len(calibrations) > 0:
-        return render_template("list_calibrations.html", calibrations=calibrations, title="Calibrations")
+        return render_template(
+            "list_calibrations.html", calibrations=calibrations, title="Calibrations"
+        )
     msg = "No Calibrations Found"
     return render_template("list_calibrations.html", warning=msg, title="Calibrations")
 
@@ -62,7 +64,9 @@ def list_calibrations_next_month():
     month = date.today().replace(month=next_month).strftime("%B-%Y")
 
     if request.method == "GET":
-        from_date = date(year=datetime.now().year, month=(datetime.now().month + 1), day=1)
+        from_date = date(
+            year=datetime.now().year, month=(datetime.now().month + 1), day=1
+        )
 
         # move to first next month
         nm = date.today().replace(day=28) + timedelta(days=4)
@@ -70,12 +74,18 @@ def list_calibrations_next_month():
         nm = nm.replace(day=28) + timedelta(days=4)
         # come back to the first next month's last day
         to_date = nm - timedelta(days=nm.day)
-        calibrations = Calibrations.query.filter(Calibrations.next_calibration_date >= from_date).filter(Calibrations.next_calibration_date <= to_date).all()
+        calibrations = (
+            Calibrations.query.filter(Calibrations.next_calibration_date >= from_date)
+            .filter(Calibrations.next_calibration_date <= to_date)
+            .all()
+        )
 
     title = f"Calibrations {month}"
 
     if len(calibrations) > 0:
-        return render_template("list_calibrations.html", calibrations=calibrations, title=title)
+        return render_template(
+            "list_calibrations.html", calibrations=calibrations, title=title
+        )
     msg = "No Calibrations Found"
     return render_template("list_calibrations.html", warning=msg, title=title)
 
@@ -95,12 +105,18 @@ def list_calibrations_this_month():
         nm = date.today().replace(day=28) + timedelta(days=4)
         # come back to this month's last day
         to_date = nm - timedelta(days=nm.day)
-        calibrations = Calibrations.query.filter(Calibrations.next_calibration_date >= from_date).filter(Calibrations.next_calibration_date <= to_date).all()
+        calibrations = (
+            Calibrations.query.filter(Calibrations.next_calibration_date >= from_date)
+            .filter(Calibrations.next_calibration_date <= to_date)
+            .all()
+        )
 
     title = f"Calibrations {month}"
 
     if len(calibrations) > 0:
-        return render_template("list_calibrations.html", calibrations=calibrations, title=title)
+        return render_template(
+            "list_calibrations.html", calibrations=calibrations, title=title
+        )
     msg = "No Calibrations Found"
     return render_template("list_calibrations.html", warning=msg, title=title)
 
@@ -110,7 +126,9 @@ def list_calibrations_this_month():
 def show_calibration(_id):
     """show a specific calibration"""
     calibration = Calibrations.query.get_or_404(_id)
-    return render_template("show_calibration.html", title=calibration.name, calibration=calibration)
+    return render_template(
+        "show_calibration.html", title=calibration.name, calibration=calibration
+    )
 
 
 @app.route("/create_calibration", methods=["GET", "POST"])
@@ -141,7 +159,7 @@ def create_calibration():
         last_calibration_date = request.form["last_calibration_date"]
         notes = request.form["notes"]
         # calculate a next calibration time
-        init = datetime.strptime(initial_check_date, '%Y-%m-%d').date()
+        init = datetime.strptime(initial_check_date, "%Y-%m-%d").date()
         nextc = init + timedelta(days=int(frequency))
         calibration = Calibrations(
             name=name,
@@ -169,7 +187,7 @@ def create_calibration():
         add_calibration_log(
             calibration.id,
             current_user.id,
-            f"created calibration {calibration.id} - {calibration.name}"
+            f"created calibration {calibration.id} - {calibration.name}",
         )
         return redirect(url_for("list_calibrations"))
 
@@ -181,14 +199,12 @@ def create_calibration():
 @roles_required("admin")
 def edit_calibration(_id):
     """edit a specific calibration"""
-    calib = db.session.query(Calibrations).filter(Calibrations.id == _id).first()
-## inserisci check che se non c'e' risposta dice che la cvalibrazione non esiste
+    calib = db.session.query(Calibrations).filter(Calibrations.id == _id).first_or_404()
 
     dep = [(dep.id, dep.name) for dep in Departments.query.all()]
     form = EditCalibrationForm(csrf_enabled=False, exclude_fk=False, obj=calib)
     form.department.choices = dep
     form.department.data = calib.department.id
-
 
     if not current_user.has_role(calib.department.short_name):
         flash(
@@ -229,7 +245,9 @@ def edit_calibration(_id):
             db.session.rollback()
         return redirect(url_for("show_calibration", _id=_id))
 
-    return render_template("edit_calibration.html", _id=_id, form=form, title="Edit calibration")
+    return render_template(
+        "edit_calibration.html", _id=_id, form=form, title="Edit calibration"
+    )
 
 
 @app.route("/delete_calibration/<int:_id>/", methods=["GET"])
@@ -275,11 +293,15 @@ def show_calibration_log(_id):
         if _id == 0:
             logs = CalibrationsLog.query.all()
         else:
-            logs = CalibrationsLog.query.filter(CalibrationsLog.calibration_id == _id).all()
+            logs = CalibrationsLog.query.filter(
+                CalibrationsLog.calibration_id == _id
+            ).all()
 
     if len(logs) > 0:
         flash(f"Log rows: {str(len(logs))}", "info")
-        return render_template("show_calibration_log.html", logs=logs, title="Calibration Logs report")
+        return render_template(
+            "show_calibration_log.html", logs=logs, title="Calibration Logs report"
+        )
     flash("No Logs Found for this calibration !", "info")
     return render_template("show_calibration_log.html", title="Calibration Logs report")
 
@@ -304,7 +326,10 @@ def set_calibration_date(_id):
         try:
             db.session.commit()
         except Exception as e:
-            flash(f"Error setting last calibration date for {calib.id} - {calib.name} with error {str(e)}", "danger")
+            flash(
+                f"Error setting last calibration date for {calib.id} - {calib.name} with error {str(e)}",
+                "danger",
+            )
 
             db.session.rollback()
 
@@ -312,14 +337,20 @@ def set_calibration_date(_id):
 
         try:
             db.session.commit()
-            flash(f"Set calibration date for {calib.name} - {calib.description}   (last: {calib.last_calibration_date}, next: {calib.next_calibration_date})", "info")
+            flash(
+                f"Set calibration date for {calib.name} - {calib.description}   (last: {calib.last_calibration_date}, next: {calib.next_calibration_date})",
+                "info",
+            )
             add_calibration_log(
                 calib.id,
                 current_user.id,
                 f"Set calibration date for {calib.id} - {calib.name} - {calib.description} - {calib.last_calibration_date}",
             )
         except Exception as e:
-            flash(f"Error setting next calibration date for {calib.id} - {calib.name} with error {str(e)}", "danger")
+            flash(
+                f"Error setting next calibration date for {calib.id} - {calib.name} with error {str(e)}",
+                "danger",
+            )
             db.session.rollback()
     else:
         flash(f"Error setting calibration for id {str(_id)}", "danger")
@@ -330,10 +361,10 @@ def set_calibration_date(_id):
 @app.template_filter("datedelta")
 def datedelta(next_cal, tolerance):
     if next_cal and tolerance:
-        if next_cal<(date.today() - timedelta(days=tolerance)):
+        if next_cal < (date.today() - timedelta(days=tolerance)):
             return "red"
-        if next_cal<(date.today() + timedelta(days=tolerance)):
+        if next_cal < (date.today() + timedelta(days=tolerance)):
             return "orange"
-        if next_cal<(date.today() + timedelta(days=30)):
+        if next_cal < (date.today() + timedelta(days=30)):
             return "lightgreen"
     return "white"
