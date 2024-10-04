@@ -34,6 +34,10 @@ from flask_security import (
     UserMixin,
 )
 
+from datetime import (
+    datetime,
+    timedelta,
+)
 
 @app.route("/list", methods=["GET", "POST"])
 @auth_required()
@@ -502,3 +506,33 @@ def export():
         return send_file("inventory.csv", mimetype="text/csv", as_attachment=True)
     except Exception as e:
         return str(e)
+
+
+@app.route("/stats", methods=["GET"])
+@auth_required()
+@roles_required("admin")
+def stats():
+
+    days = int(request.args.get('days', 365))
+
+    logs = Applog.query.filter(Applog.event_time > (datetime.now() - timedelta(days=days)), Applog.event_time <= datetime.now()).all()
+    reag = Inventory.query.all()
+    idslist = set()
+    for l in logs:
+        if l.product_id == None:
+            continue
+        idslist.add(l.product_id)
+    res = {el:0 for el in idslist}
+    for i in idslist:
+        c = 0
+        for l in logs:
+            if l.product_id == i:
+                if l.event_detail.startswith("updated"):
+                    c += 1
+        res[i] = c
+
+    title = f"Items consumed in the last { days } days"
+
+    return render_template("stats.html", stats=res, reag=reag, title=title)
+
+

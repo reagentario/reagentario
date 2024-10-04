@@ -5,3 +5,4 @@ TODO
 logfile.log
 inventory.csv
 migrations
+test*

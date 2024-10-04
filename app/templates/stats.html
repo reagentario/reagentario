@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% if stats %}
+<table id="statsTable" class="table table-hover table-striped table-bordered text-center">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Consumed</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for r in reag %}
+    {% for key, value in stats.items() %}
+    {% if r.id == key %}
+    <tr>
+        <td> {{r.id}} </td>
+        {% if r.id %}
+        <td>{{"{}".format(r.name|default("item deleted from database"))}}</td>
+        {% else %}
+        <td class="text-nowrap"> {{r.name|default("deleted from database")}}</a></td>
+        {% endif %}
+        <td> {{ value }} </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% if warning %}
+<h2>{{ warning }}</h2>
+{% endif %}
+
+{% endblock %}
