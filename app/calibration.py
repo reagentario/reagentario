@@ -153,7 +153,6 @@ def create_calibration():
         description = request.form["description"]
         department = Departments.query.get_or_404(form.department.data)
         initial_check_date = request.form["initial_check_date"]
-        log.debug(initial_check_date)
         frequency = request.form["frequency"]
         tolerance = request.form["tolerance"]
         last_calibration_date = request.form["last_calibration_date"]

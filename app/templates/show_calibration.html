@@ -64,7 +64,7 @@
           {% if current_user.has_role('admin') and current_user.is_active and current_user.has_role(calibration.department.short_name) %}
           <tr height="64px">
             <td> <a href="/set_calibration_date/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/plus.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/set_calibration_date/{{ calibration.id }}" class="btn btn-lg btn-warning w-100">Set Calibration Date</a></td>
+            <td> <a href="/set_calibration_date/{{ calibration.id }}" class="btn btn-lg btn-warning w-100">Set Last Calibration Date Today</a></td>
           </tr>
           <tr>
             <td> <a href="/edit_calibration/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/edit.png') }}" style="width:64px"/></a></td>
@@ -74,12 +74,10 @@
             <td> <a href="/show_calibration_log/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/log.png') }}" style="width:64px"/></a></td>
             <td> <a href="/show_calibration_log/{{ calibration.id }}" class="btn btn-lg btn-info w-100"> Log</a></td>
           </tr>
-          {% if calibration.amount==0 and calibration.amount2==0 %}
           <tr>
             <td> <a href="/delete_calibration/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:64px"/></a></td>
             <td> <a href="/delete_calibration/{{ calibration.id }}" class="btn btn-lg btn-danger w-100"> Delete</a></td>
           </tr>
-          {% endif %}
           {% endif %}
         </table>
       </td>
