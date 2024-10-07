@@ -1,3 +1,11 @@
+from datetime import (
+    datetime,
+    date,
+    timedelta,
+)
+
+from dateutil.relativedelta import relativedelta
+
 from flask import (
     render_template,
     make_response,
@@ -10,7 +18,7 @@ from flask import (
 )
 from app import app
 from app import db
-from app import log
+# from app import log
 from app.forms import (
     CreateCalibrationForm,
     EditCalibrationForm,
@@ -28,12 +36,6 @@ from flask_security import (
     roles_required,
     RoleMixin,
     UserMixin,
-)
-
-from datetime import (
-    datetime,
-    date,
-    timedelta,
 )
 
 
@@ -154,12 +156,24 @@ def create_calibration():
         department = Departments.query.get_or_404(form.department.data)
         initial_check_date = request.form["initial_check_date"]
         frequency = request.form["frequency"]
+        frequency_units = request.form["frequency_units"]
         tolerance = request.form["tolerance"]
+        tolerance_units = request.form["tolerance_units"]
         last_calibration_date = request.form["last_calibration_date"]
         notes = request.form["notes"]
         # calculate a next calibration time
         init = datetime.strptime(initial_check_date, "%Y-%m-%d").date()
-        nextc = init + timedelta(days=int(frequency))
+        if frequency_units == "days":
+            nextc = init + relativedelta(days=+int(frequency))
+        elif frequency_units == "weeks":
+            nextc = init + relativedelta(weeks=+int(frequency))
+        elif frequency_units == "months":
+            nextc = init + relativedelta(months=+int(frequency))
+        elif frequency_units == "years":
+            nextc = init + relativedelta(years=+int(frequency))
+        else:
+            nextc = init
+
         calibration = Calibrations(
             name=name,
             apparatus=apparatus,
@@ -167,7 +181,9 @@ def create_calibration():
             department=department,
             initial_check_date=initial_check_date,
             frequency=frequency,
+            frequency_units=frequency_units,
             tolerance=tolerance,
+            tolerance_units=tolerance_units,
             last_calibration_date=last_calibration_date,
             next_calibration_date=nextc,
             notes=notes,
@@ -222,7 +238,9 @@ def edit_calibration(_id):
         calib.department = Departments.query.get(dep_selected)
         calib.initial_check_date = request.form["initial_check_date"]
         calib.frequency = request.form["frequency"]
+        calib.frequency_units = request.form["frequency_units"]
         calib.tolerance = request.form["tolerance"]
+        calib.tolerance_units = request.form["tolerance_units"]
         calib.last_calibration_date = request.form["last_calibration_date"]
         calib.next_calibration_date = calculate_next_calibration_date(calib.id)
         calib.notes = request.form["notes"]
@@ -358,12 +376,30 @@ def set_calibration_date(_id):
 
 
 @app.template_filter("datedelta")
-def datedelta(next_cal, tolerance):
-    if next_cal and tolerance:
-        if next_cal < (date.today() - timedelta(days=tolerance)):
-            return "red"
-        if next_cal < (date.today() + timedelta(days=tolerance)):
-            return "orange"
+def datedelta(next_cal, tolerance, unit):
+    color = ''
+    if unit == "days":
         if next_cal < (date.today() + timedelta(days=30)):
-            return "lightgreen"
-    return "white"
+            color = "lightgreen"
+        if next_cal < (date.today() + relativedelta(days=+tolerance)):
+            color = "orange"
+
+        if next_cal < (date.today() - relativedelta(days=+tolerance)):
+            color = "red"
+    if unit == "weeks":
+        if next_cal < (date.today() + timedelta(days=30)):
+            color = "lightgreen"
+        if next_cal < (date.today() + relativedelta(weeks=+tolerance)):
+            color = "orange"
+        if next_cal < (date.today() - relativedelta(weeks=+tolerance)):
+            color = "red"
+    if unit == "months":
+        if next_cal < (date.today() + timedelta(days=30)):
+            color = "lightgreen"
+        if next_cal < (date.today() + relativedelta(months=+tolerance)):
+            color = "orange"
+        if next_cal < (date.today() - relativedelta(months=+tolerance)):
+            color = "red"
+    if not color:
+        color = "white"
+    return color

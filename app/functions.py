@@ -1,12 +1,14 @@
-import datetime
-from app import db
-from app import log
-from .models import Applog, Inventory, User, CalibrationsLog, Calibrations
 from datetime import (
     datetime,
     date,
     timedelta,
 )
+
+from dateutil.relativedelta import relativedelta
+
+from app import db
+from app import log
+from .models import Applog, Inventory, User, CalibrationsLog, Calibrations
 
 
 def add_log(product_id, user_id, event_detail):
@@ -34,7 +36,10 @@ def add_calibration_log(calibration_id, user_id, event_detail):
 def calculate_next_calibration_date(_id):
     calibration = db.session.query(Calibrations).filter(Calibrations.id == _id).first()
     freq = int(calibration.frequency)
+    freq_units = str(calibration.frequency_units)
     tolerance = int(calibration.tolerance)
+    tolerance_units = str(calibration.tolerance_units)
+
     # se chiamata dal form di editing i campi ritornati sono tutte stringhe
     if isinstance(calibration.initial_check_date, str):
         nextc = datetime.strptime(calibration.initial_check_date, "%Y-%m-%d").date()
@@ -44,7 +49,18 @@ def calculate_next_calibration_date(_id):
         lastc = calibration.last_calibration_date
     run = True
     while run:
-        nextc = nextc + timedelta(days=freq)
-        if nextc > lastc + timedelta(days=tolerance):
+        nextc = calculate_relativedelta(nextc, freq_units, freq)
+        if nextc > calculate_relativedelta(lastc, tolerance_units, tolerance):
             run = False
     return nextc
+
+
+def calculate_relativedelta(value, unit, increment):
+    if unit == "days":
+        return value + relativedelta(days=+increment)
+    if unit == "weeks":
+        return value + relativedelta(weeks=+increment)
+    if unit == "months":
+        return value + relativedelta(months=+increment)
+    if unit == "years":
+        return value + relativedelta(years=+increment)

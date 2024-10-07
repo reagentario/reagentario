@@ -22,18 +22,18 @@
   <tbody>
     {% for calibration in calibrations %}
     {#
-    <tr style="color: {{calibration.next_calibration_date|datedelta(calibration.tolerance)}}; --bs-table-color: {{calibration.next_calibration_date|datedelta(calibration.tolerance)}}; --bs-table-striped-color: {{calibration.next_calibration_date|datedelta(calibration.tolerance)}};">
+    <tr style="color: {{calibration.next_calibration_date|datedelta(calibration.tolerance,calibration.tolerance_units)}}; --bs-table-color: {{calibration.next_calibration_date|datedelta(calibration.tolerance)}}; --bs-table-striped-color: {{calibration.next_calibration_date|datedelta(calibration.tolerance)}};">
     <tr bgcolor="{{calibration.next_calibration_date|datedelta(calibration.tolerance)}}">
     #}
     {% if current_user.has_role(calibration.department.short_name) %}
-      <tr style="color: {{calibration.next_calibration_date|datedelta(calibration.tolerance)}}; --bs-table-bg: {{calibration.next_calibration_date|datedelta(calibration.tolerance)}};">
+      <tr style="color: {{calibration.next_calibration_date|datedelta(calibration.tolerance,calibration.tolerance_units)}}; --bs-table-bg: {{calibration.next_calibration_date|datedelta(calibration.tolerance,calibration.tolerance_units)}};">
         <td class="align-middle"><a href="/show_calibration/{{calibration.id}}" class="btn btn-light btn-sm w-100 text-start">{{"{}".format(calibration.name)}}</a></td>
         <td class="align-middle">{{calibration.apparatus}}</td>
         <td class="align-middle">{{calibration.description}}</td>
         <td class="align-middle">{{calibration.department.short_name}}</td>
         <td class="align-middle">{{calibration.initial_check_date}}</td>
-        <td class="align-middle">{{calibration.frequency}}</td>
-        <td class="align-middle">{{calibration.tolerance}}</td>
+        <td class="align-middle">{{calibration.frequency}} {{calibration.frequency_units}}</td>
+        <td class="align-middle">+/- {{calibration.tolerance}} {{calibration.tolerance_units}}</td>
         <td class="align-middle">{{calibration.last_calibration_date}}</td>
         <td class="align-middle">{{calibration.next_calibration_date}}</td>
       </tr>

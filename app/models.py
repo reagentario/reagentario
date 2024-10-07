@@ -3,9 +3,8 @@ from app import bcrypt
 #from app import login_manager
 from flask_admin.contrib.sqla import ModelView
 from flask_security import UserMixin, RoleMixin
-from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText
+from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, UnicodeText, Enum
 from sqlalchemy.orm import validates, relationship, backref
-from datetime import datetime
 
 class RolesUsers(db.Model):
     __tablename__ = "roles_users"
@@ -120,7 +119,9 @@ class Calibrations(db.Model):
     department = db.relationship('Departments', backref='departments', lazy=True)
     initial_check_date = db.Column(db.Date)
     frequency = db.Column(db.Integer, default=0)
+    frequency_units = db.Column(Enum('days', 'weeks', 'months', 'years'), nullable=False, server_default="days")
     tolerance = db.Column(db.Integer, default=0)
+    tolerance_units = db.Column(Enum('days', 'weeks', 'months', 'years'), nullable=False, server_default="days")
     last_calibration_date = db.Column(db.Date)
     next_calibration_date = db.Column(db.Date)
     notes = db.Column(db.String(512))
@@ -129,7 +130,7 @@ class Calibrations(db.Model):
         return self.name
 
     def __str__(self):
-          return self.name
+        return self.name
 
 
 class Applog(db.Model):
@@ -143,7 +144,7 @@ class Applog(db.Model):
     event_detail = db.Column(db.String(512))
 
     def __repr__(self):
-          return self.event_detail
+        return self.event_detail
 
 
 class CalibrationsLog(db.Model):
@@ -178,4 +179,3 @@ class CalibrationView(ModelView):
     column_hide_backrefs = True
     column_list = ('id', 'name', 'apparatus', 'description', 'department', 'installation_date', 'frequency', 'tolerance', 'last_calibration', 'note')
     form_excluded_columns = ('calibrationlog')
-

@@ -70,7 +70,19 @@ class CreateCalibrationForm(FlaskForm):
     department = DepartmentField('Department',  validators=[InputRequired()])
     initial_check_date = DateField('Initial Check Date', validators=[InputRequired()])
     frequency = IntegerField('Frequency', validators=[DataRequired()])
+    frequency_units = SelectField('Frequency Unit', choices=[
+        ('days', 'Days'),
+        ('weeks', 'Weeks'),
+        ('months', 'Months'),
+        ('years', 'Years')
+    ])
     tolerance = IntegerField('Tolerance', validators=[DataRequired()])
+    tolerance_units = SelectField('Tolerance Unit', choices=[
+        ('days', 'Days'),
+        ('weeks', 'Weeks'),
+        ('months', 'Months'),
+        ('years', 'Years')
+    ])
     last_calibration_date = DateField('Last Calibration Date', validators=[InputRequired()])
     notes = StringField('Notes', validators=[Length(min=0, max=512)])
     submit = SubmitField()
@@ -107,7 +119,19 @@ class EditCalibrationForm(FlaskForm):
     department = SelectField('Department',  validators=[InputRequired()], coerce=int)
     initial_check_date = DateField('Initial Check Date', validators=[InputRequired()])
     frequency = IntegerField('Frequency', validators=[DataRequired()])
+    frequency_units = SelectField('Frequency Unit', choices=[
+        ('days', 'Days'),
+        ('weeks', 'Weeks'),
+        ('months', 'Months'),
+        ('years', 'Years')
+    ])
     tolerance = IntegerField('Tolerance', validators=[DataRequired()])
+    tolerance_units = SelectField('Tolerance Unit', choices=[
+        ('days', 'Days'),
+        ('weeks', 'Weeks'),
+        ('months', 'Months'),
+        ('years', 'Years')
+    ])
     last_calibration_date = DateField('Last Calibration Date')
     #next_calibration_date = DateField('Next Calibration Date')
     notes = StringField('Notes', validators=[Length(min=0, max=512)])
