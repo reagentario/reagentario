@@ -375,6 +375,25 @@ def set_calibration_date(_id):
     return redirect(url_for("show_calibration", _id=_id, title=calib.name))
 
 
+@app.route("/show_cal_log/<int:_id>/")
+@auth_required()
+@roles_required("admin")
+def show_cal_log(_id):
+    """list calibration logs"""
+
+    if request.method == "GET":
+        if _id == 0:
+            logs = CalibrationsLog.query.all()
+        else:
+            logs = CalibrationsLog.query.filter(CalibrationsLog.calibration_id == _id).all()
+
+    if len(logs) > 0:
+        flash(f"Log rows: {str(len(logs))}", "info")
+        return render_template("show_cal_log.html", logs=logs, title="Calibration Logs report")
+    flash("No Logs Found for this calibration !", "info")
+    return render_template("show_cal_log.html", title="Calibration Logs report")
+
+
 @app.template_filter("datedelta")
 def datedelta(next_cal, tolerance, unit):
     color = ''
