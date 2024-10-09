@@ -397,28 +397,28 @@ def show_cal_log(_id):
 @app.template_filter("datedelta")
 def datedelta(next_cal, tolerance, unit):
     color = ''
+    today = date.today()
+    # Define the time delta based on the unit
     if unit == "days":
-        if next_cal < (date.today() + timedelta(days=30)):
-            color = "lightgreen"
-        if next_cal < (date.today() + relativedelta(days=+tolerance)):
-            color = "orange"
+        delta = relativedelta(days=tolerance)
+    elif unit == "weeks":
+        delta = relativedelta(weeks=tolerance)
+    elif unit == "months":
+        delta = relativedelta(months=tolerance)
+    else:
+        raise ValueError("Invalid unit. Must be 'days', 'weeks', or 'months'.")
 
-        if next_cal < (date.today() - relativedelta(days=+tolerance)):
-            color = "red"
-    if unit == "weeks":
-        if next_cal < (date.today() + timedelta(days=30)):
-            color = "lightgreen"
-        if next_cal < (date.today() + relativedelta(weeks=+tolerance)):
-            color = "orange"
-        if next_cal < (date.today() - relativedelta(weeks=+tolerance)):
-            color = "red"
-    if unit == "months":
-        if next_cal < (date.today() + timedelta(days=30)):
-            color = "lightgreen"
-        if next_cal < (date.today() + relativedelta(months=+tolerance)):
-            color = "orange"
-        if next_cal < (date.today() - relativedelta(months=+tolerance)):
-            color = "red"
+    # last date that will have a color assigned
+    future_threshold = today + relativedelta(days=30)
+    tolerance_threshold = today + delta
+    expiry_threshold = today - delta
+
+    if next_cal < future_threshold:
+        color = "lightgreen"
+    if next_cal < tolerance_threshold:
+        color = "orange"
+    if next_cal < expiry_threshold:
+        color = "red"
     if not color:
         color = "white"
     return color
