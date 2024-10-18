@@ -28,7 +28,6 @@ from sqlalchemy.exc import IntegrityError, PendingRollbackError
 from flask_security import (
     current_user,
     auth_required,
-    login_required,
     roles_required,
     RoleMixin,
     UserMixin,
@@ -41,7 +40,6 @@ from datetime import (
 
 @app.route("/list", methods=["GET", "POST"])
 @auth_required()
-@login_required
 def list():
     """list all reagents"""
     form = SearchForm(csrf_enabled=False)

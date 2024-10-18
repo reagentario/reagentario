@@ -25,7 +25,6 @@ from flask_security import (
     current_user,
     auth_required,
     hash_password,
-    login_required,
     roles_required,
     RoleMixin,
     UserMixin,

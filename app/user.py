@@ -31,7 +31,6 @@ from flask_security import (
     permissions_accepted,
     permissions_required,
     roles_accepted,
-    login_required,
     roles_required,
     RoleMixin,
     UserMixin,

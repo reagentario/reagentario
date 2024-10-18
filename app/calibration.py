@@ -32,7 +32,6 @@ from sqlalchemy.exc import IntegrityError, PendingRollbackError
 from flask_security import (
     current_user,
     auth_required,
-    login_required,
     roles_required,
     RoleMixin,
     UserMixin,
@@ -41,7 +40,6 @@ from flask_security import (
 
 @app.route("/list_calibrations", methods=["GET", "POST"])
 @auth_required()
-@login_required
 def list_calibrations():
     """list all calibrations"""
 
@@ -58,7 +56,6 @@ def list_calibrations():
 
 @app.route("/list_calibrations_next_month", methods=["GET", "POST"])
 @auth_required()
-@login_required
 def list_calibrations_next_month():
     """list calibrations expiring next month"""
 
@@ -94,7 +91,6 @@ def list_calibrations_next_month():
 
 @app.route("/list_calibrations_this_month", methods=["GET", "POST"])
 @auth_required()
-@login_required
 def list_calibrations_this_month():
     """list calibrations expiring this month"""
 
