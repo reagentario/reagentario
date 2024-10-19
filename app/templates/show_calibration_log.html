@@ -9,6 +9,8 @@
       <th class="text-nowrap">Date</th>
       <th>ID</th>
       <th>Name</th>
+      <th>Apparatus</th>
+      <th>Description</th>
       <th>Department</th>
       <th>User</th>
       <th>Detail</th>
@@ -24,7 +26,9 @@
         {% else %}
         <td class="text-nowrap"> {{log.calibration.name|default("deleted from database")}}</a></td>
         {% endif %}
-        <td class="text-nowrap"> {{log.calibration.department}} </td>
+        <td class="text-nowrap"> {{log.calibration.apparatus}} </td>
+        <td class="text-nowrap"> {{log.calibration.description}} </td>
+        <td class="text-nowrap"> {{log.calibration.department.short_name}} </td>
         <td> {{log.user.username}} </td>
         <td> {{log.event_detail}} </td>
     </tr>
