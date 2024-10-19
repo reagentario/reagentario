@@ -45,6 +45,8 @@ def list_calibrations():
 
     if request.method == "GET":
         calibrations = Calibrations.query.all()
+        #calibrations = Calibrations.query.filter(Department=deps).all()
+        #calibrations = db.session.query(Calibrations, Departments).join(Departments).all()
 
     if len(calibrations) > 0:
         return render_template(
@@ -369,25 +371,6 @@ def set_calibration_date(_id):
         flash(f"Error setting calibration for id {str(_id)}", "danger")
         return redirect(url_for("show_calibration", _id=_id))
     return redirect(url_for("show_calibration", _id=_id, title=calib.name))
-
-
-@app.route("/show_cal_log/<int:_id>/")
-@auth_required()
-@roles_required("admin")
-def show_cal_log(_id):
-    """list calibration logs"""
-
-    if request.method == "GET":
-        if _id == 0:
-            logs = CalibrationsLog.query.all()
-        else:
-            logs = CalibrationsLog.query.filter(CalibrationsLog.calibration_id == _id).all()
-
-    if len(logs) > 0:
-        flash(f"Log rows: {str(len(logs))}", "info")
-        return render_template("show_cal_log.html", logs=logs, title="Calibration Logs report")
-    flash("No Logs Found for this calibration !", "info")
-    return render_template("show_cal_log.html", title="Calibration Logs report")
 
 
 @app.template_filter("datedelta")
