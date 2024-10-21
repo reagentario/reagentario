@@ -13,22 +13,21 @@
   </thead>
   <tbody>
     {% for r in reag %}
-    {% if current_user.has_role(r.location.department.short_name) %}
-
-    {% for key, value in stats.items() %}
-    {% if r.id == key %}
-    <tr>
-        <td> {{r.id}} </td>
-        {% if r.id %}
-        <td>{{"{}".format(r.name|default("item deleted from database"))}}</td>
-        {% else %}
-        <td class="text-nowrap"> {{r.name|default("deleted from database")}}</a></td>
-        {% endif %}
-        <td> {{ value }} </td>
-    </tr>
-    {% endif %}
-    {% endfor %}
-    {% endif %> }
+      {% if current_user.has_role(r.location.department.short_name) %}
+        {% for key, value in stats.items() %}
+          {% if r.id == key %}
+            <tr>
+              <td> {{r.id}} </td>
+              {% if r.id %}
+                <td>{{"{}".format(r.name|default("item deleted from database"))}}</td>
+              {% else %}
+                <td class="text-nowrap"> {{r.name|default("deleted from database")}}</a></td>
+              {% endif %}
+              <td> {{ value }} </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      {% endif %}
     {% endfor %}
   </tbody>
 </table>
@@ -36,5 +35,4 @@
 {% if warning %}
 <h2>{{ warning }}</h2>
 {% endif %}
-
 {% endblock %}
