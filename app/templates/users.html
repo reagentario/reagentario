@@ -30,9 +30,13 @@
         {{ role.name }}
         {% endfor %}
         </td>
-        <td><a href="/delete_user/{{ user.id }}" class="btn btn-danger pull-right"> DELETE </a></td>
+        <td><a href="{{ url_for('delete_user', _id=user.id) }}"
+            class="btn btn-danger pull-right"
+            onclick="return confirm('Are you sure?')">
+            <input type="button" class="btn btn-danger pull-right" value=" DELETE "></a>
+        </td>
       </tr>
-      {% endfor %}
+    {% endfor %}
   </tbody>
 </table>
 {% endif %}
