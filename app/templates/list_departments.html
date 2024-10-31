@@ -3,46 +3,46 @@
 {% block body %}
 {% if departments %}
 <table id="departmentTable" class="table table-sm table-hover table-striped table-bordered  border-black border-opacity-75 border-1 text-center">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th>Short Name</th>
-            {% if current_user.has_role('superadmin') and current_user.is_active %}
-            <th>Edit</th>
-            <th>Delete</th>
-            {% endif %}
-        </tr>
-    </thead>
-    <tbody>
-        {% for department in departments %}
-        <tr>
-            <td><a href="/list_department_content/{{department.id}}" class="btn btn-sm btn-primary pull-right w-100">{{"{}".format(department.name)}}</a></td>
-            <td class="align-middle">{{department.short_name}}</td>
-            {% if current_user.has_role('superadmin') and current_user.is_active %}
-            <td><a href="/edit_department/{{department.id}}" class="btn btn-sm btn-success pull-right w-100">Edit</a></td>
-            <td><button type="button" class="btn btn-sm btn-block btn-danger mb-6 w-100" data-bs-toggle="modal" data-bs-target="#loc{{ department.id }}">Delete</button>
-            <div class="modal fade" id="loc{{ department.id }}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h2 class="h6 modal-title">Are you sure ?</h2>
-							<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-						</div>
-						<div class="modal-body">
-                          <p>Are you sure you want to delete department {{ department.name }} ? </p>
-						</div>
-						<div class="modal-footer">
-                            <a class="btn btn-secondary" href="/delete_department/{{ department.id }}">Yes, proceed</a>
-							<button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">No, go back</button>
-						</div>
-					</div>
-				</div>
-			</div>
-            </td>
-			{% endif %}
-        </tr>
-        {% endfor %}
-    </tbody>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Short Name</th>
+      {% if current_user.has_role('superadmin') and current_user.is_active %}
+      <th>Edit</th>
+      <th>Delete</th>
+      {% endif %}
+      </tr>
+  </thead>
+  <tbody>
+    {% for department in departments %}
+      <tr>
+        <td><a href="/list_department_content/{{department.id}}" class="btn btn-sm btn-primary pull-right w-100">{{"{}".format(department.name)}}</a></td>
+        <td class="align-middle">{{department.short_name}}</td>
+        {% if current_user.has_role('superadmin') and current_user.is_active %}
+        <td><a href="/edit_department/{{department.id}}" class="btn btn-sm btn-success pull-right w-100">Edit</a></td>
+        <td><button type="button" class="btn btn-sm btn-block btn-danger mb-6 w-100" data-bs-toggle="modal" data-bs-target="#loc{{ department.id }}">Delete</button>
+          <div class="modal fade" id="loc{{ department.id }}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+	            <div class="modal-content">
+		            <div class="modal-header">
+			            <h2 class="h6 modal-title">Are you sure ?</h2>
+			            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+		            </div>
+		            <div class="modal-body">
+                  <p>Are you sure you want to delete department {{ department.name }} ? </p>
+   					    </div>
+		            <div class="modal-footer">
+                  <a class="btn btn-secondary" href="/delete_department/{{ department.id }}">Yes, proceed</a>
+    	            <button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">No, go back</button>
+  	            </div>
+	            </div>
+            </div>
+          </div>
+       </td>
+       {% endif %}
+      </tr>
+    {% endfor %}
+  </tbody>
 </table>
 
 {% endif %}

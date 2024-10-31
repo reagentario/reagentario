@@ -83,7 +83,25 @@
           </tr>
           <tr>
             <td> <a href="/delete_calibration/{{ calibration.id }}"> <img src="{{ url_for('static', filename='images/delete.png') }}" style="width:64px"/></a></td>
-            <td> <a href="/delete_calibration/{{ calibration.id }}" class="btn btn-lg btn-danger w-100"> Delete</a></td>
+            <td><button type="button" class="btn btn-lg btn-block btn-danger w-100" data-bs-toggle="modal" data-bs-target="#cal{{ calibration.id }}">Delete</button>
+              <div class="modal fade" id="cal{{ calibration.id }}" tabindex="-1" role="dialog" aria-labelledby="modal-default" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h2 class="h6 modal-title">Are you sure ?</h2>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <p>Are you sure you want to delete calibration {{ calibration.name }} {{ calibration.description }} ? </p>
+                    </div>
+                    <div class="modal-footer">
+                      <a class="btn btn-secondary" href="{{ url_for('delete_calibration', _id=calibration.id) }}">Yes, proceed</a>
+                      <button type="button" class="btn btn-link text-gray ms-auto" data-bs-dismiss="modal">No, go back</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </td>
           </tr>
           {% endif %}
         </table>
