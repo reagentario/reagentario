@@ -44,23 +44,27 @@ with app.app_context():
     # Create users to test with
     db.create_all()
     if not app.security.datastore.find_role("admin"):
-        app.security.datastore.create_role(
-            name="admin", description="admin role", permissions="admin"
+        app.security.datastore.create_role(name="admin",
+                                           description="admin role",
+                                           permissions="admin"
         )
 
     if not app.security.datastore.find_role("superadmin"):
-        app.security.datastore.create_role(
-            name="superadmin", description="superadmin role", permissions="superadmin"
+        app.security.datastore.create_role(name="superadmin",
+                                           description="superadmin role",
+                                           permissions="superadmin"
         )
 
     if not app.security.datastore.find_role("QC"):
-        app.security.datastore.create_role(
-            name="QC", description="QC dept", permissions="QC"
+        app.security.datastore.create_role(name="QC",
+                                           description="QC dept",
+                                           permissions="QC"
         )
 
     if not app.security.datastore.find_role("VL"):
-        app.security.datastore.create_role(
-            name="VL", description="VL dept", permissions="VL"
+        app.security.datastore.create_role(name="VL",
+                                           description="VL dept",
+                                           permissions="VL"
         )
 
     if app.config["CREATE_USERS"]:
@@ -261,48 +265,56 @@ def create_user():
     form = CreateUserForm()
 
     if request.method == "POST":
-        email = request.form["email"]
-        username = request.form["username"]
-        password = hash_password(request.form["password"])
-        admin = form.data.get("admin")
-        superadmin = form.data.get("superadmin")
-        qc = form.data.get("qc")
-        vl = form.data.get("vl")
-        admin_role = user_datastore.find_role("admin")
-        superadmin_role = user_datastore.find_role("superadmin")
-        qc_role = user_datastore.find_role("QC")
-        vl_role = user_datastore.find_role("VL")
+        try:
+            if form.validate_on_submit():
+                email = request.form["email"]
+                username = request.form["username"]
+                password = hash_password(request.form["password"])
+                admin = form.data.get("admin")
+                superadmin = form.data.get("superadmin")
+                qc = form.data.get("qc")
+                vl = form.data.get("vl")
+                admin_role = user_datastore.find_role("admin")
+                superadmin_role = user_datastore.find_role("superadmin")
+                qc_role = user_datastore.find_role("QC")
+                vl_role = user_datastore.find_role("VL")
 
-        existing_user = User.query.filter(
-            User.email == email or User.username == username
-        ).first()
-        if existing_user:
-            flash(
-                f"A User with this email ({email}) or username ({username}) already exists!",
-                "danger",
-            )
+                existing_user = User.query.filter(
+                    User.email == email or User.username == username
+                ).first()
+                if existing_user:
+                    flash(
+                        f"A User with this email ({email}) or username ({username}) already exists!",
+                        "danger",
+                    )
+                    return render_template(
+                        "create_user.html", title="Add a new user", form=form
+                    )
+                app.security.datastore.create_user(
+                    email=email,
+                    password=password,
+                    username=username,
+                    active=True,
+                )
+                user = User.query.filter_by(username=username).first()
+                if admin:
+                    app.security.datastore.add_role_to_user(user, admin_role)
+                if superadmin:
+                    app.security.datastore.add_role_to_user(user, superadmin_role)
+                if qc:
+                    app.security.datastore.add_role_to_user(user, qc_role)
+                if vl:
+                    app.security.datastore.add_role_to_user(user, vl_role)
+
+                db.session.commit()
+                log.debug(f"created user {email} by user {current_user.id}")
+                return redirect(url_for("users"))
+        except Exception as e:
+            flash(f"Error creating {user.id} with error {str(e)}", "danger")
+            db.session.rollback()
             return render_template(
-                "create_user.html", title="Add a new user", form=form
+                "create_user.html", title="Add a new user", user=user, form=form
             )
-        app.security.datastore.create_user(
-            email=email,
-            password=password,
-            username=username,
-            active=True,
-        )
-        user = User.query.filter_by(username=username).first()
-        if admin:
-            app.security.datastore.add_role_to_user(user, admin_role)
-        if superadmin:
-            app.security.datastore.add_role_to_user(user, superadmin_role)
-        if qc:
-            app.security.datastore.add_role_to_user(user, qc_role)
-        if vl:
-            app.security.datastore.add_role_to_user(user, vl_role)
-
-        db.session.commit()
-        log.debug(f"created user {email} by user {current_user.id}")
-        return redirect(url_for("users"))
     return render_template("create_user.html", title="Add a new user", form=form)
 
 
