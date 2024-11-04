@@ -373,6 +373,54 @@ def set_calibration_date(_id):
     return redirect(url_for("show_calibration", _id=_id, title=calib.name))
 
 
+@app.route("/set_frit_change_date/")
+@auth_required()
+@roles_required("admin")
+def set_fringe_change_date():
+    """Set last and calculate next calibration date"""
+    calibs = db.session.query(Calibrations).filter(Calibrations.description == "frit").all()
+
+    if calibs:
+        for calib in calibs:
+            if not current_user.has_role(calib.department.short_name):
+                continue
+
+            calib.last_calibration_date = date.today()
+
+            try:
+                db.session.commit()
+            except Exception as e:
+                flash(
+                    f"Error setting last calibration date for {calib.id} - {calib.name} with error {str(e)}",
+                    "danger",
+                )
+                db.session.rollback()
+
+            calib.next_calibration_date = calculate_next_calibration_date(calib.id)
+
+            try:
+                db.session.commit()
+                flash(
+                    f"Set calibration date for {calib.name} - {calib.description}   (last: {calib.last_calibration_date}, next: {calib.next_calibration_date})",
+                    "info",
+                )
+                add_calibration_log(
+                    calib.id,
+                    current_user.id,
+                    f"Set calibration date for {calib.id} - {calib.name} - {calib.description} - {calib.last_calibration_date}",
+                )
+            except Exception as e:
+                flash(
+                    f"Error setting next calibration date for {calib.id} - {calib.name} with error {str(e)}",
+                    "danger",
+                )
+                db.session.rollback()
+    else:
+        flash(f"Error setting calibration for id {str(_id)}", "danger")
+        return redirect(url_for("list_calibrations"))
+    return redirect(url_for("list_calibrations" ))
+
+
 @app.template_filter("datedelta")
 def datedelta(next_cal, tolerance, unit):
     color = ''
