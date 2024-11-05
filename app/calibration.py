@@ -433,7 +433,7 @@ def set_frit_change_date():
                     )
                     db.session.rollback()
         else:
-            flash(f"Error setting calibration for id {str(calib.id)}", "danger")
+            flash(f"Cannot find any frit in calibration description for department {department}", "danger")
             return redirect(url_for("list_calibrations"))
         return redirect(url_for("list_calibrations" ))
     return render_template("set_frit_change_date.html", form=form, title="Set Frit Change Date")
