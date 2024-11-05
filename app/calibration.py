@@ -18,10 +18,11 @@ from flask import (
 )
 from app import app
 from app import db
-# from app import log
+from app import log
 from app.forms import (
     CreateCalibrationForm,
     EditCalibrationForm,
+    SetFritsDateForm,
 )
 from app.models import Calibrations, Departments, CalibrationsLog
 from app.functions import add_calibration_log, calculate_next_calibration_date
@@ -373,52 +374,69 @@ def set_calibration_date(_id):
     return redirect(url_for("show_calibration", _id=_id, title=calib.name))
 
 
-@app.route("/set_frit_change_date/")
+@app.route("/set_frit_change_date/", methods=["GET", "POST"])
 @auth_required()
 @roles_required("admin")
-def set_fringe_change_date():
-    """Set last and calculate next calibration date"""
-    calibs = db.session.query(Calibrations).filter(Calibrations.description == "frit").all()
+def set_frit_change_date():
+    """Set last frit change date"""
 
-    if calibs:
-        for calib in calibs:
-            if not current_user.has_role(calib.department.short_name):
-                continue
+    form = SetFritsDateForm(csrf_enabled=False)
+    form.last_calibration_date.data = date.today()
 
-            calib.last_calibration_date = date.today()
+    if request.method == "POST":
+        department = Departments.query.get_or_404(form.department.data)
+        last_calibration_date = request.form["last_calibration_date"]
 
-            try:
-                db.session.commit()
-            except Exception as e:
-                flash(
-                    f"Error setting last calibration date for {calib.id} - {calib.name} with error {str(e)}",
-                    "danger",
-                )
-                db.session.rollback()
+        calibs = db.session.query(Calibrations).filter(db.and_(
+            Calibrations.description == "frit",
+            Calibrations.department == department,
+            )
+        ).all()
 
-            calib.next_calibration_date = calculate_next_calibration_date(calib.id)
+        if calibs:
+            for calib in calibs:
+                if not current_user.has_role(calib.department.short_name):
+                    flash(
+                         f"You have not permission to set frit change date for instrument {calib.name} pertaining to {calib.department.name}",
+                         "danger",
+                    )
+                    continue
 
-            try:
-                db.session.commit()
-                flash(
-                    f"Set calibration date for {calib.name} - {calib.description}   (last: {calib.last_calibration_date}, next: {calib.next_calibration_date})",
-                    "info",
-                )
-                add_calibration_log(
-                    calib.id,
-                    current_user.id,
-                    f"Set calibration date for {calib.id} - {calib.name} - {calib.description} - {calib.last_calibration_date}",
-                )
-            except Exception as e:
-                flash(
-                    f"Error setting next calibration date for {calib.id} - {calib.name} with error {str(e)}",
-                    "danger",
-                )
-                db.session.rollback()
-    else:
-        flash(f"Error setting calibration for id {str(_id)}", "danger")
-        return redirect(url_for("list_calibrations"))
-    return redirect(url_for("list_calibrations" ))
+                calib.last_calibration_date = last_calibration_date
+
+                try:
+                    db.session.commit()
+                except Exception as e:
+                    flash(
+                        f"Error setting last calibration date for {calib.id} - {calib.name} with error {str(e)}",
+                        "danger",
+                    )
+                    db.session.rollback()
+
+                calib.next_calibration_date = calculate_next_calibration_date(calib.id)
+
+                try:
+                    db.session.commit()
+                    flash(
+                        f"Set calibration date for {calib.name} - {calib.description}   (last: {calib.last_calibration_date}, next: {calib.next_calibration_date})",
+                        "info",
+                    )
+                    add_calibration_log(
+                        calib.id,
+                        current_user.id,
+                        f"Set calibration date for {calib.id} - {calib.name} - {calib.description} - {calib.last_calibration_date}",
+                    )
+                except Exception as e:
+                    flash(
+                        f"Error setting next calibration date for {calib.id} - {calib.name} with error {str(e)}",
+                        "danger",
+                    )
+                    db.session.rollback()
+        else:
+            flash(f"Error setting calibration for id {str(calib.id)}", "danger")
+            return redirect(url_for("list_calibrations"))
+        return redirect(url_for("list_calibrations" ))
+    return render_template("set_frit_change_date.html", form=form, title="Set Frit Change Date")
 
 
 @app.template_filter("datedelta")

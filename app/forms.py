@@ -139,6 +139,13 @@ class EditCalibrationForm(FlaskForm):
     cancel = SubmitField('Cancel')
 
 
+class SetFritsDateForm(FlaskForm):
+    department = DepartmentField('Department',  validators=[InputRequired()])
+    last_calibration_date = DateField('Last Calibration Date', validators=[InputRequired()])
+    submit = SubmitField('Save')
+    cancel = SubmitField('Cancel')
+
+
 class EditDepartmentForm(FlaskForm):
     name = StringField('Name', validators=[InputRequired('Name is required'), Length(min=2, max=128)])
     short_name = StringField('Short Name', validators=[DataRequired('Short Name is required'), Length(min=1, max=8)])
