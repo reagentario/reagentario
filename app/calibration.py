@@ -49,9 +49,22 @@ def list_calibrations():
         #calibrations = Calibrations.query.filter(Department=deps).all()
         #calibrations = db.session.query(Calibrations, Departments).join(Departments).all()
 
+    e = []
+    for c in calibrations:
+        if c.last_calibration_date > date.today():
+            e.append(c.name)
+
     if len(calibrations) > 0:
+        msg = ''
+        if len(e) > 0:
+            flash(
+                f"There are { len(e) } last calibration date set in the future, is it right ???? (see bottom of this page for details)",
+                "danger",
+            )
+            msg = "last calibration date set in the future: " + ' - '.join(str(l) for l in e)
+
         return render_template(
-            "list_calibrations.html", calibrations=calibrations, title="Calibrations"
+            "list_calibrations.html", calibrations=calibrations, warning=msg, title="Calibrations"
         )
     msg = "No Calibrations Found"
     return render_template("list_calibrations.html", warning=msg, title="Calibrations")
@@ -127,8 +140,16 @@ def list_calibrations_this_month():
 def show_calibration(_id):
     """show a specific calibration"""
     calibration = Calibrations.query.get_or_404(_id)
+    msg = ''
+    if calibration.last_calibration_date > date.today():
+        flash(
+            "Last calibration date is set in the future, is it right ????",
+            "danger",
+        )
+        msg = "WARNING !!! Last calibration date is set in the future, is it right ????"
+
     return render_template(
-        "show_calibration.html", title=calibration.name, calibration=calibration
+        "show_calibration.html", title=calibration.name, calibration=calibration, warning=msg
     )
 
 
