@@ -99,7 +99,7 @@ def create_location():
         db.session.add(location)
         db.session.commit()
         db.session.refresh(location)
-        log.debug(f"created location id {location.id} (name: {location.name}) by user id {current_user.id} (email: {current_user.email})")
+        app.logger.info(f"created location id {location.id} (name: {location.name}) by user id {current_user.id} (email: {current_user.email})")
 
         return redirect(url_for("list_locations"))
     return render_template("create_location.html", form=form, title="Add a new location")
@@ -138,7 +138,7 @@ def delete_location(_id):
                 f"deleted location {location.id} - {location.name}",
             )
             flash(f"Location {location.name} deleted", "info")
-            log.debug(f"deleted location id {location.id} (name: {location.name}) by user id {current_user.id} (email: {current_user.email})")
+            app.logger.info(f"deleted location id {location.id} (name: {location.name}) by user id {current_user.id} (email: {current_user.email})")
         except Exception as e:
             flash(f"Error deleting location {location.name} with error {str(e)}", "danger")
             db.session.rollback()
@@ -206,10 +206,10 @@ def edit_location(_id):
 
                 for key in common_keys:
                     if str(l1[key]) != str(l2[key]):
-                        log.debug(
+                        app.logger.info(
                             loc.id,
                             current_user.id,
-                            f'updated item {loc.id} - {loc.name}: {key} value changed from "{str(l1[key])}" to "{str(l2[key])}" by user {current_user.email}',
+                            f'updated item {loc.id} - {loc.name}: {key} value changed from "{str(l1[key])}" to "{str(l2[key])}" by user {current_user.id}',
                         )
             except Exception as e:
                 flash(f"Error updating location id {str(loc.id)} with error {str(e)}", "danger")

@@ -10,7 +10,7 @@ from flask_security.models import fsqla_v3 as fsqla
 from flask_mailman import Mail
 
 from .config import Config
-logging.basicConfig(filename='logfile.log', level=logging.DEBUG, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
+logging.basicConfig(filename='logfile.log', level=logging.ERROR, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
 logw = logging.getLogger('werkzeug')
 logw.setLevel(logging.ERROR)
 

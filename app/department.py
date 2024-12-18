@@ -69,7 +69,7 @@ def create_department():
             )
         db.session.add(department)
         db.session.commit()
-        log.debug(
+        app.logger.info(
             f"created department {department.id} - {department.name} by user {current_user.id}"
         )
 
@@ -101,7 +101,7 @@ def delete_department(_id):
                 f"deleted department {department.id} - {department.name}",
             )
             flash("Department deleted", "info")
-            log.debug(
+            app.logger.info(
                 f"deleted department id {department.id} by user {current_user.id}"
             )
         except Exception as e:
@@ -149,7 +149,7 @@ def edit_department(_id):
                 department.short_name = form.short_name.data
                 db.session.commit()
                 flash("Your changes have been saved.")
-                log.debug(
+                app.logger.info(
                     f"Department {department.id} updated by user {current_user.id}: name={department.name}, short_name={department.short_name}"
                 )
                 return redirect(url_for("list_departments"))

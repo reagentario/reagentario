@@ -107,7 +107,7 @@ def edit_profile():
             current_user.username = form.username.data
             db.session.commit()
             flash("Your changes have been saved.", "info")
-            log.debug(
+            app.logger.info(
                 f"user {current_user.id} updated, new email: {current_user.email}, new userame: {current_user.username}"
             )
             return redirect(url_for("edit_profile"))
@@ -140,7 +140,7 @@ def change_pw(_id):
         if form.validate_on_submit():
             user.password = hash_password(form.password.data)
             flash(f"Password changed for {user.email}", "info")
-            log.debug(f"user {user.email} password changed by user {current_user.id}")
+            app.logger.info(f"user {user.email} password changed by user {current_user.id}")
             db.session.commit()
             return redirect(url_for("users"))
         return render_template(
@@ -194,8 +194,8 @@ def edit_role(_id):
                 app.security.datastore.remove_role_from_user(user, vl_role)
             db.session.commit()
             flash("Your changes have been saved.", "info")
-            log.debug(
-                f"user {current_user.id} updated, admin role: {form.admin.data}, superadmin role: {form.superadmin.data}, qc role: {form.qc.data}, vl role: {form.vl.data}"
+            app.logger.info(
+                f"user {current_user.id} updated by user {current_user.id}, admin role: {form.admin.data}, superadmin role: {form.superadmin.data}, qc role: {form.qc.data}, vl role: {form.vl.data}"
             )
             return redirect(url_for("users"))
         if request.method == "GET":
@@ -238,7 +238,7 @@ def edit_user(_id):
                 user.active = form.active.data
                 db.session.commit()
                 flash("Your changes have been saved.", "info")
-                log.debug(
+                app.logger.info(
                     f"user {user.id} updated by user {current_user.id}, email: {user.email}, username: {user.username}, active: {user.active}"
                 )
                 return redirect(url_for("users"))
@@ -307,7 +307,7 @@ def create_user():
                     app.security.datastore.add_role_to_user(user, vl_role)
 
                 db.session.commit()
-                log.debug(f"created user {email} by user {current_user.id}")
+                app.logger.info(f"created user {email} by user {current_user.id}")
                 return redirect(url_for("users"))
         except Exception as e:
             flash(f"Error creating {user.id} with error {str(e)}", "danger")
@@ -329,7 +329,7 @@ def delete_user(_id):
             db.session.delete(user)
             db.session.commit()
             flash("User deleted", "info")
-            log.debug(f"deleted user id {user.id} (email: {user.email}) by user {current_user.id} (email: {current_user.email})")
+            app.logger.info(f"deleted user id {user.id} (email: {user.email}) by user {current_user.id} (email: {current_user.email})")
         except Exception as e:
             flash(f"Error deleting user id {str(user.id)} with error {str(e)}", "danger")
             db.session.rollback()
