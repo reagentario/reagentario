@@ -46,6 +46,7 @@
           <script>
             $(document).ready(function () {
               $('#myTable').DataTable( {
+                "stateSave": true,
                 "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
                 "order": [[ 0, 'asc' ], [ 1, 'asc' ], [ 2, 'asc']],
                 "dom": 'frtipB',
@@ -66,6 +67,7 @@
           <script>
               $(document).ready(function () {
                 $('#locationTable').DataTable( {
+                  "stateSave": true,
                   "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
                   "order": [[ 0, 'asc' ], [ 1, 'asc' ], [ 2, 'asc']],
                   "dom": 'frtipB',
@@ -92,6 +94,7 @@
                 var d = day + "-" + month + "-" + year;
 
                 $('#calibrationTable').DataTable( {
+                  "stateSave": true,
                   "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
                   "order": [[ 8, 'asc' ], [ 1, 'asc' ], [ 0, 'asc']],
                   "dom": 'frtipB',
@@ -157,6 +160,7 @@
             <script>
               $(document).ready(function () {
                 $('#logTable').DataTable( {
+                  "stateSave": true,
                   "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
                   "order": [[ 0, 'desc' ]],
                   "dom": 'frtipB',
@@ -177,6 +181,7 @@
            <script>
               $(document).ready(function () {
                 $('#statsTable').DataTable( {
+                  "stateSave": true,
                   "lengthMenu": [ [200, -1, 10, 25, 50], [200, "All", 10, 25, 50] ],
                   "order": [[ 2, 'desc' ]],
                   "dom": 'frtipB',
