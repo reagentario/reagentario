@@ -75,13 +75,15 @@ def list_calibrations():
 def list_calibrations_next_month():
     """list calibrations expiring next month"""
 
-    next_month = datetime.now().month + 1
+    if datetime.now().month == 12:
+        next_month = 1
+    else:
+        next_month = datetime.now().month + 1
     month = date.today().replace(month=next_month).strftime("%B-%Y")
 
     if request.method == "GET":
-        from_date = date(
-            year=datetime.now().year, month=(datetime.now().month + 1), day=1
-        )
+
+        from_date = (date.today().replace(day=1) + timedelta(days=32)).replace(day=1)
 
         # move to first next month
         nm = date.today().replace(day=28) + timedelta(days=4)
