@@ -96,6 +96,7 @@ def create():
         amount2 = request.form["amount2"]
         size = request.form["size"]
         amount_limit = request.form["amount_limit"]
+        cas_number = request.form["cas_number"]
         product_code = request.form["product_code"]
         supplier = request.form["supplier"]
         batch = request.form["batch"]
@@ -109,6 +110,7 @@ def create():
             amount2=amount2,
             size=size,
             amount_limit=amount_limit,
+            cas_number=cas_number,
             product_code=product_code,
             supplier=supplier,
             batch=batch,
@@ -165,6 +167,7 @@ def edit(_id):
         reag.amount2 = request.form["amount2"]
         reag.size = request.form["size"]
         reag.amount_limit = request.form["amount_limit"]
+        reag.cas_number = request.form["cas_number"]
         reag.product_code = request.form["product_code"]
         reag.supplier = request.form["supplier"]
         reag.batch = request.form["batch"]
@@ -473,6 +476,7 @@ def export():
                 "amount lab",
                 "amount deposit",
                 "amount limit",
+                "cas_number",
                 "product code",
                 "supplier",
                 "batch",
@@ -491,6 +495,7 @@ def export():
                     r.amount,
                     r.amount2,
                     r.amount_limit,
+                    r.cas_number,
                     r.product_code,
                     r.supplier,
                     r.batch,

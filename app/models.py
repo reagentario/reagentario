@@ -94,6 +94,7 @@ class Inventory(db.Model):
     name = db.Column(db.String(256), index=True, unique=False, nullable=False)
     location_id = db.Column(db.Integer, db.ForeignKey('locations.id'))
     location = db.relationship('Locations', backref='location', lazy=True)
+    cas_number = db.Column(db.String(64))
     product_code = db.Column(db.String(64))
     supplier = db.Column(db.String(64))
     batch = db.Column(db.String(64))

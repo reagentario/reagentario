@@ -36,6 +36,10 @@
                 <td>{{ reagent.size }}</td>
               </tr>
               <tr>
+                <td>CAS number</td>
+                <td>{{ reagent.cas_number if reagent.cas_number is not none else ''  }}</td>
+              </tr>
+              <tr>
                 <td>Product Code</td>
                 <td>{{ reagent.product_code if reagent.product_code is not none else ''  }}</td>
               </tr>
