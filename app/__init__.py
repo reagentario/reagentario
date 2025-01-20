@@ -8,6 +8,8 @@ from flask.logging import create_logger
 from flask_bootstrap import Bootstrap5
 from flask_security.models import fsqla_v3 as fsqla
 from flask_mailman import Mail
+from flask_compress import Compress
+from flask_caching import Cache
 
 from .config import Config
 logging.basicConfig(filename='logfile.log', level=logging.ERROR, format=f'%(asctime)s %(levelname)s %(name)s %(threadName)s : %(message)s')
@@ -18,6 +20,24 @@ logw.setLevel(logging.ERROR)
 app = Flask(__name__)
 log = create_logger(app)
 app.config.from_object(Config)
+
+cache = Cache(config={
+    'CACHE_TYPE': 'SimpleCache',
+    'CACHE_DEFAULT_TIMEOUT': 60*60  # 1 hour cache timeout
+})
+cache.init_app(app)
+
+# Define a function to return cache key for incoming requests
+def get_cache_key(request):
+    return request.url
+
+# Initialize Flask-Compress
+compress = Compress()
+compress.init_app(app)
+
+# Set up cache for compressed responses
+compress.cache = cache
+compress.cache_key = get_cache_key
 
 bootstrap = Bootstrap5(app)
 
