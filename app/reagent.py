@@ -12,7 +12,6 @@ from flask import (
     send_file,
 )
 from app import app
-from app import cache
 from app import db
 from app import log
 from app.forms import (
