@@ -79,7 +79,8 @@ def list_calibrations_next_month():
         next_month = 1
     else:
         next_month = datetime.now().month + 1
-    month = date.today().replace(month=next_month).strftime("%B-%Y")
+    app.logger.info(next_month)
+    month = date.today().replace(day=1).replace(month=next_month).strftime("%B-%Y")
 
     if request.method == "GET":
 
