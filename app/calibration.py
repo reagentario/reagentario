@@ -489,5 +489,5 @@ def datedelta(next_cal, tolerance, unit):
     if next_cal < expiry_threshold:
         color = "red"
     if not color:
-        color = "white"
+        color = "white" # "#FFFFFF"
     return color
