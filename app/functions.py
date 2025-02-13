@@ -7,7 +7,6 @@ from datetime import (
 from dateutil.relativedelta import relativedelta
 
 from app import db
-from app import log
 from .models import Applog, Inventory, User, CalibrationsLog, Calibrations
 
 
@@ -42,20 +41,23 @@ def calculate_next_calibration_date(_id):
 
     # se chiamata dal form di editing i campi ritornati sono tutte stringhe
     if isinstance(calibration.initial_check_date, str):
-        nextc = datetime.strptime(calibration.initial_check_date, "%Y-%m-%d").date()
+        initc = datetime.strptime(calibration.initial_check_date, "%Y-%m-%d").date()
         lastc = datetime.strptime(calibration.last_calibration_date, "%Y-%m-%d").date()
     else:
-        nextc = calibration.initial_check_date
+        initc = calibration.initial_check_date
         lastc = calibration.last_calibration_date
     run = True
+    n = 0
     while run:
-        nextc = calculate_relativedelta(nextc, freq_units, freq)
-        if nextc > calculate_relativedelta(lastc, tolerance_units, tolerance):
+        n += 1
+        nextc = calculate_relativedelta(initc, freq_units, freq, n)
+        if nextc > calculate_relativedelta(lastc, tolerance_units, tolerance, n=1):
             run = False
     return nextc
 
 
-def calculate_relativedelta(value, unit, increment):
+def calculate_relativedelta(value, unit, increment, n):
+    increment = increment * n
     if unit == "days":
         return value + relativedelta(days=+increment)
     if unit == "weeks":
