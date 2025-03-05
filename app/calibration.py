@@ -25,7 +25,7 @@ from app.forms import (
     SetFritsDateForm,
 )
 from app.models import Calibrations, Departments, CalibrationsLog
-from app.functions import add_calibration_log, calculate_next_calibration_date
+from app.functions import add_calibration_log, calculate_next_calibration_date, calculate_relativedelta
 
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError, PendingRollbackError
@@ -39,15 +39,14 @@ from flask_security import (
 )
 
 
-@app.route("/list_calibrations", methods=["GET", "POST"])
+@app.route("/list_calibrations")
 @auth_required()
 def list_calibrations():
     """list all calibrations"""
 
-    if request.method == "GET":
-        calibrations = Calibrations.query.all()
-        #calibrations = Calibrations.query.filter(Department=deps).all()
-        #calibrations = db.session.query(Calibrations, Departments).join(Departments).all()
+    calibrations = Calibrations.query.all()
+    #calibrations = Calibrations.query.filter(Department=deps).all()
+    #calibrations = db.session.query(Calibrations, Departments).join(Departments).all()
 
     e = []
     for c in calibrations:
@@ -70,7 +69,7 @@ def list_calibrations():
     return render_template("list_calibrations.html", warning=msg, title="Calibrations")
 
 
-@app.route("/list_calibrations_next_month", methods=["GET", "POST"])
+@app.route("/list_calibrations_next_month")
 @auth_required()
 def list_calibrations_next_month():
     """list calibrations expiring next month"""
@@ -82,21 +81,20 @@ def list_calibrations_next_month():
     app.logger.info(next_month)
     month = date.today().replace(day=1).replace(month=next_month).strftime("%B-%Y")
 
-    if request.method == "GET":
 
-        from_date = (date.today().replace(day=1) + timedelta(days=32)).replace(day=1)
+    from_date = (date.today().replace(day=1) + timedelta(days=32)).replace(day=1)
 
-        # move to first next month
-        nm = date.today().replace(day=28) + timedelta(days=4)
-        # Now move to the second next month
-        nm = nm.replace(day=28) + timedelta(days=4)
-        # come back to the first next month's last day
-        to_date = nm - timedelta(days=nm.day)
-        calibrations = (
-            Calibrations.query.filter(Calibrations.next_calibration_date >= from_date)
-            .filter(Calibrations.next_calibration_date <= to_date)
-            .all()
-        )
+    # move to first next month
+    nm = date.today().replace(day=28) + timedelta(days=4)
+    # Now move to the second next month
+    nm = nm.replace(day=28) + timedelta(days=4)
+    # come back to the first next month's last day
+    to_date = nm - timedelta(days=nm.day)
+    calibrations = (
+        Calibrations.query.filter(Calibrations.next_calibration_date >= from_date)
+        .filter(Calibrations.next_calibration_date <= to_date)
+        .all()
+    )
 
     title = f"Calibrations {month}"
 
@@ -108,25 +106,24 @@ def list_calibrations_next_month():
     return render_template("list_calibrations.html", warning=msg, title=title)
 
 
-@app.route("/list_calibrations_this_month", methods=["GET", "POST"])
+@app.route("/list_calibrations_this_month")
 @auth_required()
 def list_calibrations_this_month():
     """list calibrations expiring this month"""
 
     month = date.today().strftime("%B-%Y")
 
-    if request.method == "GET":
-        from_date = date(year=datetime.now().year, month=(datetime.now().month), day=1)
+    from_date = date(year=datetime.now().year, month=(datetime.now().month), day=1)
 
-        # move to first next month
-        nm = date.today().replace(day=28) + timedelta(days=4)
-        # come back to this month's last day
-        to_date = nm - timedelta(days=nm.day)
-        calibrations = (
-            Calibrations.query.filter(Calibrations.next_calibration_date >= from_date)
-            .filter(Calibrations.next_calibration_date <= to_date)
-            .all()
-        )
+    # move to first next month
+    nm = date.today().replace(day=28) + timedelta(days=4)
+    # come back to this month's last day
+    to_date = nm - timedelta(days=nm.day)
+    calibrations = (
+        Calibrations.query.filter(Calibrations.next_calibration_date >= from_date)
+        .filter(Calibrations.next_calibration_date <= to_date)
+        .all()
+    )
 
     title = f"Calibrations {month}"
 
@@ -136,6 +133,29 @@ def list_calibrations_this_month():
         )
     msg = "No Calibrations Found"
     return render_template("list_calibrations.html", warning=msg, title=title)
+
+@app.route("/list_calibrations_expiring")
+@auth_required()
+def list_calibrations_expiring():
+    """list calibrations expiring today"""
+
+    calibrations = Calibrations.query.all()
+
+    expiring = []
+
+    for c in calibrations:
+        if date.today() - calculate_relativedelta(c.next_calibration_date, c.tolerance_units, c.tolerance, 1) == timedelta(days=0):
+            expiring.append(c)
+
+    title = "Calibrations expiring to be performed today !!!"
+
+    if len(expiring) > 0:
+        return render_template(
+            "list_calibrations.html", calibrations=expiring, title=title
+        )
+    msg = "No Calibrations Found expiring today"
+    return render_template("list_calibrations.html", warning=msg, title=title)
+
 
 
 @app.route("/show_calibration/<int:_id>/")
