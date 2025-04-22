@@ -1,5 +1,6 @@
 instance/
 config.py
+config_test.py
 __pycache__
 TODO
 logfile.log
