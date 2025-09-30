@@ -1,18 +1,14 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand navbar-dark bg-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="/"><b>Reagentario</b></a>
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav me-auto mb-2 mb-md-0">
-                <li class="nav-item">
-                  <a class="nav-link text-warning" href="{{ url_for('index') }}">Index</a>
-                </li>
-
                 {% if current_user.is_active %}
                 <li class="nav-item">
-                  <a class="nav-link text-warning" href="/list">Reagents List</a>
+                  <a class="nav-link text-warning" href="/list">Reagents</a>
                 </li>
                 <li class="nav-item">
-                  <a class="nav-link text-warning" href="/list_locations">Locations list</a>
+                  <a class="nav-link text-warning" href="/list_locations">Locations</a>
                 </li>
                 {% endif %}
 
@@ -50,7 +46,7 @@
 
                 {% if current_user.has_role('superadmin') and current_user.is_active %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link text-info dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">SuperAdmin</a>
+                    <a class="nav-link text-info dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Superadmin</a>
                     <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                       <li><a class="dropdown-item" href="/users">Users management</a></li>
                       <li><hr class="dropdown-divider"></li>
@@ -74,7 +70,7 @@
                 </li>
                 {% else %}
                 <li class="nav-item">
-                  <a class="nav-link link-warning" href="{{ url_for('edit_profile') }}"> {{ current_user.email }} Profile</a>
+                  <a class="nav-link link-warning" href="{{ url_for('edit_profile') }}"> {{ current_user.username }} Profile</a>
                 </li>
                 <li class="nav-item">
                   <a class="nav-link link-warning" href="{{ url_for('security.logout') }}">Logout</a>
