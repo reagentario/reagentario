@@ -7,3 +7,4 @@ logfile.log
 inventory.csv
 migrations
 test*
+AGENTS.md
