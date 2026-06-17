@@ -28,6 +28,7 @@ from flask_security import (
     RoleMixin,
     UserMixin,
 )
+from app.user import user_datastore
 
 
 @app.route("/list_departments", methods=["GET"])
@@ -50,6 +51,7 @@ def list_departments():
 @roles_required("superadmin")
 def create_department():
     """create a new department form"""
+    from app.user import user_datastore
 
     if request.method == "POST":
         name = request.form["name"]
@@ -69,6 +71,11 @@ def create_department():
             )
         db.session.add(department)
         db.session.commit()
+        if not user_datastore.find_role(department.short_name):
+            user_datastore.create_role(name=department.short_name,
+                                       description=f"{department.name} dept",
+                                       permissions=department.short_name)
+            db.session.commit()
         app.logger.info(
             f"created department {department.id} - {department.name} by user {current_user.id}"
         )

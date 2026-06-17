@@ -167,25 +167,33 @@ class EditProfileForm(FlaskForm):
     cancel = SubmitField('Cancel')
 
 
-class EditRolesForm(FlaskForm):
-    admin = BooleanField('Admin')
-    superadmin = BooleanField('Superadmin')
-    qc = BooleanField('QC')
-    vl = BooleanField('VL')
-    submit = SubmitField('Save')
-    cancel = SubmitField('Cancel')
+def make_edit_roles_form():
+    """Build an EditRolesForm class with a BooleanField per department (+ admin/superadmin)."""
+    _fields = {
+        "admin": BooleanField("Admin"),
+        "superadmin": BooleanField("Superadmin"),
+    }
+    for dept in Departments.query.all():
+        _fields[dept.short_name.lower()] = BooleanField(dept.name)
+    _fields["submit"] = SubmitField("Save")
+    _fields["cancel"] = SubmitField("Cancel")
+    return type("EditRolesForm", (FlaskForm,), _fields)
 
 
-class CreateUserForm(FlaskForm):
-    email = StringField('Email', validators=[DataRequired('Email is required'), Email()])
-    username = StringField('Username', validators=[DataRequired('Username is required'), Length(min=2, max=64)])
-    password = PasswordField('Password', validators=[DataRequired()])
-    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
-    admin = BooleanField('Admin', default=False)
-    superadmin = BooleanField('Superadmin', default=False)
-    qc = BooleanField('QC', default=False)
-    vl = BooleanField('VL', default=False)
-    submit = SubmitField('Save')
+def make_create_user_form():
+    """Build a CreateUserForm class with a BooleanField per department (+ admin/superadmin)."""
+    _fields = {
+        "email": StringField("Email", validators=[DataRequired("Email is required"), Email()]),
+        "username": StringField("Username", validators=[DataRequired("Username is required"), Length(min=2, max=64)]),
+        "password": PasswordField("Password", validators=[DataRequired()]),
+        "password2": PasswordField("Repeat Password", validators=[DataRequired(), EqualTo("password")]),
+        "admin": BooleanField("Admin", default=False),
+        "superadmin": BooleanField("Superadmin", default=False),
+    }
+    for dept in Departments.query.all():
+        _fields[dept.short_name.lower()] = BooleanField(dept.name, default=False)
+    _fields["submit"] = SubmitField("Save")
+    return type("CreateUserForm", (FlaskForm,), _fields)
 
 
 class ChangePasswordForm(FlaskForm):

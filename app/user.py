@@ -12,11 +12,11 @@ from app import db
 from app import log
 from app.forms import (
     EditProfileForm,
-    EditRolesForm,
     ChangePasswordForm,
-    CreateUserForm,
+    make_edit_roles_form,
+    make_create_user_form,
 )
-from app.models import User, Role
+from app.models import User, Role, Departments
 
 from sqlalchemy import inspect
 from sqlalchemy.exc import IntegrityError, PendingRollbackError
@@ -55,17 +55,12 @@ with app.app_context():
                                            permissions="superadmin"
         )
 
-    if not app.security.datastore.find_role("QC"):
-        app.security.datastore.create_role(name="QC",
-                                           description="QC dept",
-                                           permissions="QC"
-        )
-
-    if not app.security.datastore.find_role("VL"):
-        app.security.datastore.create_role(name="VL",
-                                           description="VL dept",
-                                           permissions="VL"
-        )
+    for dept in Departments.query.all():
+        if not app.security.datastore.find_role(dept.short_name):
+            app.security.datastore.create_role(name=dept.short_name,
+                                               description=f"{dept.name} dept",
+                                               permissions=dept.short_name
+            )
 
     if app.config["CREATE_USERS"]:
         if not app.security.datastore.find_user(email="user@test.com"):
@@ -165,15 +160,16 @@ def users():
 @roles_required("superadmin")
 def edit_role(_id):
     """edit roles form"""
-    form = EditRolesForm()
     user = User.query.filter_by(id=_id).first()
-    admin_role = user_datastore.find_role("admin")
-    superadmin_role = user_datastore.find_role("superadmin")
-    qc_role = user_datastore.find_role("QC")
-    vl_role = user_datastore.find_role("VL")
     if not user:
         flash(f"Not existing user id {_id}", "danger")
         return redirect(url_for("users"))
+
+    EditRolesForm = make_edit_roles_form()
+    form = EditRolesForm()
+    admin_role = user_datastore.find_role("admin")
+    superadmin_role = user_datastore.find_role("superadmin")
+
     try:
         if form.validate_on_submit():
             if form.admin.data:
@@ -184,29 +180,28 @@ def edit_role(_id):
                 app.security.datastore.add_role_to_user(user, superadmin_role)
             else:
                 app.security.datastore.remove_role_from_user(user, superadmin_role)
-            if form.qc.data:
-                app.security.datastore.add_role_to_user(user, qc_role)
-            else:
-                app.security.datastore.remove_role_from_user(user, qc_role)
-            if form.vl.data:
-                app.security.datastore.add_role_to_user(user, vl_role)
-            else:
-                app.security.datastore.remove_role_from_user(user, vl_role)
+
+            for dept in Departments.query.all():
+                dept_role = user_datastore.find_role(dept.short_name)
+                if dept_role:
+                    if getattr(form, dept.short_name.lower()).data:
+                        app.security.datastore.add_role_to_user(user, dept_role)
+                    else:
+                        app.security.datastore.remove_role_from_user(user, dept_role)
+
             db.session.commit()
             flash("Your changes have been saved.", "info")
             app.logger.info(
-                f"user {current_user.id} updated by user {current_user.id}, admin role: {form.admin.data}, superadmin role: {form.superadmin.data}, qc role: {form.qc.data}, vl role: {form.vl.data}"
+                f"user {user.id} roles updated by user {current_user.id}"
             )
             return redirect(url_for("users"))
+
         if request.method == "GET":
-            if user.has_role("admin"):
-                form.admin.data = True
-            if user.has_role("superadmin"):
-                form.superadmin.data = True
-            if user.has_role("QC"):
-                form.qc.data = True
-            if user.has_role("VL"):
-                form.vl.data = True
+            form.admin.data = user.has_role("admin")
+            form.superadmin.data = user.has_role("superadmin")
+            for dept in Departments.query.all():
+                if user.has_role(dept.short_name):
+                    setattr(form, dept.short_name.lower(), True)
 
     except Exception as e:
         flash(f"Error editing {user.id} with error {str(e)}", "danger")
@@ -261,7 +256,7 @@ def edit_user(_id):
 @roles_required("superadmin")
 def create_user():
     """create a new user"""
-
+    CreateUserForm = make_create_user_form()
     form = CreateUserForm()
 
     if request.method == "POST":
@@ -272,12 +267,8 @@ def create_user():
                 password = hash_password(request.form["password"])
                 admin = form.data.get("admin")
                 superadmin = form.data.get("superadmin")
-                qc = form.data.get("qc")
-                vl = form.data.get("vl")
                 admin_role = user_datastore.find_role("admin")
                 superadmin_role = user_datastore.find_role("superadmin")
-                qc_role = user_datastore.find_role("QC")
-                vl_role = user_datastore.find_role("VL")
 
                 existing_user = User.query.filter(
                     User.email == email or User.username == username
@@ -301,10 +292,11 @@ def create_user():
                     app.security.datastore.add_role_to_user(user, admin_role)
                 if superadmin:
                     app.security.datastore.add_role_to_user(user, superadmin_role)
-                if qc:
-                    app.security.datastore.add_role_to_user(user, qc_role)
-                if vl:
-                    app.security.datastore.add_role_to_user(user, vl_role)
+                for dept in Departments.query.all():
+                    if form.data.get(dept.short_name.lower()):
+                        dept_role = user_datastore.find_role(dept.short_name)
+                        if dept_role:
+                            app.security.datastore.add_role_to_user(user, dept_role)
 
                 db.session.commit()
                 app.logger.info(f"created user {email} by user {current_user.id}")

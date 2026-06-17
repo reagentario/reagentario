@@ -21,18 +21,16 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
+        {% for field in form %}
+            {% if field.name not in ('admin', 'superadmin', 'submit', 'cancel') %}
         <p>
-            {{ form.qc }}   {{ form.qc.label }}
-            {% for error in form.qc.errors %}
+            {{ field }}   {{ field.label }}
+            {% for error in field.errors %}
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>
-        {{ form.vl }}   {{ form.vl.label }}
-            {% for error in form.vl.errors %}
-            <span style="color: red;">[{{ error }}]</span>
-            {% endfor %}
-        </p>
+            {% endif %}
+        {% endfor %}
         <p>{{ form.submit() }}   {{ form.cancel() }} </p>
     </form>
 
